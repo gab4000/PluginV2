@@ -19,7 +19,7 @@ import fr.openmc.core.features.corporation.data.MerchantData;
 import fr.openmc.core.features.corporation.listener.ShopListener;
 import fr.openmc.core.disabled.corporation.models.*;
 import fr.openmc.core.features.corporation.manager.PlayerShopManager;
-import fr.openmc.core.features.corporation.manager.ShopBlocksManager;
+import fr.openmc.core.features.corporation.manager.ShopManager;
 import fr.openmc.core.features.corporation.models.*;
 import fr.openmc.core.features.corporation.shops.Shop;
 import fr.openmc.core.features.corporation.shops.ShopItem;

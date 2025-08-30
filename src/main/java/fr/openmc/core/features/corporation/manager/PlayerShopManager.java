@@ -2,7 +2,6 @@ package fr.openmc.core.features.corporation.manager;
 
 import fr.openmc.core.features.corporation.MethodState;
 import fr.openmc.core.features.corporation.shops.Shop;
-import fr.openmc.core.features.corporation.shops.ShopOwner;
 import fr.openmc.core.features.economy.EconomyManager;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -23,23 +22,18 @@ public class PlayerShopManager {
      * @param playerUUID   the UUID of the player who creates it
      * @param barrel       the barrel block of the shop
      * @param cashRegister the cash register block of the shop
-     * @param shopUUID     the UUID of the shop if it already has one
      * @return true if the shop has been created
      */
-    public static boolean createShop(UUID playerUUID, Block barrel, Block cashRegister, UUID shopUUID) {
-        if (! EconomyManager.withdrawBalance(playerUUID, 500) && shopUUID == null) {
-            return false;
-        }
+    public static boolean createShop(UUID playerUUID, Block barrel, Block cashRegister) {
+        if (! EconomyManager.withdrawBalance(playerUUID, 500)) return false;
         
-        Shop newShop = new Shop(new ShopOwner(playerUUID), 0, shopUUID);
+        Shop newShop = new Shop(playerUUID, 0);
 
         playerShops.put(playerUUID, newShop);
-        ShopBlocksManager.registerMultiblock(newShop,
+        ShopManager.registerMultiblock(newShop,
                 new Shop.Multiblock(barrel.getLocation(), cashRegister.getLocation()));
         
-        if (shopUUID == null) {
-            ShopBlocksManager.placeShop(newShop, Bukkit.getPlayer(playerUUID), false);
-        }
+        ShopManager.placeShop(newShop, Bukkit.getPlayer(playerUUID));
         return true;
     }
 
@@ -51,12 +45,10 @@ public class PlayerShopManager {
      */
     public static MethodState deleteShop(UUID playerUUID) {
         Shop shop = getPlayerShop(playerUUID);
-        if (!shop.getItems().isEmpty()) {
-            return MethodState.WARNING;
-        }
-        if (!ShopBlocksManager.removeShop(shop)) {
-            return MethodState.ESCAPE;
-        }
+        if (! shop.getItems().isEmpty()) return MethodState.WARNING;
+        
+        if (! ShopManager.removeShop(shop)) return MethodState.ESCAPE;
+        
         playerShops.remove(playerUUID);
         EconomyManager.addBalance(playerUUID, 400);
         return MethodState.SUCCESS;
@@ -75,11 +67,11 @@ public class PlayerShopManager {
     /**
      * Get a shop from a shop UUID
      *
-     * @param shopUUID the UUID of the shop to check
+     * @param shopOwnerUUID the UUID of the shop to check
      * @return the Shop if found
      */
-    public static Shop getShopByUUID(UUID shopUUID) {
-        return playerShops.values().stream().filter(shop -> shop.getUuid().equals(shopUUID)).findFirst().orElse(null);
+    public static Shop getShopByUUID(UUID shopOwnerUUID) {
+        return playerShops.values().stream().filter(shop -> shop.getOwnerUUID().equals(shopOwnerUUID)).findFirst().orElse(null);
     }
 
     /**

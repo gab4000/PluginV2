@@ -12,7 +12,7 @@ public class ShopSupplier {
     @DatabaseField(id = true)
     private UUID id; // différencie les supplier (un joueur peut avoir plusieurs supplier)
     @DatabaseField(canBeNull = false)
-    private UUID shop;
+    private UUID ownerUUID;
     @DatabaseField(canBeNull = false)
     private UUID item;
     @DatabaseField(canBeNull = false)
@@ -25,10 +25,10 @@ public class ShopSupplier {
     ShopSupplier() {
         // required for ORMLite
     }
-
-    public ShopSupplier(UUID id, UUID shop, UUID item, UUID player, int amount, long time) {
+    
+    public ShopSupplier(UUID id, UUID ownerUUID, UUID item, UUID player, int amount, long time) {
         this.id = id;
-        this.shop = shop;
+        this.ownerUUID = ownerUUID;
         this.item = item;
         this.player = player;
         this.amount = amount;

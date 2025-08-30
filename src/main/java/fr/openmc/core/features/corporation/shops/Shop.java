@@ -3,7 +3,7 @@ package fr.openmc.core.features.corporation.shops;
 import fr.openmc.api.menulib.Menu;
 import fr.openmc.api.menulib.utils.ItemBuilder;
 import fr.openmc.core.features.corporation.MethodState;
-import fr.openmc.core.features.corporation.manager.ShopBlocksManager;
+import fr.openmc.core.features.corporation.manager.ShopManager;
 import fr.openmc.core.features.economy.EconomyManager;
 import fr.openmc.core.utils.CacheOfflinePlayer;
 import fr.openmc.core.utils.ItemUtils;
@@ -26,34 +26,46 @@ import java.util.*;
 
 @Getter
 public class Shop {
-
-    private final ShopOwner owner;
+    
+    private final UUID ownerUUID;
     private final List<ShopItem> items = new ArrayList<>();
     private final List<ShopItem> sales = new ArrayList<>();
     private final Map<Long, Supply> suppliers = new HashMap<>();
     private final int index;
-    private final UUID uuid;
 
     private double turnover = 0;
-
-    public Shop(ShopOwner owner, int index) {
-        this(owner, index, null);
+    
+    public Shop(UUID ownerUUID, int index) {
+        this.ownerUUID = ownerUUID;
+        this.index = index;
     }
 
-    public Shop(ShopOwner owner, int index, UUID uuid) {
-        this.owner = owner;
-        this.index = index;
-        this.uuid = uuid != null ? uuid : UUID.randomUUID();
+    /**
+     * get the shop with what player looking
+     *
+     * @param player the player we check
+     * @param onlyCash if we only check the cach register
+     */
+    public static UUID getShopPlayerLookingAt(Player player, boolean onlyCash) {
+        Block targetBlock = player.getTargetBlockExact(5);
+
+        if (targetBlock == null) return null;
+
+        if (targetBlock.getType() != Material.BARREL && targetBlock.getType() != Material.OAK_SIGN && targetBlock.getType() != Material.BARRIER) return null;
+        if (onlyCash) if (targetBlock.getType() == Material.BARREL) return null;
+        
+        Shop shop = ShopManager.getShop(targetBlock.getLocation());
+        if (shop == null) return null;
+        return shop.getOwnerUUID();
     }
 
     /**
      * requirement : item need the uuid of the player who restock the shop
 
      * quand un item est vendu un partie du profit reviens a celui qui a approvisionner
-     * @param shop the shop we want to check the stock
      */
-    public static void checkStock(Shop shop) {
-        Multiblock multiblock = ShopBlocksManager.getMultiblock(shop.getUuid());
+    public void checkStock() {
+        Multiblock multiblock = ShopManager.getMultiblock(ownerUUID);
 
         if (multiblock == null) {
             return;
@@ -61,7 +73,7 @@ public class Shop {
 
         Block stockBlock = multiblock.stockBlock().getBlock();
         if (stockBlock.getType() != Material.BARREL) {
-            ShopBlocksManager.removeShop(shop);
+            ShopManager.removeShop(this);
             return;
         }
 
@@ -81,13 +93,8 @@ public class Shop {
         }
     }
 
-
     public String getName() {
-        return CacheOfflinePlayer.getOfflinePlayer(owner.getPlayer()).getName() + "'s Shop";
-    }
-
-    public UUID getSupremeOwner() {
-        return owner.getPlayer();
+        return CacheOfflinePlayer.getOfflinePlayer(ownerUUID).getName() + "'s Shop";
     }
 
     /**
@@ -96,29 +103,7 @@ public class Shop {
      * @param uuid the uuid we check
      */
     public boolean isOwner(UUID uuid) {
-        return owner.getPlayer().equals(uuid);
-    }
-
-    /**
-     * add an item to the shop
-     *
-     * @param itemStack the item
-     * @param price the price
-     * @param amount the amount of it
-     */
-    public boolean addItem(ItemStack itemStack, double price, int amount, UUID itemID) {
-
-        ShopItem item = itemID == null ? new ShopItem(itemStack, price) : new ShopItem(itemStack, price, itemID);
-        for (ShopItem shopItem : items) {
-            if (shopItem.getItem().isSimilar(itemStack)) {
-                return true;
-            }
-        }
-        if (amount>1){
-            item.setAmount(amount);
-        }
-        items.add(item);
-        return false;
+        return ownerUUID.equals(uuid);
     }
 
     public void addItem(ShopItem item){
@@ -148,6 +133,23 @@ public class Shop {
         suppliers.entrySet().removeIf(entry -> entry.getValue().getItemId().equals(item.getItemID()));
     }
 
+    /**
+     * add an item to the shop
+     *
+     * @param itemStack the item
+     * @param price the price
+     * @param amount the amount of it
+     */
+    public boolean addItem(ItemStack itemStack, double price, int amount, UUID itemID) {
+        ShopItem item = itemID == null ? new ShopItem(itemStack, price) : new ShopItem(itemStack, price, itemID);
+        for (ShopItem shopItem : items) if (shopItem.getItem().isSimilar(itemStack)) return true;
+        
+        if (amount > 1) item.setAmount(amount);
+        
+        items.add(item);
+        return false;
+    }
+
     public int recoverItemOf(ShopItem item, Player supplier) {
         int amount = item.getAmount();
 
@@ -161,28 +163,32 @@ public class Shop {
         Iterator<Map.Entry<Long, Supply>> iterator = suppliers.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<Long, Supply> entry = iterator.next();
-            if (entry.getValue().getSupplierUUID().equals(supplier.getUniqueId())) {
-                if (entry.getValue().getItemId().equals(item.getItemID())){
-                    amount -= entry.getValue().getAmount();
-                    toRemove += entry.getValue().getAmount();
-                    if (amount >= 0){
-                        iterator.remove();
-                    }
-                    else {
-                        break;
-                    }
-                }
+            
+            if (! entry.getValue().getSupplierUUID().equals(supplier.getUniqueId())) continue;
+            if (! entry.getValue().getItemId().equals(item.getItemID())) continue;
+            
+            amount -= entry.getValue().getAmount();
+            toRemove += entry.getValue().getAmount();
+            
+            if (amount < 0) {
+                break;
+            } else {
+                iterator.remove();
             }
         }
-
-        if (amount == 0){
+        
+        if (amount == 0) {
             items.remove(item);
             MessagesManager.sendMessage(supplier, Component.text("§aL'item a bien été retiré du shop !"), Prefix.SHOP, MessageType.SUCCESS, false);
         } else {
             item.setAmount(amount);
         }
-
+        
         return toRemove;
+    }
+
+    public void addSupply(long time, Supply supply){
+        suppliers.put(time, supply);
     }
 
     /**
@@ -190,23 +196,17 @@ public class Shop {
      */
     public boolean supply(ItemStack item, UUID supplier) {
         for (ShopItem shopItem : items) {
-            if (shopItem.getItem().getType().equals(item.getType())) {
-                int delay = 0;
-                shopItem.setAmount(shopItem.getAmount() + item.getAmount());
-                while (suppliers.containsKey(System.currentTimeMillis() + delay)){
-                    delay ++;
-                }
-                suppliers.put(System.currentTimeMillis() + delay, new Supply(supplier, shopItem.getItemID(), item.getAmount()));
-                return true;
-            }
+            if (! shopItem.getItem().getType().equals(item.getType())) continue;
+            
+            int delay = 0;
+            shopItem.setAmount(shopItem.getAmount() + item.getAmount());
+            while (suppliers.containsKey(System.currentTimeMillis() + delay)) delay++;
+            
+            suppliers.put(System.currentTimeMillis() + delay, new Supply(supplier, shopItem.getItemID(), item.getAmount()));
+            return true;
         }
         return false;
     }
-
-    public void addSupply(long time, Supply supply){
-        suppliers.put(time, supply);
-    }
-
 
     /**
      * buy an item in the shop
@@ -217,21 +217,16 @@ public class Shop {
      * @return a MethodState
      */
     public MethodState buy(ShopItem item, int amountToBuy, Player buyer) {
-        if (!ItemUtils.hasAvailableSlot(buyer)) {
-            return MethodState.SPECIAL;
-        }
-        if (amountToBuy > item.getAmount()) {
-            return MethodState.WARNING;
-        }
-        if (isOwner(buyer.getUniqueId())) {
-            return MethodState.FAILURE;
-        }
+        if (! ItemUtils.hasAvailableSlot(buyer)) return MethodState.SPECIAL;
+        if (amountToBuy > item.getAmount()) return MethodState.WARNING;
+        if (isOwner(buyer.getUniqueId())) return MethodState.FAILURE;
+        
         if (!EconomyManager.withdrawBalance(buyer.getUniqueId(), item.getPrice(amountToBuy))) return MethodState.ERROR;
         double basePrice = item.getPrice(amountToBuy);
         turnover += item.getPrice(amountToBuy);
         
-        EconomyManager.addBalance(owner.getPlayer(), item.getPrice(amountToBuy));
-        Player player = Bukkit.getPlayer(owner.getPlayer());
+        EconomyManager.addBalance(ownerUUID, item.getPrice(amountToBuy));
+        Player player = Bukkit.getPlayer(ownerUUID);
         if (player != null) {
             MessagesManager.sendMessage(player, Component.text(buyer.getName() + " a acheté " + amountToBuy + " " + item.getItem().getType() + " pour " + item.getPrice(amountToBuy) + EconomyManager.getEconomyIcon() + ", l'argent vous a été transféré !"), Prefix.SHOP, MessageType.SUCCESS, false);
         }
@@ -240,10 +235,8 @@ public class Shop {
         toGive.setAmount(amountToBuy);
 
         List<ItemStack> stacks = ItemUtils.splitAmountIntoStack(toGive);
-        for (ItemStack stack : stacks) {
-            buyer.getInventory().addItem(stack);
-        }
-
+        for (ItemStack stack : stacks) buyer.getInventory().addItem(stack);
+        
         sales.add(item.copy().setAmount(amountToBuy));
         item.setAmount(item.getAmount() - amountToBuy);
 
@@ -259,16 +252,14 @@ public class Shop {
                 supply = entry.getValue();
             }
         }
-        if (supply != null) {
-            suppliers.remove(latest);
-        }
+        if (supply == null) return;
+        
+        suppliers.remove(latest);
     }
 
     public boolean isSupplier(UUID playerUUID){
         for (Map.Entry<Long, Supply> entry : suppliers.entrySet()) {
-            if (entry.getValue().getSupplierUUID().equals(playerUUID)){
-                return true;
-            }
+            if (entry.getValue().getSupplierUUID().equals(playerUUID)) return true;
         }
         return false;
     }
@@ -281,42 +272,21 @@ public class Shop {
      */
     public ItemBuilder getIcon(Menu menu, boolean fromShopMenu) {
         return new ItemBuilder(menu, fromShopMenu ? Material.GOLD_INGOT : Material.BARREL, itemMeta -> {
-            itemMeta.setDisplayName("§e§l" + (fromShopMenu ? "Informations" : getName()));
-            List<String> lore = new ArrayList<>();
-            lore.add("§7■ Chiffre d'affaire : " + EconomyManager.getFormattedNumber(turnover));
-            lore.add("§7■ Ventes : §f" + sales.size());
-            if (!fromShopMenu)
-                lore.add("§7■ Cliquez pour accéder au shop");
-            itemMeta.setLore(lore);
+            itemMeta.displayName(Component.text("§e§l" + (fromShopMenu ? "Informations" : getName())));
+            
+            List<Component> lore = new ArrayList<>(List.of(
+                    Component.text("§7■ Chiffre d'affaire : " + EconomyManager.getFormattedNumber(turnover)),
+                    Component.text("§7■ Ventes : §f" + sales.size())
+            ));
+            if (! fromShopMenu) lore.add(Component.text("§7■ Cliquez pour accéder au shop"));
+            itemMeta.lore(lore);
         });
     }
 
     public int getAllItemsAmount() {
         int amount = 0;
-        for (ShopItem item : items) {
-            amount += item.getAmount();
-        }
+        for (ShopItem item : items) amount += item.getAmount();
         return amount;
-    }
-
-    /**
-     * get the shop with what player looking
-     *
-     * @param player the player we check
-     * @param onlyCash if we only check the cach register
-     */
-    public static UUID getShopPlayerLookingAt(Player player, boolean onlyCash) {
-        Block targetBlock = player.getTargetBlockExact(5);
-
-        if (targetBlock == null) return null;
-
-        if (targetBlock.getType() != Material.BARREL && targetBlock.getType() != Material.OAK_SIGN && targetBlock.getType() != Material.BARRIER) return null;
-        if (onlyCash) {
-            if (targetBlock.getType() != Material.OAK_SIGN && targetBlock.getType() != Material.BARRIER) return null;
-        }
-        Shop shop = ShopBlocksManager.getShop(targetBlock.getLocation());
-        if (shop == null) return null;
-        return shop.getUuid();
     }
 
     public record Multiblock(Location stockBlock, Location cashBlock) {

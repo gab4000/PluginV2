@@ -20,12 +20,7 @@ public class ShopItem {
     private int amount;
 
     public ShopItem(ItemStack item, double pricePerItem) {
-        this.item = item.clone();
-        this.pricePerItem = pricePerItem;
-        this.item.setAmount(1);
-        this.price = pricePerItem * amount;
-        this.amount = 0;
-        this.itemID = UUID.randomUUID();
+        this(item, pricePerItem, UUID.randomUUID());
     }
 
     public ShopItem(ItemStack item, double pricePerItem, UUID itemID) {
@@ -58,9 +53,7 @@ public class ShopItem {
     public static Component getItemName(ItemStack itemStack) {
         if (itemStack.hasItemMeta()) {
             ItemMeta itemMeta = itemStack.getItemMeta();
-            if (itemMeta.hasDisplayName()) {
-                return itemMeta.displayName();
-            }
+            if (itemMeta.hasDisplayName()) return itemMeta.displayName();
         }
         // If no custom name, return default name
         return ItemUtils.getItemTranslation(itemStack).color(NamedTextColor.GRAY).decorate(TextDecoration.BOLD);

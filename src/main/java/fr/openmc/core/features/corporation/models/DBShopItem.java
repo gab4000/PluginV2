@@ -15,7 +15,7 @@ public class DBShopItem {
     @DatabaseField(canBeNull = false, dataType = DataType.BYTE_ARRAY)
     private byte[] items;
     @DatabaseField(canBeNull = false)
-    private UUID shop;
+    private UUID ownerUUID;
     @DatabaseField(canBeNull = false)
     private double price;
     @DatabaseField(canBeNull = false)
@@ -26,10 +26,10 @@ public class DBShopItem {
     DBShopItem() {
         // required for ORMLite
     }
-
-    public DBShopItem(byte[] items, UUID shop, double price, int amount, UUID itemUuid) {
+    
+    public DBShopItem(byte[] items, UUID ownerUUID, double price, int amount, UUID itemUuid) {
         this.items = items;
-        this.shop = shop;
+        this.ownerUUID = ownerUUID;
         this.price = price;
         this.amount = amount;
         this.itemUuid = itemUuid;

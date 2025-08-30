@@ -1,4 +1,4 @@
-package fr.openmc.core.features.corporation.data;
+package fr.openmc.core.disabled.corporation.data;
 
 import java.util.UUID;
 

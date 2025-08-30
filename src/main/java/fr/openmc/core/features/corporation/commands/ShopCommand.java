@@ -29,7 +29,7 @@ import java.util.UUID;
 @Description("Manage shops")
 @CommandPermission("omc.commands.shop")
 public class ShopCommand {
-
+    
     @Subcommand("manage")
     @Description("Manage a shop")
     public static void manageShop(Player player) {
@@ -38,8 +38,13 @@ public class ShopCommand {
             MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas de shop"), Prefix.SHOP, MessageType.INFO, false);
             return;
         }
-        ShopMenu shopMenu = new ShopMenu(player, PlayerShopManager.getPlayerShop(player.getUniqueId()), 0);
+        ShopMenu shopMenu = new ShopMenu(player);
         shopMenu.open();
+    }
+
+    @DefaultFor("~")
+    public void onCommand(Player player) {
+        new ShopMenu(player).open();
     }
 
     @Subcommand("help")
@@ -57,11 +62,6 @@ public class ShopCommand {
             §e▪ /shop search§7 - Permet de rechercher des shops par leur nom ou le nom du joueur
             """),
                 Prefix.ENTREPRISE, MessageType.INFO, false);
-    }
-
-    @DefaultFor("~")
-    public void onCommand(Player player) {
-    
     }
 
     @Subcommand("sell")
@@ -108,7 +108,7 @@ public class ShopCommand {
             MessagesManager.sendMessage(player, Component.text("§cVous avez déjà un shop"), Prefix.SHOP, MessageType.INFO, false);
             return;
         }
-        if (!PlayerShopManager.createShop(player.getUniqueId(), targetBlock, aboveBlock, null)) {
+        if (! PlayerShopManager.createShop(player.getUniqueId(), targetBlock, aboveBlock)) {
             MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas assez d'argent pour créer un shop (500" + EconomyManager.getEconomyIcon() + ")"), Prefix.SHOP, MessageType.INFO, false);
             return;
         }
@@ -198,12 +198,13 @@ public class ShopCommand {
         toGive.setAmount(toTake);
         owner.getInventory().addItem(toGive);
         stock.setAmount(stock.getAmount() - toTake);
-
+        
         if (stock.getAmount() > 0) {
             MessagesManager.sendMessage(owner, Component.text("§6Vous avez récupéré §a" + toTake + "§6 dans le stock de cet item"), Prefix.SHOP, MessageType.SUCCESS, false);
         } else {
             MessagesManager.sendMessage(owner, Component.text("§6Vous avez récupéré le stock restant de cet item"), Prefix.SHOP, MessageType.SUCCESS, false);
         }
+        
 
         // Mise à jour des suppliers
         int toRemove = toTake;

@@ -9,6 +9,10 @@ database:
 features:
   analytics: true
   transactions: true
+  aywen_pelush:
+    day: 3
+    month: 11
+    year: 2025
 
 chat:
   # {prefix}, {suffix}, {name}, {message}

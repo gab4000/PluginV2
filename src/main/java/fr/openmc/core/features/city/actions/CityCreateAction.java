@@ -38,11 +38,13 @@ import static fr.openmc.core.features.city.sub.mayor.managers.MayorManager.PHASE
 
 public class CityCreateAction {
 
+    public static final int FREE_CLAIMS = 9;
     public static final long IMMUNITY_COOLDOWN = 7 * 24 * 60 * 60 * 1000L;
 
     private static final Map<UUID, String> pendingCities = new HashMap<>();
 
     public static void beginCreateCity(Player player, String cityName) {
+        if (cityName == null) return;
         if (!CityCreateConditions.canCityCreate(player, cityName)) return;
 
         pendingCities.put(player.getUniqueId(), cityName);
@@ -59,6 +61,7 @@ public class CityCreateAction {
                 "§cCréation annulée",
                 location -> {
                     if (!isValidLocation(player, location)) return false;
+
                     return finalizeCreation(player, location);
                 },
                 () -> {
@@ -98,11 +101,6 @@ public class CityCreateAction {
     }
 
     public static boolean finalizeCreation(Player player, Location mascotLocation) {
-        UUID playerUUID = player.getUniqueId();
-        String pendingCityName = pendingCities.remove(playerUUID);
-        if (pendingCityName == null) return false;
-
-        UUID cityUUID = UUID.randomUUID();
         Chunk chunk = mascotLocation.getChunk();
 
         if (WorldGuardHook.doesChunkContainWGRegion(chunk)) {
@@ -114,6 +112,12 @@ public class CityCreateAction {
             MessagesManager.sendMessage(player, Component.text("Une des parcelles autour de ce chunk est claim!"), Prefix.CITY, MessageType.ERROR, false);
             return false;
         }
+
+        UUID cityUUID = UUID.randomUUID();
+
+        UUID playerUUID = player.getUniqueId();
+        String pendingCityName = pendingCities.remove(playerUUID);
+        if (pendingCityName == null) return false;
 
         City city = new City(cityUUID, pendingCityName, player, CityType.PEACE, chunk);
 
@@ -136,7 +140,7 @@ public class CityCreateAction {
 
         // Feedback
         MessagesManager.sendMessage(player, Component.text("§aVotre ville a été crée : " + pendingCityName), Prefix.CITY, MessageType.SUCCESS, true);
-        MessagesManager.sendMessage(player, Component.text("§7+ §615 chunks gratuits"), Prefix.CITY, MessageType.INFO, false);
+        MessagesManager.sendMessage(player, Component.text("§7+ §6" + FREE_CLAIMS + " chunks gratuits"), Prefix.CITY, MessageType.INFO, false);
 
         DynamicCooldownManager.use(playerUUID, "city:big", 60000);
         DynamicCooldownManager.use(cityUUID, "city:immunity", IMMUNITY_COOLDOWN);

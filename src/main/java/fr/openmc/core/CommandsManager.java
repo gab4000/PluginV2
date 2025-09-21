@@ -8,6 +8,8 @@ import fr.openmc.core.commands.fun.Diceroll;
 import fr.openmc.core.commands.fun.Playtime;
 import fr.openmc.core.commands.utils.*;
 import fr.openmc.core.features.adminshop.AdminShopCommand;
+import fr.openmc.core.features.cube.CubeCommands;
+import fr.openmc.core.features.cube.multiblocks.MultiBlockManager;
 import fr.openmc.core.features.corporation.commands.ShopCommand;
 import fr.openmc.core.features.friend.FriendCommand;
 import fr.openmc.core.features.friend.FriendManager;
@@ -56,11 +58,13 @@ public class CommandsManager {
                 new SocialSpyCommand(),
                 new SettingsCommand(),
                 new Cooldowns(),
+                new CubeCommands(),
                 new ShopCommand()
         );
     }
 
     private static void registerSuggestions() {
         FriendManager.initCommandSuggestion();
+        MultiBlockManager.initCommandSuggestion();
     }
 }

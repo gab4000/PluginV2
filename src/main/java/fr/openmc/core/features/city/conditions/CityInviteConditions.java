@@ -4,6 +4,7 @@ import fr.openmc.core.features.city.City;
 import fr.openmc.core.features.city.CityManager;
 import fr.openmc.core.features.city.CityPermission;
 import fr.openmc.core.features.city.commands.CityCommands;
+import fr.openmc.core.features.city.sub.milestone.rewards.MemberLimitRewards;
 import fr.openmc.core.features.settings.PlayerSettingsManager;
 import fr.openmc.core.utils.messages.MessageType;
 import fr.openmc.core.utils.messages.MessagesManager;
@@ -50,6 +51,11 @@ public class CityInviteConditions {
 			return false;
 		}
 
+        if (city.getMembers().size() >= MemberLimitRewards.getMemberLimit(city.getLevel())) {
+            MessagesManager.sendMessage(player, Component.text("§cVous avez atteint la limite de membre qui est de §3" + MemberLimitRewards.getMemberLimit(city.getLevel()) + "§f, Améliorez votre ville au niveau suppérieur !"), Prefix.CITY, MessageType.ERROR, false);
+            return false;
+        }
+
 		return true;
 	}
 	
@@ -61,6 +67,12 @@ public class CityInviteConditions {
 	 */
 	public static boolean canCityInviteDeny(Player player, Player inviter) {
 		List<Player> playerInvitations = CityCommands.invitations.get(player);
+
+		if (playerInvitations == null) {
+			MessagesManager.sendMessage(player, Component.text("Tu n'as aucune invitation en attente"), Prefix.CITY, MessageType.ERROR, false);
+			return false;
+		}
+
 		if (!playerInvitations.contains(inviter)) {
 			MessagesManager.sendMessage(player, Component.text(inviter.getName() + " ne vous a pas invité"), Prefix.CITY, MessageType.ERROR, false);
 			return false;

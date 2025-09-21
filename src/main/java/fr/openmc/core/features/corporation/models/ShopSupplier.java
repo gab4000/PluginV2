@@ -10,7 +10,7 @@ import java.util.UUID;
 @Getter
 public class ShopSupplier {
     @DatabaseField(id = true)
-    private UUID id; // différencie les supplier (un joueur peut avoir plusieurs supplier)
+    private UUID id; // différencie les supplier (un joueur peut avoir plusieurs suppliers)
     @DatabaseField(canBeNull = false)
     private UUID ownerUUID;
     @DatabaseField(canBeNull = false)

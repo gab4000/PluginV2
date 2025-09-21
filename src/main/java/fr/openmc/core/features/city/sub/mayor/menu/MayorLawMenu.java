@@ -10,7 +10,7 @@ import fr.openmc.api.menulib.utils.MenuUtils;
 import fr.openmc.core.OMCPlugin;
 import fr.openmc.core.features.city.City;
 import fr.openmc.core.features.city.CityManager;
-import fr.openmc.core.features.city.actions.MayorSetWarpAction;
+import fr.openmc.core.features.city.sub.mayor.actions.MayorSetWarpAction;
 import fr.openmc.core.features.city.sub.mayor.managers.PerkManager;
 import fr.openmc.core.features.city.sub.mayor.models.CityLaw;
 import fr.openmc.core.features.city.sub.mayor.models.Mayor;
@@ -149,11 +149,11 @@ public class MayorLawMenu extends Menu {
                 ));
             }
 
-            if (!DynamicCooldownManager.isReady(mayor.getMayorUUID(), "mayor:law-move-warp")) {
+            if (!DynamicCooldownManager.isReady(city.getUniqueId(), "mayor:law-move-warp")) {
                 loreLawWarp.addAll(
                         List.of(
                                 Component.empty(),
-                                Component.text("§cCooldown §7: " + DateUtils.convertMillisToTime(DynamicCooldownManager.getRemaining(mayor.getMayorUUID(), "mayor:law-move-warp")))
+                                Component.text("§cCooldown §7: " + DateUtils.convertMillisToTime(DynamicCooldownManager.getRemaining(city.getUniqueId(), "mayor:law-move-warp")))
                         )
                 );
             } else {
@@ -308,7 +308,7 @@ public class MayorLawMenu extends Menu {
                         DynamicCooldownManager.use(city.getUniqueId(), "city:mineral_rush", 5 * 60 * 1000L); // 5 minutes
                         DynamicCooldownManager.use(mayor.getMayorUUID(), "mayor:law-perk-event", PerkManager.getPerkEvent(mayor).getCooldown());
                     } else if (PerkManager.hasPerk(city.getMayor(), Perks.MILITARY_DISSUASION.getId())) {
-                        // Dissuasion Militaire (id : 13) - Perk Event
+                        // Dissuasion Militaire (id: 13) - Perk Event
                         for (UUID uuid : city.getMembers()) {
                             Player member = Bukkit.getPlayer(uuid);
 

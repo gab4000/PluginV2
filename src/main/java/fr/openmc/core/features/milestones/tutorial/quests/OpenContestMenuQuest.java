@@ -32,7 +32,7 @@ public class OpenContestMenuQuest extends Quest implements Listener {
 
     public OpenContestMenuQuest() {
         super(
-                "Ouvrez le menu des Contests",
+                "Ouvrez le menu des contests",
                 List.of(
                         "§fTapez §d/contest §fou bien aller dans le §dmenu principal (/menu) §fpour pouvoir ouvrir le menu",
                         "§8§oUne méthode compétitive pour gagner des grosses récompenses !"
@@ -47,7 +47,7 @@ public class OpenContestMenuQuest extends Quest implements Listener {
                 1,
                 new QuestMoneyReward(1000),
                 new QuestTextReward(
-                        "Bien Joué ! Vous avez fini l'§6Étape " + (step.ordinal() + 1) + " §f! Les §6Contests§f opposent 2 groupes sur un thème, les gagnants remportent une grosse récompense ! Et voila le tutoriel est maintenant terminé, allez récupérer votre récompense dans la §9Mailbox§f, un système de lettre pour recevoir ou bien envoyer des lettres ! Sur ce, nous vous souhaitons le meilleur de votre aventure sur §dOpenMC §f!",
+                        "Bien joué ! Vous avez fini l'§6étape " + (step.ordinal() + 1) + " §f! Les §6contests§f opposent 2 groupes sur un thème, les gagnants remportent une grosse récompense ! Et voila le tutoriel est maintenant terminé, allez récupérer votre récompense dans la §9mailbox§f, un système de lettre pour recevoir ou bien envoyer des lettres !",
                         Prefix.MILLESTONE,
                         MessageType.SUCCESS
                 ),
@@ -86,11 +86,10 @@ public class OpenContestMenuQuest extends Quest implements Listener {
     @EventHandler
     public void onContestCommand(PlayerCommandPreprocessEvent event) {
         Player player = event.getPlayer();
-        String message = event.getMessage();
 
         if (MilestonesManager.getPlayerStep(type, player) != step.ordinal()) return;
 
-        if (!message.equals("/contest")) return;
+        if (!event.getMessage().equals("/contest")) return;
 
         this.incrementProgress(player.getUniqueId());
     }

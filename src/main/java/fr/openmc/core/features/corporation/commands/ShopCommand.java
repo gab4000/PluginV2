@@ -30,6 +30,11 @@ import java.util.UUID;
 @CommandPermission("omc.commands.shop")
 public class ShopCommand {
     
+    @CommandPlaceholder
+    public void onCommand(Player player) {
+        new ShopMenu(player).open();
+    }
+    
     @Subcommand("manage")
     @Description("Manage a shop")
     public static void manageShop(Player player) {
@@ -40,11 +45,6 @@ public class ShopCommand {
         }
         ShopMenu shopMenu = new ShopMenu(player);
         shopMenu.open();
-    }
-
-    @DefaultFor("~")
-    public void onCommand(Player player) {
-        new ShopMenu(player).open();
     }
 
     @Subcommand("help")

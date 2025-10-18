@@ -1,20 +1,18 @@
 package fr.openmc.core.features.homes.models;
 
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
 import fr.openmc.core.features.homes.icons.HomeIcon;
 import fr.openmc.core.features.homes.icons.HomeIconRegistry;
-import fr.openmc.core.features.homes.icons.OldHomeIcon;
+import fr.openmc.core.features.homes.icons.LegacyHomeIcon;
 import fr.openmc.core.features.homes.utils.HomeUtil;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
 
 import java.util.List;
 import java.util.UUID;
@@ -60,7 +58,7 @@ public class Home {
         this.iconId = icon.getSaveId();
     }
 
-    public Home(UUID uniqueId, UUID owner, String name, Location location, OldHomeIcon legacyIcon) {
+    public Home(UUID uniqueId, UUID owner, String name, Location location, LegacyHomeIcon legacyIcon) {
         this(uniqueId, owner, name, location, HomeIconRegistry.fromLegacyHomeIcon(legacyIcon));
     }
 
@@ -114,12 +112,12 @@ public class Home {
     }
 
     @Deprecated
-    public OldHomeIcon getLegacyIcon() {
+    public LegacyHomeIcon getLegacyIcon() {
         return HomeIconRegistry.toLegacyHomeIcon(getIcon());
     }
 
     @Deprecated
-    public void setLegacyIcon(OldHomeIcon legacyIcon) {
+    public void setLegacyIcon(LegacyHomeIcon legacyIcon) {
         this.iconId = HomeIconRegistry.fromLegacyHomeIcon(legacyIcon).getSaveId();
     }
 
@@ -147,7 +145,7 @@ public class Home {
             return icon;
 
         try {
-            OldHomeIcon legacyIcon = OldHomeIcon.valueOf(iconId.toUpperCase());
+            LegacyHomeIcon legacyIcon = LegacyHomeIcon.valueOf(iconId.toUpperCase());
             return HomeIconRegistry.fromLegacyHomeIcon(legacyIcon);
         } catch (IllegalArgumentException e) {
             return HomeUtil.mapLegacyCustomId(iconId);

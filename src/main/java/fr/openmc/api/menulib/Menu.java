@@ -1,8 +1,8 @@
 package fr.openmc.api.menulib;
 
+import fr.openmc.api.menulib.events.OpenMenuEvent;
 import fr.openmc.api.menulib.utils.InventorySize;
 import fr.openmc.api.menulib.utils.ItemBuilder;
-import fr.openmc.api.menulib.utils.ItemUtils;
 import fr.openmc.core.utils.messages.MessageType;
 import fr.openmc.core.utils.messages.MessagesManager;
 import fr.openmc.core.utils.messages.Prefix;
@@ -48,7 +48,6 @@ public abstract class Menu implements InventoryHolder {
 	protected Menu(Player owner) {
 		this.owner = owner;
 	}
-	
 	
 	/**
 	 * Retrieves the name of the menu.
@@ -119,7 +118,6 @@ public abstract class Menu implements InventoryHolder {
 	 *
 	 * @return A non-null list of integers representing the takable inventory slot indices.
 	 */
-
 	public abstract List<Integer> getTakableSlot();
 
 	/**
@@ -151,11 +149,13 @@ public abstract class Menu implements InventoryHolder {
 				setItem(owner, inventory, slot, item);
 			});
 
+            Bukkit.getServer().getPluginManager().callEvent(new OpenMenuEvent(owner, this));
+
 			owner.openInventory(inventory);
 		} catch (Exception e) {
 			MessagesManager.sendMessage(owner, Component.text("§cUne Erreur est survenue, veuillez contacter le Staff"), Prefix.OPENMC, MessageType.ERROR, false);
 			owner.closeInventory();
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -163,13 +163,9 @@ public abstract class Menu implements InventoryHolder {
 		if (item.isBackButton() && !MenuLib.hasPreviousMenu(player)) return;
 
 		if (this instanceof PaginatedMenu paginatedMenu) {
-			if (item.isPreviousButton() && paginatedMenu.isFirstPage()) {
+			if ((item.isPreviousButton() && paginatedMenu.isFirstPage())
+                    || (item.isNextButton() && paginatedMenu.isLastPage()))
 				return;
-			}
-
-			if (item.isNextButton() && paginatedMenu.isLastPage()) {
-				return;
-			}
 		}
 
 		if (item.isBackButton()) {

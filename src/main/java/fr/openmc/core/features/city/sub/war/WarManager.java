@@ -78,7 +78,7 @@ public class WarManager {
                 warHistory.computeIfAbsent(cityUUID, k -> war);
             });
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -87,7 +87,7 @@ public class WarManager {
                     try {
                         warHistoryDeo.createOrUpdate(warHistory);
                     } catch (SQLException e) {
-                        e.printStackTrace();
+                        throw new RuntimeException(e);
                     }
                 }
         );
@@ -156,9 +156,10 @@ public class WarManager {
         War warRemoved = warsByAttacker.remove(war.getCityAttacker().getUniqueId());
         warsByDefender.remove(war.getCityDefender().getUniqueId());
 
-        if (warRemoved == null) return;
+        pendingDefenses.remove(war.getCityAttacker().getUniqueId());
+        pendingDefenses.remove(war.getCityDefender().getUniqueId());
 
-        war.setPhase(War.WarPhase.ENDED);
+        if (warRemoved == null) return;
 
         Mascot attackerMascot = war.getCityAttacker().getMascot();
         Mascot defenderMascot = war.getCityDefender().getMascot();
@@ -204,6 +205,8 @@ public class WarManager {
                     loser = war.getCityAttacker();
                     winReason = WinReason.KILLS;
                 } else {
+                    winner = war.getCityDefender();
+                    loser = war.getCityAttacker();
                     winReason = WinReason.DRAW;
                 }
             }
@@ -223,7 +226,7 @@ public class WarManager {
                 warHistoryDeo.update(loserHistory);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
         int claimsWon = -1;
@@ -292,7 +295,7 @@ public class WarManager {
             String message = String.format("""
                             §8§m                                                     §r
                             §7
-                            §c§lGUERRE!§r §7C'est la fin des combats!§7
+                            §c§lGUERRE !§r §7C'est la fin des combats!§7
                             §8§oIl y a eu égalité !
                             §7
                             §7Statistiques globales:
@@ -322,7 +325,7 @@ public class WarManager {
         String message = """
                 §8§m                                                     §r
                 §7
-                §c§lGUERRE!§r §7C'est la fin des combats!§7
+                §c§lGUERRE !§r §7C'est la fin des combats!§7
                 §8§oVous avez %s contre %s!
                 §8§o%s
                 §7
@@ -343,8 +346,8 @@ public class WarManager {
                 "gagné",
                 loser.getName(),
                 switch (reason) {
-                    case MASCOT_DEATH -> "Vous avez tué la Mascotte adverse!";
-                    case MASCOT_HP -> "Votre Mascotte a eu le plus de points de vie!";
+                    case MASCOT_DEATH -> "Vous avez tué la mascotte adverse!";
+                    case MASCOT_HP -> "Votre mascotte a eu le plus de points de vie!";
                     case KILLS -> "Votre ville a tué le plus d'adversaires!";
                     case DRAW -> "C'est une égalité!";
                 }, winner.getName(), killsWinner, loser.getName(), killsLoser,
@@ -365,8 +368,8 @@ public class WarManager {
                 "perdu",
                 loser.getName(),
                 switch (reason) {
-                    case MASCOT_DEATH -> "Votre Mascotte a été tuée!";
-                    case MASCOT_HP -> "Votre Mascotte a eu le moins de points de vie!";
+                    case MASCOT_DEATH -> "Votre mascotte a été tuée!";
+                    case MASCOT_HP -> "Votre mascotte a eu le moins de points de vie!";
                     case KILLS -> "L'adversaire a tué le plus de monde!";
                     case DRAW -> "C'est une égalité!";
                 }, winner.getName(), killsWinner, loser.getName(), killsLoser,

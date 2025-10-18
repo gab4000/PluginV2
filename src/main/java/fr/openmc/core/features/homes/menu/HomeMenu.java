@@ -4,6 +4,7 @@ import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.api.menulib.PaginatedMenu;
 import fr.openmc.api.menulib.utils.InventorySize;
 import fr.openmc.api.menulib.utils.ItemBuilder;
+import fr.openmc.api.menulib.utils.ItemUtils;
 import fr.openmc.core.features.homes.HomesManager;
 import fr.openmc.core.features.homes.icons.HomeIcon;
 import fr.openmc.core.features.homes.icons.HomeIconRegistry;
@@ -94,7 +95,7 @@ public class HomeMenu extends PaginatedMenu {
                             Component.text("§7■ §aClique §2gauche pour vous téléporter"),
                             Component.text("§7■ §cCliquez §4droit §cpour configurer le home")
                     ));
-                }).setOnClick(event -> {
+                }).hide(ItemUtils.getDataComponentType()).setOnClick(event -> {
                     if(event.isLeftClick()) {
                         this.getInventory().close();
                         getOwner().teleportAsync(home.getLocation()).thenAccept(success -> {
@@ -106,7 +107,7 @@ public class HomeMenu extends PaginatedMenu {
                     }
                 }));
             } catch (Exception e) {
-                MessagesManager.sendMessage(getOwner(), Component.text("§cUne Erreur est survenue, veuillez contacter le Staff"), Prefix.OPENMC, MessageType.ERROR, false);
+                MessagesManager.sendMessage(getOwner(), Component.text("§cUne erreur est survenue, veuillez contacter le staff"), Prefix.OPENMC, MessageType.ERROR, false);
                 getOwner().closeInventory();
                 throw new RuntimeException("Failed to create HomeMenu item for home: " + home.getName(), e);
             }
@@ -123,27 +124,14 @@ public class HomeMenu extends PaginatedMenu {
     public Map<Integer, ItemBuilder> getButtons() {
         Map<Integer, ItemBuilder> map = new HashMap<>();
 
-            if(!wasTarget) {
-                map.put(45, new ItemBuilder(this, Objects.requireNonNull(CustomItemRegistry.getByName("omc_homes:omc_homes_icon_information")).getBest(),
-                        itemMeta -> {
-                            itemMeta.displayName(Component.text("§8(§bⓘ§8) §6Informations sur vos homes"));
-                            itemMeta.lore(List.of(
-                                    Component.text("§8→ §6Chaque icon qui représente un home est lié au nom du home, par exemple, si vous appelé votre home 'maison', l'icône sera une maison"),
-                                    Component.empty(),
-                                    Component.text("§8› §6Vous pouvez configurer le home en effectuant un clique droit sur l'icône du home."),
-                                    Component.text("§8› §6Vous pouvez vous téléporter à votre home en effectuant un clique gauche sur l'icône du home.")
-                            ));
-                        }
-                    )
-            );
-
-                map.put(53, new ItemBuilder(this, Objects.requireNonNull(CustomItemRegistry.getByName("omc_homes:omc_homes_icon_upgrade")).getBest(), itemMeta -> {
-                    itemMeta.displayName(Component.text("§8● §6Améliorer les homes §8(Click ici)"));
-                    itemMeta.lore(List.of(
-                        Component.text("§6Cliquez pour améliorer vos homes")
-                    ));
-                }).setOnClick(event -> new HomeUpgradeMenu(getOwner()).open()));
-            }
+        if(!wasTarget) {
+            map.put(53, new ItemBuilder(this, Objects.requireNonNull(CustomItemRegistry.getByName("omc_homes:omc_homes_icon_upgrade")).getBest(), itemMeta -> {
+                itemMeta.displayName(Component.text("§8● §6Améliorer les homes §8(Click ici)"));
+                itemMeta.lore(List.of(
+                    Component.text("§6Cliquez pour améliorer vos homes")
+                ));
+            }).setOnClick(event -> new HomeUpgradeMenu(getOwner()).open()));
+        }
 
         map.put(48, new ItemBuilder(this, MailboxMenuManager.previousPageBtn()).setPreviousPageButton());
         map.put(49, new ItemBuilder(this, MailboxMenuManager.cancelBtn()).setCloseButton());
@@ -153,8 +141,7 @@ public class HomeMenu extends PaginatedMenu {
     }
 
     @Override
-    public void onInventoryClick(InventoryClickEvent inventoryClickEvent) {
-    }
+    public void onInventoryClick(InventoryClickEvent inventoryClickEvent) {}
 
     @Override
     public void onClose(InventoryCloseEvent event) {

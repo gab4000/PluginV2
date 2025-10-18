@@ -1,7 +1,7 @@
 package fr.openmc.core.features.city.menu.playerlist;
 
 import fr.openmc.api.menulib.Menu;
-import fr.openmc.api.menulib.default_menu.ConfirmMenu;
+import fr.openmc.api.menulib.defaultmenu.ConfirmMenu;
 import fr.openmc.api.menulib.utils.InventorySize;
 import fr.openmc.api.menulib.utils.ItemBuilder;
 import fr.openmc.api.menulib.utils.ItemUtils;
@@ -35,7 +35,7 @@ public class CityPlayerGestionMenu extends Menu {
 
     @Override
     public @NotNull String getName() {
-        return "Menu des Villes - Modifier un Joueur";
+	    return "Menu des villes - Modifier un joueur";
     }
 
     @Override
@@ -109,7 +109,7 @@ public class CityPlayerGestionMenu extends Menu {
 
 
         List<Component> lorePlayerTarget = List.of(
-                Component.text("§7Vous êtes entrain de modifier son status dans la §dville")
+		        Component.text("§7Vous êtes en train de modifier son statut dans la §dville")
         );
 
         inventory.put(13, new ItemBuilder(this, ItemUtils.getPlayerSkull(playerTarget.getUniqueId()), itemMeta -> {

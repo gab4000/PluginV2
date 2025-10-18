@@ -56,16 +56,16 @@ public class CityTypeMenu extends Menu {
         List<Component> peaceInfo = new ArrayList<>();
 
         boolean enchantPeace = city.getType() == CityType.PEACE;
-        peaceInfo.add(Component.text("§7Votre sécurité est §aassurée§7!"));
+	    peaceInfo.add(Component.text("§7Votre sécurité est §aassurée §7!"));
         peaceInfo.add(Component.empty());
-        peaceInfo.add(Component.text("§6§lTIPS: Parfait pour build, et échanger en toute tranquilité!"));
+	    peaceInfo.add(Component.text("§6§lTIPS: Parfait pour build, et échanger en toute tranquilité !"));
 
         map.put(11, new ItemBuilder(this, Material.POPPY, itemMeta -> {
             itemMeta.displayName(Component.text("§aVille en paix"));
             itemMeta.lore(peaceInfo);
             itemMeta.setEnchantmentGlintOverride(enchantPeace);
         }).setOnClick(inventoryClickEvent -> {
-            if (!CityTypeConditions.canCityChangeType(city, player)) return;
+            if (!CityTypeConditions.canCityChangeType(city, player, CityType.PEACE)) return;
 
             CityChangeAction.beginChangeCity(player, CityType.PEACE);
         }));
@@ -74,12 +74,12 @@ public class CityTypeMenu extends Menu {
         warInfo.add(Component.text("§7Un monde de §cguerre §7et de §cconcurrence."));
         warInfo.add(Component.empty());
         warInfo.add(Component.text("§c§l ⚠ ATTENTION"));
-        warInfo.add(Component.text("§8- §cLes villes étant dans le même status que vous, pourront vous §cdéclarer la guerre!"));
+	    warInfo.add(Component.text("§8- §cLes villes étant dans le même status que vous, pourront vous §cdéclarer la guerre !"));
         warInfo.add(Component.text("§6§lTIPS: Idéal pour les tryhardeurs et les compétitifs"));
 
         if (!FeaturesRewards.hasUnlockFeature(city, FeaturesRewards.Feature.TYPE_WAR)) {
             warInfo.add(Component.empty());
-            warInfo.add(Component.text("§cVous devez etre Niveau " + FeaturesRewards.getFeatureUnlockLevel(FeaturesRewards.Feature.TYPE_WAR) + " pour débloquer ceci"));
+	        warInfo.add(Component.text("§cVous devez être niveau " + FeaturesRewards.getFeatureUnlockLevel(FeaturesRewards.Feature.TYPE_WAR) + " pour débloquer ceci"));
         }
 
         boolean enchantWar = city.getType() == CityType.WAR;
@@ -88,7 +88,7 @@ public class CityTypeMenu extends Menu {
             itemMeta.lore(warInfo);
             itemMeta.setEnchantmentGlintOverride(enchantWar);
         }).setOnClick(inventoryClickEvent -> {
-            if (!CityTypeConditions.canCityChangeType(city, player)) return;
+            if (!CityTypeConditions.canCityChangeType(city, player, CityType.WAR)) return;
 
             CityChangeAction.beginChangeCity(player, CityType.WAR);
         }));

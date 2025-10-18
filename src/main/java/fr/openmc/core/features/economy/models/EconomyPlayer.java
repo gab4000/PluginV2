@@ -1,17 +1,16 @@
 package fr.openmc.core.features.economy.models;
 
-import java.util.UUID;
-
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
-
 import lombok.Getter;
+
+import java.util.UUID;
 
 @Getter
 @DatabaseTable(tableName = "balances")
 public class EconomyPlayer {
-    @DatabaseField(id = true)
-    private UUID player;
+    @DatabaseField(id = true, columnName = "player")
+    private UUID playerUUID;
     @DatabaseField(canBeNull = false, defaultValue = "0")
     private double balance;
 
@@ -19,8 +18,8 @@ public class EconomyPlayer {
         // necessary for OrmLite
     }
 
-    public EconomyPlayer(UUID player) {
-        this.player = player;
+    public EconomyPlayer(UUID playerUUID) {
+        this.playerUUID = playerUUID;
         this.balance = 0;
     }
 

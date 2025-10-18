@@ -3,7 +3,6 @@ package fr.openmc.core.features.displays.scoreboards;
 import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.api.hooks.ItemsAdderHook;
 import fr.openmc.api.hooks.LuckPermsHook;
-import fr.openmc.api.hooks.PapiHook;
 import fr.openmc.api.hooks.WorldGuardHook;
 import fr.openmc.core.CommandsManager;
 import fr.openmc.core.OMCPlugin;
@@ -43,7 +42,7 @@ public class ScoreboardManager implements Listener {
 
     public static final Set<UUID> disabledPlayers = new HashSet<>();
     public static final HashMap<UUID, Scoreboard> playerScoreboards = new HashMap<>();
-    private static final boolean canShowLogo = PapiHook.hasPAPI() && ItemsAdderHook.hasItemAdder();
+    private static final boolean canShowLogo = ItemsAdderHook.isHasItemAdder();
     final OMCPlugin plugin = OMCPlugin.getInstance();
     private static GlobalTeamManager globalTeamManager = null;
 
@@ -69,7 +68,7 @@ public class ScoreboardManager implements Listener {
                 updateScoreboard(player);
             }
         }, 0L, 20L); // 1s
-        if (LuckPermsHook.hasLuckPerms()) globalTeamManager = new GlobalTeamManager(playerScoreboards);
+        if (LuckPermsHook.isHasLuckPerms()) globalTeamManager = new GlobalTeamManager(playerScoreboards);
     }
 
     public static Scoreboard createNewScoreboard(Player player) {
@@ -143,15 +142,15 @@ public class ScoreboardManager implements Listener {
                 War war = city.getWar();
 
                 objective.getScore("§7").setScore(14);
-
-                objective.getScore("§8• §fNom: §7" + player.getName()).setScore(13);
+                
+                objective.getScore("§8• §fNom §7: " + player.getName()).setScore(13);
 
                 String cityName = city.getName();
-                objective.getScore("§8• §fVille§7: " + cityName).setScore(12);
+                objective.getScore("§8• §fVille §7: " + cityName).setScore(12);
 
                 City chunkCity = CityManager.getCityFromChunk(player.getChunk().getX(), player.getChunk().getZ());
                 String chunkCityName = (chunkCity != null) ? chunkCity.getName() : "Nature";
-                objective.getScore("§8• §fLocation§7: " + chunkCityName).setScore(11);
+                objective.getScore("§8• §fLocation §7: " + chunkCityName).setScore(11);
 
                 objective.getScore("  ").setScore(10);
                 objective.getScore("§c§l⚔ GUERRE EN COURS ⚔").setScore(9);
@@ -159,10 +158,10 @@ public class ScoreboardManager implements Listener {
                 City cityEnemy = war.getCityAttacker().equals(city) ?
                         war.getCityDefender() : war.getCityAttacker();
                 String ennemyName = cityEnemy.getName();
-                objective.getScore("§8• §cEnnemi§7: " + ennemyName).setScore(8);
+                objective.getScore("§8• §cEnnemi §7: " + ennemyName).setScore(8);
 
                 War.WarPhase phase = war.getPhase();
-                objective.getScore("§8• §6Phase§7: " + WarManager.getFormattedPhase(phase)).setScore(7);
+                objective.getScore("§8• §6Phase §7: " + WarManager.getFormattedPhase(phase)).setScore(7);
 
                 Chunk chunk = cityEnemy.getMascot().getChunk();
                 World world = chunk.getWorld();
@@ -177,36 +176,36 @@ public class ScoreboardManager implements Listener {
                 String direction = DirectionUtils.getDirectionArrow(player, mascotLocation);
                 double distance = mascotLocation.distance(player.getLocation());
                 int rounded = (int) Math.round(distance);
-                objective.getScore("§8• §cMascotte: " + direction + " (" + rounded + "m)").setScore(6);
+                objective.getScore("§8• §cMascotte §7: " + direction + " (" + rounded + "m)").setScore(6);
 
                 switch (war.getPhase()) {
                     case PREPARATION:
                         objective.getScore("   ").setScore(5);
                         int secondsPreparationRemaining = war.getPreparationTimeRemaining();
                         String timePreparationFormatted = DateUtils.convertSecondToTime(secondsPreparationRemaining);
-                        objective.getScore("§8• §eDébut dans§7: " + timePreparationFormatted).setScore(4);
+                        objective.getScore("§8• §eDébut dans §7: " + timePreparationFormatted).setScore(4);
                         break;
                     case COMBAT:
                         objective.getScore("   ").setScore(5);
                         if (mobMascot != null) {
                             if (city.getMascot().isAlive()) {
-                                objective.getScore("§8• §fVotre Mascotte§7: §c" + Math.floor(mobMascot.getHealth()) + "§4/§c" + mobMascot.getAttribute(Attribute.MAX_HEALTH).getValue() + " ❤").setScore(4);
+                                objective.getScore("§8• §fVotre Mascotte §7: §c" + Math.floor(mobMascot.getHealth()) + "§4/§c" + mobMascot.getAttribute(Attribute.MAX_HEALTH).getValue() + " ❤").setScore(4);
                             } else {
-                                objective.getScore("§8• §fVotre Mascotte§7: §4☠ MORT").setScore(4);
+                                objective.getScore("§8• §fVotre Mascotte §7: §4☠ MORTE").setScore(4);
                             }
                         }
 
                         if (mobMascotEnemy != null) {
                             if (cityEnemy.getMascot().isAlive()) {
-                                objective.getScore("§8• §4Mascotte Enemnie§7: §c" + Math.floor(mobMascotEnemy.getHealth()) + "§4/§c" + mobMascotEnemy.getAttribute(Attribute.MAX_HEALTH).getValue() + " ❤").setScore(3);
+                                objective.getScore("§8• §4Mascotte Ennemie §7: §c" + Math.floor(mobMascotEnemy.getHealth()) + "§4/§c" + mobMascotEnemy.getAttribute(Attribute.MAX_HEALTH).getValue() + " ❤").setScore(3);
                             } else {
-                                objective.getScore("§8• §4Mascotte Enemnie§7: §4☠ MORT").setScore(3);
+                                objective.getScore("§8• §4Mascotte Ennemie §7: §4☠ MORTE").setScore(3);
                             }
                         }
 
                         int secondsCombatRemaining = war.getCombatTimeRemaining();
                         String timeCombatFormatted = DateUtils.convertSecondToTime(secondsCombatRemaining);
-                        objective.getScore("§8• §eFin dans§7: " + timeCombatFormatted).setScore(2);
+                        objective.getScore("§8• §eFin dans §7: " + timeCombatFormatted).setScore(2);
                         break;
                     case ENDED:
                         break;
@@ -222,13 +221,13 @@ public class ScoreboardManager implements Listener {
         // GENERAL SCOREBOARD
 
         objective.getScore("§7").setScore(19);
-
-        objective.getScore("§8• §fNom: §7" + player.getName()).setScore(18);
+        
+        objective.getScore("§8• §fNom §7: " + player.getName()).setScore(18);
 
         if (player.getWorld().getName().equalsIgnoreCase("world")) {
             City city = CityManager.getPlayerCity(player.getUniqueId());
             String cityName = city != null ? city.getName() : "Aucune";
-            objective.getScore("§8• §fVille§7: " + cityName).setScore(17);
+            objective.getScore("§8• §fVille §7: " + cityName).setScore(17);
 
 
             objective.getScore("  ").setScore(7);
@@ -237,7 +236,7 @@ public class ScoreboardManager implements Listener {
             boolean isInRegion = WorldGuardHook.isRegionConflict(player.getLocation());
             String location = isInRegion ? "§6Région Protégée" : "Nature";
             location = (chunkCity != null) ? chunkCity.getName() : location;
-            objective.getScore("§8• §fLocation§7: " + location).setScore(6);
+            objective.getScore("§8• §fLocation §7: " + location).setScore(6);
         }
 
         String balance = EconomyManager.getMiniBalance(player.getUniqueId());
@@ -248,7 +247,7 @@ public class ScoreboardManager implements Listener {
         int phase = data.getPhase();
         if(phase != 1) {
             objective.getScore(" ").setScore(5);
-            objective.getScore("§8• §6§lCONTEST!").setScore(4);
+            objective.getScore("§8• §6§lCONTEST !").setScore(4);
             objective.getScore(ChatColor.valueOf(data.getColor1()) + data.getCamp1() + " §8VS " + ChatColor.valueOf(data.getColor2()) + data.getCamp2()).setScore(3);
             objective.getScore("§cFin dans " + DateUtils.getTimeUntilNextDay(DayOfWeek.MONDAY)).setScore(2);
         }
@@ -256,6 +255,6 @@ public class ScoreboardManager implements Listener {
         objective.getScore("   ").setScore(1);
         objective.getScore("§d      ᴘʟᴀʏ.ᴏᴘᴇɴᴍᴄ.ꜰʀ").setScore(0);
 
-        if (LuckPermsHook.hasLuckPerms() && globalTeamManager != null) globalTeamManager.updatePlayerTeam(player);
+        if (LuckPermsHook.isHasLuckPerms() && globalTeamManager != null) globalTeamManager.updatePlayerTeam(player);
     }
 }

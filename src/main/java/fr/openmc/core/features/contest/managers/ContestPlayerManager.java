@@ -24,7 +24,7 @@ public class ContestPlayerManager  {
             1000, "Légende en ",
             750, "Sénior en ",
             500, "Pro en ",
-            250, "Semi-Pro en ",
+            250, "Semi-pro en ",
             100, "Amateur en ",
             0, "Noob en "
     );
@@ -98,11 +98,11 @@ public class ContestPlayerManager  {
      * Met à jour le nombre de points d’un joueur.
      * Cette opération écrase les points précédemment enregistrés.
      *
-     * @param player L’UUID du joueur à mettre à jour.
+     * @param playerUUID L’UUID du joueur à mettre à jour.
      * @param points Le nouveau nombre de points du joueur.
      */
-    public static void setPointsPlayer(UUID player, int points) {
-        ContestPlayer data = ContestManager.dataPlayer.get(player);
+    public static void setPointsPlayer(UUID playerUUID, int points) {
+        ContestPlayer data = ContestManager.dataPlayer.get(playerUUID);
         if (data != null) {
             data.setPoints(points);
         }

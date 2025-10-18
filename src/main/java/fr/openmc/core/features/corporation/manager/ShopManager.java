@@ -85,7 +85,7 @@ public class ShopManager {
         Block cashBlock = multiblock.cashBlock().getBlock();
         Yaw yaw = WorldUtils.getYaw(player);
 
-        if (ItemsAdderHook.hasItemAdder()) {
+        if (ItemsAdderHook.isHasItemAdder()) {
             if (! ItemsAdderIntegration.placeShopFurniture(cashBlock)) cashBlock.setType(Material.OAK_SIGN);
         } else {
             cashBlock.setType(Material.OAK_SIGN);
@@ -111,7 +111,7 @@ public class ShopManager {
         Block cashBlock = multiblock.cashBlock().getBlock();
         Block stockBlock = multiblock.stockBlock().getBlock();
 
-        if (ItemsAdderHook.hasItemAdder()) {
+        if (ItemsAdderHook.isHasItemAdder()) {
             if (! ItemsAdderIntegration.hasFurniture(cashBlock)) return false;
             if (! ItemsAdderIntegration.removeShopFurniture(cashBlock)) return false;
         } else {

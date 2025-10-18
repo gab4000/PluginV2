@@ -22,7 +22,7 @@ public class ListenersManager {
         registerEvents(
                 new HappyGhastListener(),
                 new SessionsListener(),
-                new JoinMessageListener(),
+                new JoinQuitMessageListener(),
                 new UpdateListener(),
                 new ClockInfos(),
                 new MailboxListener(),
@@ -39,11 +39,16 @@ public class ListenersManager {
                 new BossbarListener(),
                 new PlayerSettingsManager(),
                 new InteractListener(),
-                new ItemsAddersListener(),
-                new TicketListener(),
                 new AywenCapListener(),
-                new ShopListener()
+                new ArmorListener(),
+		        new ShopListener()
         );
+        if (!OMCPlugin.isUnitTestVersion()) {
+            registerEvents(
+                    new ItemsAddersListener(),
+                    new TicketListener()
+            );
+        }
     }
 
     private static void registerEvents(Listener... args) {

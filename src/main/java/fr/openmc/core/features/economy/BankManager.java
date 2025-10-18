@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public class BankManager {
     @Getter
@@ -90,11 +91,11 @@ public class BankManager {
 
     private static boolean saveBank(Bank bank) {
         try {
-            banks.put(bank.getPlayer(), bank);
+            banks.put(bank.getPlayerUUID(), bank);
             banksDao.createOrUpdate(bank);
             return true;
         } catch (SQLException e) {
-            e.printStackTrace();
+            OMCPlugin.getInstance().getLogger().log(Level.SEVERE, "Failed to save bank " + bank.getPlayerUUID(), e);
             return false;
         }
     }
@@ -113,7 +114,7 @@ public class BankManager {
 
         if (city == null || city.getLevel() < 2) {
             MessagesManager.sendMessage(offlinePlayer,
-                    Component.text("Pour avoir une banque personnelle, vous devez appartenir à une ville niveau 2 minimum !"),
+                    Component.text("Pour avoir une banque personnelle, vous devez appartenir à une ville de niveau 2 minimum !"),
                     Prefix.BANK, MessageType.ERROR, false);
             return;
         }
@@ -184,7 +185,7 @@ public class BankManager {
         try {
             List<Bank> dbBanks = banksDao.queryForAll();
             for (Bank bank : dbBanks) {
-                newBanks.put(bank.getPlayer(), bank);
+                newBanks.put(bank.getPlayerUUID(), bank);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -214,7 +215,7 @@ public class BankManager {
         Player sender = Bukkit.getPlayer(playerUUID);
         if (sender != null)
             MessagesManager.sendMessage(sender,
-                    Component.text("Vous venez de percevoir §d" + interest * 100 + "% §rd'intérèt, soit §d"
+                    Component.text("Vous venez de percevoir §d" + interest * 100 + "% §rd'intérêt, soit §d"
                             + EconomyManager.getFormattedSimplifiedNumber(amount) + "§r"
                             + EconomyManager.getEconomyIcon()),
                     Prefix.CITY, MessageType.SUCCESS, false);

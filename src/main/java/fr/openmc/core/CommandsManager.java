@@ -27,7 +27,7 @@ public class CommandsManager {
     @Getter
     static Lamp handler;
 
-    public CommandsManager() {
+    public static void init() {
         handler = BukkitLamp.builder(OMCPlugin.getInstance())
                 .commandCondition(new CooldownInterceptor())
                 .build();

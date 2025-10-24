@@ -1,6 +1,6 @@
 package fr.openmc.api.menulib;
 
-import fr.openmc.api.menulib.defaultmenu.ConfirmMenu;
+import fr.openmc.api.menulib.template.ConfirmMenu;
 import fr.openmc.api.menulib.utils.ItemBuilder;
 import fr.openmc.core.OMCPlugin;
 import fr.openmc.core.features.homes.menu.HomeDeleteConfirmMenu;
@@ -13,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -162,9 +163,6 @@ public final class MenuLib implements Listener {
         if (!(e.getInventory().getHolder() instanceof Menu menu))
             return;
 
-        if (e.getCurrentItem() == null)
-            return;
-
         if (menu.getTakableSlot().contains(e.getRawSlot()))
             return;
 
@@ -200,6 +198,16 @@ public final class MenuLib implements Listener {
         } catch (Exception ex) {
             OMCPlugin.getInstance().getSLF4JLogger().error("An error occurred while handling a click event in a menu: {}", ex.getMessage(), ex);
         }
+    }
+
+    @EventHandler
+    public void onInventoryDrag(InventoryDragEvent e) {
+        if (!(e.getInventory().getHolder() instanceof Menu menu))
+            return;
+
+        if (e.getRawSlots().stream().anyMatch(menu.getTakableSlot()::contains))
+            return;
+        e.setCancelled(true);
     }
 
     /**

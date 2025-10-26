@@ -385,6 +385,7 @@ public class MayorManager {
             OfflinePlayer offlinePlayer = CacheOfflinePlayer.getOfflinePlayer(uuid);
             if (offlinePlayer.isOnline()) {
                 Player player = offlinePlayer.getPlayer();
+                if (player == null) continue;
                 // Mineur Dévoué
                 if (PerkManager.hasPerk(city.getMayor(), Perks.MINER.getId())) {
                     MinerPerk.updatePlayerEffects(player);
@@ -398,6 +399,12 @@ public class MayorManager {
                 // Fruit du Démon
                 if (PerkManager.hasPerk(city.getMayor(), Perks.FRUIT_DEMON.getId())) {
                     DemonFruitPerk.applyReachBonus(player);
+                }
+
+                // Fou de Rage
+                if (PerkManager.hasPerk(city.getMayor(), Perks.FOU_DE_RAGE.getId())) {
+                    City locCity = CityManager.getCityFromChunk(player.getLocation().getChunk());
+                    RagePerk.updateEffect(locCity, player);
                 }
             }
         }

@@ -5,11 +5,16 @@ import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import fr.openmc.api.hooks.ItemsAdderHook;
+import fr.openmc.api.menulib.Menu;
 import fr.openmc.core.CommandsManager;
 import fr.openmc.core.OMCPlugin;
 import fr.openmc.core.features.contest.ContestEndEvent;
 import fr.openmc.core.features.contest.commands.ContestCommand;
 import fr.openmc.core.features.contest.listeners.ContestIntractEvents;
+import fr.openmc.core.features.contest.menu.ContributionMenu;
+import fr.openmc.core.features.contest.menu.MoreInfoMenu;
+import fr.openmc.core.features.contest.menu.TradeMenu;
+import fr.openmc.core.features.contest.menu.VoteMenu;
 import fr.openmc.core.features.contest.models.Contest;
 import fr.openmc.core.features.contest.models.ContestPlayer;
 import fr.openmc.core.features.economy.EconomyManager;
@@ -30,6 +35,8 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 
@@ -56,6 +63,14 @@ public class ContestManager {
             "DARK_GRAY","GRAY","GOLD","DARK_PURPLE","DARK_AQUA","DARK_RED",
             "DARK_GREEN","DARK_BLUE","BLACK"
     );
+    private static final Set<Class<? extends Menu>> contestMenus = new HashSet<>();
+
+    static {
+        contestMenus.add(ContributionMenu.class);
+        contestMenus.add(MoreInfoMenu.class);
+        contestMenus.add(TradeMenu.class);
+        contestMenus.add(VoteMenu.class);
+    }
 
     /**
      * Constructeur du ContestManager :
@@ -247,6 +262,15 @@ public class ContestManager {
         ParticleUtils.color2 = null;
 
         for (Player player : Bukkit.getOnlinePlayers()) {
+            InventoryView openInv = player.getOpenInventory();
+            InventoryHolder holder = openInv.getTopInventory().getHolder();
+
+            if (holder instanceof Menu menu) {
+                if (contestMenus.contains(menu.getClass())) {
+                    player.closeInventory();
+                }
+            }
+
             player.playSound(player.getEyeLocation(), Sound.ENTITY_ENDER_DRAGON_DEATH, 1.0F, 2F);
         }
 

@@ -18,6 +18,8 @@ import fr.openmc.core.features.contest.menu.VoteMenu;
 import fr.openmc.core.features.contest.models.Contest;
 import fr.openmc.core.features.contest.models.ContestPlayer;
 import fr.openmc.core.features.economy.EconomyManager;
+import fr.openmc.core.features.economy.Transaction;
+import fr.openmc.core.features.economy.TransactionsManager;
 import fr.openmc.core.features.leaderboards.LeaderboardManager;
 import fr.openmc.core.features.mailboxes.MailboxManager;
 import fr.openmc.core.items.CustomItemRegistry;
@@ -284,12 +286,6 @@ public class ContestManager {
                         §7
                         §8§m                                                     §r"""
         ));
-        Component messageMail = Component.text("Vous avez reçu la lettre du contest", NamedTextColor.DARK_GREEN)
-                .append(Component.text("\nCliquez ici", NamedTextColor.YELLOW))
-                .clickEvent(ClickEvent.runCommand("mailbox"))
-                .hoverEvent(getHoverEvent("Ouvrir la mailbox"))
-                .append(Component.text(" pour ouvrir la mailbox", NamedTextColor.GOLD));
-        Bukkit.broadcast(messageMail);
 
         // GET GLOBAL CONTEST INFORMATION
         String camp1Color = data.getColor1();
@@ -437,6 +433,15 @@ public class ContestManager {
             OfflinePlayer player = CacheOfflinePlayer.getOfflinePlayer(uuid);
             int points = dataPlayer1.getPoints();
 
+            if (player.isOnline() && player instanceof Player onelinePlayer) {
+                Component messageMail = Component.text("Vous avez reçu la lettre du contest", NamedTextColor.DARK_GREEN)
+                        .append(Component.text("\nCliquez ici", NamedTextColor.YELLOW))
+                        .clickEvent(ClickEvent.runCommand("mailbox"))
+                        .hoverEvent(getHoverEvent("Ouvrir la mailbox"))
+                        .append(Component.text(" pour ouvrir la mailbox", NamedTextColor.GOLD));
+                onelinePlayer.sendMessage(messageMail);
+            }
+
             String playerCampName = data.get("camp" + dataPlayer1.getCamp());
             NamedTextColor playerCampColor = ColorUtils.getReadableColor(dataPlayer1.getColor());
             String playerTitleContest = ContestPlayerManager.getTitleWithPoints(points) + playerCampName; // ex. Novice en + Moutarde
@@ -469,6 +474,14 @@ public class ContestManager {
                 Random randomMoney = new Random();
                 money = randomMoney.nextInt(moneyMin, moneyMax);
                 EconomyManager.addBalance(player.getUniqueId(), money);
+                TransactionsManager.registerTransaction(
+                        new Transaction(
+                                "CONSOLE",
+                                player.getUniqueId().toString(),
+                                money,
+                                "Récompense contest - Gagnant"
+                        )
+                );
                 // Gagnant - Aywenite
                 int ayweniteMin = 40;
                 int ayweniteMax = 60;
@@ -489,6 +502,14 @@ public class ContestManager {
                 Random randomMoney = new Random();
                 money = randomMoney.nextInt(moneyMin, moneyMax);
                 EconomyManager.addBalance(player.getUniqueId(), money);
+                TransactionsManager.registerTransaction(
+                        new Transaction(
+                                "CONSOLE",
+                                player.getUniqueId().toString(),
+                                money,
+                                "Récompense contest - Perdant"
+                        )
+                );
 
                 // Perdant - Aywenite
                 int ayweniteMin = 20;

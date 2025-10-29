@@ -17,6 +17,7 @@ import fr.openmc.core.features.corporation.manager.ShopManager;
 import fr.openmc.core.features.economy.BankManager;
 import fr.openmc.core.features.economy.EconomyManager;
 import fr.openmc.core.features.economy.TransactionsManager;
+import fr.openmc.core.features.events.halloween.managers.HalloweenManager;
 import fr.openmc.core.features.friend.FriendSQLManager;
 import fr.openmc.core.features.homes.HomesManager;
 import fr.openmc.core.features.mailboxes.MailboxManager;
@@ -70,8 +71,8 @@ public class DatabaseManager {
             MascotsManager.initDB(connectionSource);
             PlayerSettingsManager.initDB(connectionSource);
             CityStatisticsManager.initDB(connectionSource);
-	        ShopManager.initDB(connectionSource);
-         
+	          ShopManager.initDB(connectionSource);
+            HalloweenManager.initDB(connectionSource);
         } catch (SQLException e) {
             OMCPlugin.getInstance().getSLF4JLogger().error("Failed to initialize the database connection.", e);
             throw new RuntimeException(e);

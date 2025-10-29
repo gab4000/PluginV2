@@ -132,7 +132,7 @@ public class AdminShopYAML {
     private static @NotNull Map<String, Object> convertShopItemToMap(Map.Entry<String, ShopItem> itemEntry) {
         ShopItem item = itemEntry.getValue();
         return Map.of(
-                "name", item.getName(),
+                "name", item.getId(),
                 "slot", item.getSlot(),
                 "price", Map.of(
                         "initial", Map.of("sell", item.getInitialSellPrice(), "buy", item.getInitialBuyPrice()),

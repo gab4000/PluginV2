@@ -13,6 +13,7 @@ import fr.openmc.core.features.economy.commands.Money;
 import fr.openmc.core.features.economy.commands.Pay;
 import fr.openmc.core.features.economy.models.EconomyPlayer;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -157,5 +158,10 @@ public class EconomyManager {
         } else {
             return "Ⓐ";
         }
+    }
+    
+    public static boolean hasEnoughMoney(@NotNull UUID uniqueId, int requiredAmount) {
+        double balance = EconomyManager.getBalance(uniqueId);
+        return balance >= requiredAmount;
     }
 }

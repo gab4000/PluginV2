@@ -5,8 +5,8 @@ import fr.openmc.api.menulib.utils.ItemBuilder;
 import fr.openmc.core.features.corporation.MethodState;
 import fr.openmc.core.features.corporation.manager.ShopManager;
 import fr.openmc.core.features.economy.EconomyManager;
-import fr.openmc.core.utils.CacheOfflinePlayer;
 import fr.openmc.core.utils.ItemUtils;
+import fr.openmc.core.utils.cache.CacheOfflinePlayer;
 import fr.openmc.core.utils.messages.MessageType;
 import fr.openmc.core.utils.messages.MessagesManager;
 import fr.openmc.core.utils.messages.Prefix;
@@ -31,13 +31,13 @@ public class Shop {
     private final List<ShopItem> items = new ArrayList<>();
     private final List<ShopItem> sales = new ArrayList<>();
     private final Map<Long, Supply> suppliers = new HashMap<>();
-    private final int index;
+    private final Location location;
 
     private double turnover = 0;
     
-    public Shop(UUID ownerUUID, int index) {
+    public Shop(UUID ownerUUID, Location location) {
         this.ownerUUID = ownerUUID;
-        this.index = index;
+        this.location = location;
     }
 
     /**

@@ -1,11 +1,19 @@
 package fr.openmc.core.features.corporation.manager;
 
+import fr.openmc.api.input.location.ItemInteraction;
 import fr.openmc.core.features.corporation.MethodState;
 import fr.openmc.core.features.corporation.shops.Shop;
 import fr.openmc.core.features.economy.EconomyManager;
+import fr.openmc.core.features.economy.Transaction;
+import fr.openmc.core.features.economy.TransactionsManager;
+import fr.openmc.core.utils.messages.MessageType;
+import fr.openmc.core.utils.messages.MessagesManager;
+import fr.openmc.core.utils.messages.Prefix;
 import lombok.Getter;
-import org.bukkit.Bukkit;
-import org.bukkit.block.Block;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,24 +25,31 @@ public class PlayerShopManager {
     private static final Map<UUID, Shop> playerShops = new HashMap<>();
 
     /**
-     * Create a shop if the player has enough money and doesn't already have one
+     * Create a shop if the player has enough money and does not already have one
      *
-     * @param playerUUID   the UUID of the player who creates it
-     * @param barrel       the barrel block of the shop
-     * @param cashRegister the cash register block of the shop
-     * @return true if the shop has been created
+     * @param player the player who creates it
      */
-    public static boolean createShop(UUID playerUUID, Block barrel, Block cashRegister) {
-        if (! EconomyManager.withdrawBalance(playerUUID, 500)) return false;
+    public static void startCreatingShop(Player player) {
+        if (! EconomyManager.withdrawBalance(player.getUniqueId(), 500)) return;
         
-        Shop newShop = new Shop(playerUUID, 0);
-
-        playerShops.put(playerUUID, newShop);
-        ShopManager.registerMultiblock(newShop,
-                new Shop.Multiblock(barrel.getLocation(), cashRegister.getLocation()));
-        
-        ShopManager.placeShop(newShop, Bukkit.getPlayer(playerUUID));
-        return true;
+        ItemInteraction.runLocationInteraction(
+                player,
+                new ItemStack(Material.BARREL),
+                "shop:shop_creator",
+                300,
+                "Vous avez reçu un baril pour poser votre shop",
+                "§cCréation de shop annulée",
+                location -> {
+                    Shop shop = new Shop(player.getUniqueId(), location);
+                    playerShops.put(player.getUniqueId(), shop);
+                    return true;
+                },
+                () -> {
+                    EconomyManager.addBalance(player.getUniqueId(), 500);
+                    TransactionsManager.registerTransaction(new Transaction(player.getUniqueId().toString(), "CONSOLE", 500, "Annulation création shop"));
+                    MessagesManager.sendMessage(player, Component.text("§cVous avez été remboursé de 500 " + EconomyManager.getEconomyIcon() + " §cpour l'annulation de la création de votre shop"), Prefix.SHOP, MessageType.INFO, true);
+                }
+        );
     }
 
     /**

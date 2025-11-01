@@ -14,7 +14,6 @@ import fr.openmc.core.utils.messages.MessagesManager;
 import fr.openmc.core.utils.messages.Prefix;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import revxrsal.commands.annotation.*;
@@ -22,7 +21,6 @@ import revxrsal.commands.bukkit.annotation.CommandPermission;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 @Command("shop")
@@ -32,6 +30,10 @@ public class ShopCommand {
     
     @CommandPlaceholder
     public void onCommand(Player player) {
+        if (!PlayerShopManager.hasShop(player.getUniqueId())) {
+            MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas de shop"), Prefix.SHOP, MessageType.INFO, false);
+            return;
+        }
         new ShopMenu(player).open();
     }
     
@@ -93,25 +95,16 @@ public class ShopCommand {
     @Subcommand("create")
     @Description("Create a shop")
     public void createShop(Player player) {
-        Block targetBlock = player.getTargetBlockExact(5);
-        if (targetBlock == null || targetBlock.getType() != Material.BARREL) {
-            MessagesManager.sendMessage(player, Component.text("§cVous devez regarder un tonneau pour créer un shop"), Prefix.SHOP, MessageType.INFO, false);
-            return;
-        }
-        Block aboveBlock = Objects.requireNonNull(targetBlock.getLocation().getWorld()).getBlockAt(targetBlock.getLocation().clone().add(0, 1, 0));
-        if (aboveBlock.getType() != Material.AIR) {
-            MessagesManager.sendMessage(player, Component.text("§cVous devez liberer de l'espace au dessus de votre tonneau pour créer un shop"), Prefix.SHOP, MessageType.INFO, false);
-            return;
-        }
-        
         if (PlayerShopManager.hasShop(player.getUniqueId())) {
             MessagesManager.sendMessage(player, Component.text("§cVous avez déjà un shop"), Prefix.SHOP, MessageType.INFO, false);
             return;
         }
-        if (! PlayerShopManager.createShop(player.getUniqueId(), targetBlock, aboveBlock)) {
-            MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas assez d'argent pour créer un shop (500" + EconomyManager.getEconomyIcon() + ")"), Prefix.SHOP, MessageType.INFO, false);
+        if (! EconomyManager.hasEnoughMoney(player.getUniqueId(), 500)) {
+            MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas assez d'argent pour créer un shop (500" + EconomyManager.getEconomyIcon() + " nécessaires)"), Prefix.SHOP, MessageType.ERROR, false);
             return;
         }
+        
+        PlayerShopManager.startCreatingShop(player);
         MessagesManager.sendMessage(player, Component.text("§6[Shop] §c -500" + EconomyManager.getEconomyIcon() +" sur votre compte personnel"), Prefix.SHOP, MessageType.SUCCESS, false);
         MessagesManager.sendMessage(player, Component.text("§aVous avez bien crée un shop !"), Prefix.SHOP, MessageType.SUCCESS, false);
     }

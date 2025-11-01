@@ -18,9 +18,9 @@ import fr.openmc.core.features.city.sub.notation.models.CityNotation;
 import fr.openmc.core.features.city.sub.rank.CityRankManager;
 import fr.openmc.core.features.city.sub.war.War;
 import fr.openmc.core.features.city.sub.war.WarManager;
-import fr.openmc.core.utils.CacheOfflinePlayer;
 import fr.openmc.core.utils.ChunkPos;
 import fr.openmc.core.utils.DateUtils;
+import fr.openmc.core.utils.cache.CacheOfflinePlayer;
 import fr.openmc.core.utils.messages.MessageType;
 import fr.openmc.core.utils.messages.MessagesManager;
 import fr.openmc.core.utils.messages.Prefix;
@@ -214,6 +214,7 @@ public class City {
             this.members = CityManager.getCityMembers(this);
 
         members.remove(player);
+        permissions.remove(player);
         Bukkit.getScheduler().runTask(OMCPlugin.getInstance(), () ->
             Bukkit.getPluginManager()
                     .callEvent(new MemberLeaveEvent(CacheOfflinePlayer.getOfflinePlayer(player), this))

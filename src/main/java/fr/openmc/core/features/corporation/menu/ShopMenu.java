@@ -116,7 +116,7 @@ public class ShopMenu extends Menu {
             open();
         }));
 
-        content.put(20, new ItemBuilder(this, CustomItemRegistry.getByName("omc_company:10_btn").getBest(), itemMeta -> {
+        content.put(20, new ItemBuilder(this, CustomItemRegistry.getByName("omc_menus:10_btn").getBest(), itemMeta -> {
             itemMeta.displayName(Component.text("§cRetirer 10"));
         }).setOnClick(inventoryClickEvent -> {
             if (getCurrentItem() == null) return;
@@ -154,7 +154,7 @@ public class ShopMenu extends Menu {
             amountToBuy = getCurrentItem().getAmount()<=amountToBuy ? getCurrentItem().getAmount() : amountToBuy + 1;
             open();
         }));
-        content.put(24, new ItemBuilder(this, CustomItemRegistry.getByName("omc_company:10_btn").getBest(), itemMeta -> {
+        content.put(24, new ItemBuilder(this, CustomItemRegistry.getByName("omc_menus:10_btn").getBest(), itemMeta -> {
             itemMeta.displayName(Component.text("§aAjouter 10"));
         }).setOnClick(inventoryClickEvent -> {
             if (getCurrentItem() == null) return;
@@ -304,17 +304,13 @@ public class ShopMenu extends Menu {
     }
 
     private void accept () {
-        MethodState methodState = PlayerShopManager.deleteShop(getOwner().getUniqueId());
-        if (methodState == MethodState.WARNING) {
-            MessagesManager.sendMessage(getOwner(), Component.text("§cVotre shop n'est pas vide"), Prefix.SHOP, MessageType.INFO, false);
+        if (shop == null) {
+            MessagesManager.sendMessage(getOwner(), Component.text("§cShop introuvable, impossible de le supprimer"), Prefix.SHOP, MessageType.INFO, false);
+            getOwner().closeInventory();
             return;
         }
-        if (methodState == MethodState.ESCAPE) {
-            MessagesManager.sendMessage(getOwner(), Component.text("§cCaisse introuvable (appelez un admin)"), Prefix.SHOP, MessageType.INFO, false);
-            return;
-        }
-        MessagesManager.sendMessage(getOwner(), Component.text("§aVotre shop a bien été supprimé !"), Prefix.SHOP, MessageType.INFO, false);
-        MessagesManager.sendMessage(getOwner(), Component.text("§6[Shop]§a +400" + EconomyManager.getEconomyIcon() + " de remboursés sur votre compte personnel"), Prefix.SHOP, MessageType.INFO, false);
+        
+        PlayerShopManager.deleteShop(getOwner());
         getOwner().closeInventory();
     }
 

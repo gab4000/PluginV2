@@ -33,17 +33,17 @@ public class ShopListener implements Listener {
 
     @EventHandler
     public void onShopBreak(BlockBreakEvent event) {
-        if (ShopManager.getShop(event.getBlock().getLocation()) != null) event.setCancelled(true);
+        if (ShopManager.getShopAt(event.getBlock().getLocation()) != null) event.setCancelled(true);
     }
 
     @EventHandler
     public void onShopExplode(BlockExplodeEvent event){
-        event.blockList().removeIf(block -> ShopManager.getShop(block.getLocation()) != null);
+        event.blockList().removeIf(block -> ShopManager.getShopAt(block.getLocation()) != null);
     }
 
     @EventHandler
     public void onEntityExplode(EntityExplodeEvent event) {
-        event.blockList().removeIf(block -> ShopManager.getShop(block.getLocation()) != null);
+        event.blockList().removeIf(block -> ShopManager.getShopAt(block.getLocation()) != null);
     }
 
     @EventHandler
@@ -58,7 +58,7 @@ public class ShopListener implements Listener {
         
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
         
-        Shop shop = ShopManager.getShop(event.getClickedBlock().getLocation());
+        Shop shop = ShopManager.getShopAt(event.getClickedBlock().getLocation());
         if (shop == null) return;
         
         event.setCancelled(true);
@@ -71,7 +71,7 @@ public class ShopListener implements Listener {
         Block block = e.getClickedBlock();
         if (block == null || block.getType() != Material.BARREL) return;
         
-        Shop shop = ShopManager.getShop(block.getLocation());
+        Shop shop = ShopManager.getShopAt(block.getLocation());
         boolean isShop = shop != null;
         if (! isShop) return;
         
@@ -118,7 +118,7 @@ public class ShopListener implements Listener {
             double y = e.getFurniture().getEntity().getLocation().getBlockY();
             double z = e.getFurniture().getEntity().getLocation().getBlockZ();
             
-            Shop shop = ShopManager.getShop(new Location(e.getFurniture().getEntity().getWorld(), x, y, z));
+            Shop shop = ShopManager.getShopAt(new Location(e.getFurniture().getEntity().getWorld(), x, y, z));
             if (shop == null) {
                 MessagesManager.sendMessage(e.getPlayer(), Component.text("§cErreur lors de l'ouverture du shop, veuillez contacter le staff. (Shop is null)"), Prefix.SHOP, MessageType.ERROR, true);
                 return;

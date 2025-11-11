@@ -71,7 +71,7 @@ public class DatabaseManager {
             MascotsManager.initDB(connectionSource);
             PlayerSettingsManager.initDB(connectionSource);
             CityStatisticsManager.initDB(connectionSource);
-	          ShopManager.initDB(connectionSource);
+            ShopManager.initDB(connectionSource);
             HalloweenManager.initDB(connectionSource);
         } catch (SQLException e) {
             OMCPlugin.getInstance().getSLF4JLogger().error("Failed to initialize the database connection.", e);

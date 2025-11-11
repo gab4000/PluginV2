@@ -1,17 +1,22 @@
 package fr.openmc.core.features.corporation.manager;
 
+import fr.openmc.api.hooks.ItemsAdderHook;
 import fr.openmc.api.input.location.ItemInteraction;
-import fr.openmc.core.features.corporation.MethodState;
+import fr.openmc.core.OMCPlugin;
+import fr.openmc.core.features.corporation.ItemsAdderIntegration;
 import fr.openmc.core.features.corporation.shops.Shop;
 import fr.openmc.core.features.economy.EconomyManager;
-import fr.openmc.core.features.economy.Transaction;
-import fr.openmc.core.features.economy.TransactionsManager;
 import fr.openmc.core.utils.messages.MessageType;
 import fr.openmc.core.utils.messages.MessagesManager;
 import fr.openmc.core.utils.messages.Prefix;
+import fr.openmc.core.utils.world.WorldUtils;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -30,7 +35,7 @@ public class PlayerShopManager {
      * @param player the player who creates it
      */
     public static void startCreatingShop(Player player) {
-        if (! EconomyManager.withdrawBalance(player.getUniqueId(), 500)) return;
+        if (!EconomyManager.withdrawBalance(player.getUniqueId(), 500)) return;
         
         ItemInteraction.runLocationInteraction(
                 player,
@@ -40,33 +45,76 @@ public class PlayerShopManager {
                 "Vous avez reçu un baril pour poser votre shop",
                 "§cCréation de shop annulée",
                 location -> {
-                    Shop shop = new Shop(player.getUniqueId(), location);
-                    playerShops.put(player.getUniqueId(), shop);
-                    return true;
+                    if (location == null) return false;
+                    return createShop(player, location);
                 },
                 () -> {
-                    EconomyManager.addBalance(player.getUniqueId(), 500);
-                    TransactionsManager.registerTransaction(new Transaction(player.getUniqueId().toString(), "CONSOLE", 500, "Annulation création shop"));
+                    EconomyManager.addBalance(player.getUniqueId(), 500, "Annulation création shop");
                     MessagesManager.sendMessage(player, Component.text("§cVous avez été remboursé de 500 " + EconomyManager.getEconomyIcon() + " §cpour l'annulation de la création de votre shop"), Prefix.SHOP, MessageType.INFO, true);
                 }
         );
+    }
+    
+    private static boolean createShop(Player player, Location location) {
+        Shop shop = new Shop(player.getUniqueId(), location);
+        
+        Block barrel = location.getBlock();
+        Block cashBlock = location.add(0, 1, 0).getBlock();
+        
+        try {
+            ShopManager.registerMultiblock(shop, new Shop.Multiblock(barrel.getLocation(), cashBlock.getLocation()));
+        } catch (RuntimeException e) {
+            MessagesManager.sendMessage(player, Component.text("§cErreur lors de la création du shop (cannot register multiblock) : §bappelez un admin"), Prefix.SHOP, MessageType.ERROR, true);
+            OMCPlugin.getInstance().getSLF4JLogger().error("Error registering multiblock for shop UUID: " + shop.getOwnerUUID().toString(), e);
+            return false;
+        }
+        
+        if (ShopManager.placeShop(player, shop)) {
+            barrel.setType(Material.BARREL);
+            BlockData barrelData = barrel.getBlockData();
+            if (barrelData instanceof Directional directional) {
+                directional.setFacing(WorldUtils.getYaw(player).getOpposite().toBlockFace());
+                barrel.setBlockData(barrelData);
+            }
+            
+            playerShops.put(player.getUniqueId(), shop);
+            
+            MessagesManager.sendMessage(player, Component.text("§aVotre shop a été créé avec succès ! Vous pouvez maintenant y ajouter des articles"), Prefix.SHOP, MessageType.SUCCESS, true);
+            MessagesManager.sendMessage(player, Component.text("§c500" + EconomyManager.getEconomyIcon() + " retirés de votre compte personnel"), Prefix.SHOP, MessageType.SUCCESS, false);
+            return true;
+        } else {
+            if (ItemsAdderHook.isHasItemAdder())
+                if (ItemsAdderIntegration.removeShopFurniture(cashBlock)) {
+                    cashBlock.setType(Material.AIR);
+                    barrel.setType(Material.AIR);
+                } else {
+                    MessagesManager.sendMessage(player, Component.text("§cErreur lors de la création du shop (cannot remove shop furniture) : §bappelez un admin"), Prefix.SHOP, MessageType.ERROR, false);
+                }
+            return false;
+        }
     }
 
     /**
      * Delete a shop if it's empty
      *
-     * @param playerUUID The UUID of the player who deletes the shop
-     * @return a MethodeState indicating the result
+     * @param player The player who deletes the shop
      */
-    public static MethodState deleteShop(UUID playerUUID) {
-        Shop shop = getPlayerShop(playerUUID);
-        if (! shop.getItems().isEmpty()) return MethodState.WARNING;
+    public static void deleteShop(Player player) {
+        Shop shop = getPlayerShop(player.getUniqueId());
+        if (!shop.getItems().isEmpty()) {
+            MessagesManager.sendMessage(player, Component.text("§cVotre shop n'est pas vide"), Prefix.SHOP, MessageType.WARNING, false);
+            return;
+        }
         
-        if (! ShopManager.removeShop(shop)) return MethodState.ESCAPE;
+        if (!ShopManager.removeShop(shop)) {
+            MessagesManager.sendMessage(player, Component.text("§cCaisse introuvable (appelez un admin)"), Prefix.SHOP, MessageType.ERROR, false);
+            return;
+        }
         
-        playerShops.remove(playerUUID);
-        EconomyManager.addBalance(playerUUID, 400);
-        return MethodState.SUCCESS;
+        playerShops.remove(player.getUniqueId());
+        EconomyManager.addBalance(player.getUniqueId(), 400);
+        MessagesManager.sendMessage(player, Component.text("§6Votre shop a bien été supprimé !"), Prefix.SHOP, MessageType.SUCCESS, false);
+        MessagesManager.sendMessage(player, Component.text("§a400" + EconomyManager.getEconomyIcon() + " remboursés sur votre compte personnel"), Prefix.SHOP, MessageType.SUCCESS, true);
     }
 
     /**
@@ -77,16 +125,6 @@ public class PlayerShopManager {
      */
     public static Shop getPlayerShop(UUID playerUUID) {
         return playerShops.get(playerUUID);
-    }
-
-    /**
-     * Get a shop from a shop UUID
-     *
-     * @param shopOwnerUUID the UUID of the shop to check
-     * @return the Shop if found
-     */
-    public static Shop getShopByUUID(UUID shopOwnerUUID) {
-        return playerShops.values().stream().filter(shop -> shop.getOwnerUUID().equals(shopOwnerUUID)).findFirst().orElse(null);
     }
 
     /**

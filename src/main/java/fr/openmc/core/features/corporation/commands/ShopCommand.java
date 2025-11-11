@@ -1,6 +1,5 @@
 package fr.openmc.core.features.corporation.commands;
 
-import fr.openmc.core.features.corporation.MethodState;
 import fr.openmc.core.features.corporation.manager.PlayerShopManager;
 import fr.openmc.core.features.corporation.menu.ShopMenu;
 import fr.openmc.core.features.corporation.menu.ShopSearchMenu;
@@ -21,7 +20,6 @@ import revxrsal.commands.bukkit.annotation.CommandPermission;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.UUID;
 
 @Command("shop")
 @Description("Manage shops")
@@ -105,8 +103,6 @@ public class ShopCommand {
         }
         
         PlayerShopManager.startCreatingShop(player);
-        MessagesManager.sendMessage(player, Component.text("§6[Shop] §c -500" + EconomyManager.getEconomyIcon() +" sur votre compte personnel"), Prefix.SHOP, MessageType.SUCCESS, false);
-        MessagesManager.sendMessage(player, Component.text("§aVous avez bien crée un shop !"), Prefix.SHOP, MessageType.SUCCESS, false);
     }
 
     @Subcommand("unsell")
@@ -114,7 +110,7 @@ public class ShopCommand {
     public void unsellItem(Player player, @Named("item number") int itemIndex) {
         
         if (!PlayerShopManager.hasShop(player.getUniqueId())) {
-            MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas de shop"), Prefix.SHOP, MessageType.INFO, false);
+            MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas de shop"), Prefix.SHOP, MessageType.WARNING, false);
             return;
         }
 
@@ -122,7 +118,7 @@ public class ShopCommand {
         ShopItem item = shop.getItem(itemIndex - 1);
 
         if (item == null) {
-            MessagesManager.sendMessage(player, Component.text("§cCet item n'est pas dans le shop"), Prefix.SHOP, MessageType.INFO, false);
+            MessagesManager.sendMessage(player, Component.text("§cCet item n'est pas dans le shop"), Prefix.SHOP, MessageType.WARNING, false);
             return;
         }
 
@@ -140,28 +136,12 @@ public class ShopCommand {
     @Subcommand("delete")
     @Description("Delete a shop")
     public void deleteShop(Player player) {
-        
-        UUID shopUUID = Shop.getShopPlayerLookingAt(player, false);
-        if (shopUUID == null) {
-            MessagesManager.sendMessage(player, Component.text("§cShop non reconnu"), Prefix.SHOP, MessageType.INFO, false);
-            return;
-        }
-        
         if (!PlayerShopManager.hasShop(player.getUniqueId())) {
-            MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas de shop"), Prefix.SHOP, MessageType.INFO, false);
+            MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas de shop"), Prefix.SHOP, MessageType.WARNING, false);
             return;
         }
-        MethodState methodState = PlayerShopManager.deleteShop(player.getUniqueId());
-        if (methodState == MethodState.WARNING) {
-            MessagesManager.sendMessage(player, Component.text("§cVotre shop n'est pas vide"), Prefix.SHOP, MessageType.INFO, false);
-            return;
-        }
-        if (methodState == MethodState.ESCAPE) {
-            MessagesManager.sendMessage(player, Component.text("§cCaisse introuvable (appelez un admin)"), Prefix.SHOP, MessageType.INFO, false);
-            return;
-        }
-        MessagesManager.sendMessage(player, Component.text("§6Votre shop a bien été supprimé !"), Prefix.SHOP, MessageType.SUCCESS, false);
-        MessagesManager.sendMessage(player, Component.text("§6[Shop] §a +400" + EconomyManager.getEconomyIcon() + " de remboursés sur votre compte personnel"), Prefix.SHOP, MessageType.SUCCESS, false);
+        
+        PlayerShopManager.deleteShop(player);
     }
 
     @Subcommand("search")
@@ -180,7 +160,7 @@ public class ShopCommand {
 
         int maxPlace = ItemUtils.getFreePlacesForItem(owner, stock.getItem());
         if (maxPlace <= 0) {
-            MessagesManager.sendMessage(owner, Component.text("§cVous n'avez pas assez de place"), Prefix.SHOP, MessageType.INFO, false);
+            MessagesManager.sendMessage(owner, Component.text("§cVous n'avez pas assez de place"), Prefix.SHOP, MessageType.WARNING, false);
             owner.closeInventory();
             return;
         }

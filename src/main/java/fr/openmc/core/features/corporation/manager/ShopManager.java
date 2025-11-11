@@ -13,13 +13,10 @@ import fr.openmc.core.features.corporation.models.DBShopSale;
 import fr.openmc.core.features.corporation.models.ShopSupplier;
 import fr.openmc.core.features.corporation.shops.Shop;
 import fr.openmc.core.utils.world.WorldUtils;
-import fr.openmc.core.utils.world.Yaw;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.Directional;
 import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
@@ -67,7 +64,7 @@ public class ShopManager {
      * @param location The location to check.
      * @return The shop found at that location, or null if none exists.
      */
-    public static Shop getShop(Location location) {
+    public static Shop getShopAt(Location location) {
         return shopsByLocation.get(location);
     }
 
@@ -75,26 +72,21 @@ public class ShopManager {
      * Places the shop block (sign or ItemsAdder furniture) in the world,
      * oriented based on the player's direction.
      *
-     * @param shop The shop to place.
      * @param player The player placing the shop.
+     * @param shop The shop to place.
      */
-    public static void placeShop(Shop shop, Player player) {
+    public static boolean placeShop(Player player, Shop shop) {
         Shop.Multiblock multiblock = multiblocks.get(shop.getOwnerUUID());
-        if (multiblock == null) return;
+        if (multiblock == null) return false;
         
         Block cashBlock = multiblock.cashBlock().getBlock();
-        Yaw yaw = WorldUtils.getYaw(player);
-
+        
         if (ItemsAdderHook.isHasItemAdder()) {
-            if (! ItemsAdderIntegration.placeShopFurniture(cashBlock)) cashBlock.setType(Material.OAK_SIGN);
-        } else {
-            cashBlock.setType(Material.OAK_SIGN);
-        }
-
-        BlockData cashData = cashBlock.getBlockData();
-        if (! (cashData instanceof Directional directional)) return;
-        directional.setFacing(yaw.getOpposite().toBlockFace());
-        cashBlock.setBlockData(directional);
+            if (!ItemsAdderIntegration.placeShopFurniture(cashBlock, WorldUtils.getYaw(player)))
+                cashBlock.setType(Material.OAK_SIGN);
+        } else cashBlock.setType(Material.OAK_SIGN);
+        
+        return true;
     }
 
     /**
@@ -115,34 +107,32 @@ public class ShopManager {
             if (! ItemsAdderIntegration.hasFurniture(cashBlock)) return false;
             if (! ItemsAdderIntegration.removeShopFurniture(cashBlock)) return false;
         } else {
-            if (cashBlock.getType() != Material.OAK_SIGN && cashBlock.getType() != Material.BARRIER || stockBlock.getType() != Material.BARREL) {
+            if ((cashBlock.getType() != Material.OAK_SIGN && cashBlock.getType() != Material.BARRIER) || stockBlock.getType() != Material.BARREL) {
                 return false;
             }
         }
 
+        stockBlock.setType(Material.AIR); // Remove barrel block
+        
         // Async cleanup of location mappings
         multiblocks.remove(shop.getOwnerUUID());
-        cashBlock.setType(Material.AIR);
+        cashBlock.setType(Material.AIR); // Remove sign or furniture block
         Bukkit.getScheduler().runTaskAsynchronously(OMCPlugin.getInstance(), () ->
                 shopsByLocation.entrySet().removeIf(entry -> entry.getValue().getOwnerUUID().equals(shop.getOwnerUUID())));
         return true;
     }
     
-    public static void initDB(ConnectionSource connectionSource) {
-        try {
-            TableUtils.createTableIfNotExists(connectionSource, DBShop.class);
-            shopsDao = DaoManager.createDao(connectionSource, DBShop.class);
-            
-            TableUtils.createTableIfNotExists(connectionSource, DBShopSale.class);
-            salesDao = DaoManager.createDao(connectionSource, DBShopSale.class);
-            
-            TableUtils.createTableIfNotExists(connectionSource, DBShopItem.class);
-            itemsDao = DaoManager.createDao(connectionSource, DBShopItem.class);
-            
-            TableUtils.createTableIfNotExists(connectionSource, ShopSupplier.class);
-            suppliersDao = DaoManager.createDao(connectionSource, ShopSupplier.class);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public static void initDB(ConnectionSource connectionSource) throws SQLException {
+        TableUtils.createTableIfNotExists(connectionSource, DBShop.class);
+        shopsDao = DaoManager.createDao(connectionSource, DBShop.class);
+        
+        TableUtils.createTableIfNotExists(connectionSource, DBShopSale.class);
+        salesDao = DaoManager.createDao(connectionSource, DBShopSale.class);
+        
+        TableUtils.createTableIfNotExists(connectionSource, DBShopItem.class);
+        itemsDao = DaoManager.createDao(connectionSource, DBShopItem.class);
+        
+        TableUtils.createTableIfNotExists(connectionSource, ShopSupplier.class);
+        suppliersDao = DaoManager.createDao(connectionSource, ShopSupplier.class);
     }
 }

@@ -54,7 +54,7 @@ public class Shop {
         if (targetBlock.getType() != Material.BARREL && targetBlock.getType() != Material.OAK_SIGN && targetBlock.getType() != Material.BARRIER) return null;
         if (onlyCash) if (targetBlock.getType() == Material.BARREL) return null;
         
-        Shop shop = ShopManager.getShop(targetBlock.getLocation());
+        Shop shop = ShopManager.getShopAt(targetBlock.getLocation());
         if (shop == null) return null;
         return shop.getOwnerUUID();
     }
@@ -289,7 +289,5 @@ public class Shop {
         return amount;
     }
 
-    public record Multiblock(Location stockBlock, Location cashBlock) {
-
-    }
+    public record Multiblock(Location stockBlock, Location cashBlock) {}
 }

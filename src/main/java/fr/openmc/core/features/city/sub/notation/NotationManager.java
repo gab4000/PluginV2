@@ -13,6 +13,7 @@ import fr.openmc.core.features.city.sub.notation.commands.NotationCommands;
 import fr.openmc.core.features.city.sub.notation.listeners.PlayerJoinListener;
 import fr.openmc.core.features.city.sub.notation.models.ActivityTimePlayed;
 import fr.openmc.core.features.city.sub.notation.models.CityNotation;
+import fr.openmc.core.features.economy.BankManager;
 import fr.openmc.core.features.economy.EconomyManager;
 import fr.openmc.core.utils.DateUtils;
 import fr.openmc.core.utils.cache.CacheOfflinePlayer;
@@ -25,7 +26,6 @@ import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.time.DayOfWeek;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static fr.openmc.core.features.city.sub.notation.NotationNote.getMaxTotalNote;
 
@@ -257,46 +257,28 @@ public class NotationManager {
     }
 
     /**
-     * Calcule le score économique d'une ville.
+     * Calcule le score économique d'une ville selon sa richesse totale.
+     * 15 points = 500 000$ (ville + membres)
      *
-     * @param city   la ville concernée
-     * @param pibMax le PIB maximal de comparaison
-     * @return le score économique calculé
+     * @param city la ville concernée
+     * @return le score économique (entre 0 et 15)
      */
-    public static double getEconomyScore(City city, double pibMax) {
+    public static double getEconomyScore(City city) {
         double totalMoney = 0;
-        int memberCount = 0;
-        for (UUID playerUUID : city.getMembers()) {
-            double balance = EconomyManager.getBalance(playerUUID);
-            totalMoney += balance;
-            memberCount++;
-        }
-        if (memberCount == 0 || pibMax == 0) return 0;
-        double pib = totalMoney / memberCount;
-        double score = (Math.log10(pib + 1) / Math.log10(pibMax + 1)) * NotationNote.NOTE_PIB.getMaxNote();
-        return Math.min(score, NotationNote.NOTE_PIB.getMaxNote());
-    }
 
-    /**
-     * Retourne le PIB maximal parmi une liste de villes.
-     *
-     * @param cities la liste des villes
-     * @return le PIB maximal trouvé
-     */
-    public static double getMaxPib(List<City> cities) {
-        double maxPib = 0;
-        for (City city : cities) {
-            double totalMoney = 0;
-            int memberCount = city.getMembers().size();
-            for (UUID playerUUID : city.getMembers()) {
-                totalMoney += EconomyManager.getBalance(playerUUID);
-            }
-            if (memberCount > 0) {
-                double pib = totalMoney / memberCount;
-                maxPib = Math.max(maxPib, pib);
-            }
+        totalMoney += city.getBalance();
+
+        for (UUID playerUUID : city.getMembers()) {
+            totalMoney += BankManager.getBalance(playerUUID);
+            totalMoney += EconomyManager.getBalance(playerUUID);
         }
-        return maxPib;
+
+        double plafond = 400000;
+        double ratio = totalMoney / plafond;
+
+        double score = Math.min(ratio * NotationNote.NOTE_PIB.getMaxNote(), NotationNote.NOTE_PIB.getMaxNote());
+
+        return Math.round(score * 10.0) / 10.0;
     }
 
     /**
@@ -314,13 +296,7 @@ public class NotationManager {
             City city = CityManager.getCity(notation.getCityUUID());
             notation.setNoteActivity(getActivityScore(city));
             notation.setNoteMilitary(getMilitaryScore(city));
-            double economyScore = getEconomyScore(
-                    city,
-                    getMaxPib(cityNotations.get(city.getUniqueId()).stream()
-                            .map(CityNotation::getCityUUID)
-                            .map(CityManager::getCity)
-                            .collect(Collectors.toList()))
-            );
+            double economyScore = getEconomyScore(city);
             notation.setNoteEconomy(Math.floor(economyScore));
             createOrUpdateNotation(notation);
         }

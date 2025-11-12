@@ -141,7 +141,7 @@ public class ShopCommand {
             return;
         }
         
-        PlayerShopManager.deleteShop(player);
+        PlayerShopManager.deleteShop(player, false);
     }
 
     @Subcommand("search")

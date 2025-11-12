@@ -310,7 +310,7 @@ public class ShopMenu extends Menu {
             return;
         }
         
-        PlayerShopManager.deleteShop(getOwner());
+        PlayerShopManager.deleteShop(getOwner(), false);
         getOwner().closeInventory();
     }
 

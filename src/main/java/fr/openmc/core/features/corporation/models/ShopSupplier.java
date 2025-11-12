@@ -9,9 +9,7 @@ import java.util.UUID;
 @DatabaseTable(tableName = "shop_suppliers")
 @Getter
 public class ShopSupplier {
-    @DatabaseField(id = true)
-    private UUID id; // différencie les supplier (un joueur peut avoir plusieurs suppliers)
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(canBeNull = false, id = true, columnName = "owner_uuid")
     private UUID ownerUUID;
     @DatabaseField(canBeNull = false)
     private UUID item;
@@ -26,8 +24,7 @@ public class ShopSupplier {
         // required for ORMLite
     }
     
-    public ShopSupplier(UUID id, UUID ownerUUID, UUID item, UUID player, int amount, long time) {
-        this.id = id;
+    public ShopSupplier(UUID ownerUUID, UUID item, UUID player, int amount, long time) {
         this.ownerUUID = ownerUUID;
         this.item = item;
         this.player = player;

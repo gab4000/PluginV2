@@ -12,12 +12,12 @@ import java.util.UUID;
 @Getter
 @DatabaseTable(tableName = "shop_sales")
 public class DBShopSale {
+    @DatabaseField(canBeNull = false, id = true, columnName = "owner_uuid")
+    private UUID ownerUUID;
     @DatabaseField(canBeNull = false, dataType = DataType.BYTE_ARRAY)
     private byte[] items;
-    @DatabaseField(canBeNull = false)
-    private UUID ownerUUID;
     @DatabaseField(canBeNull = false, columnName = "sale_uuid")
-    private UUID saleUuid;
+    private UUID saleUUID;
     @DatabaseField(canBeNull = false)
     private double price;
     @DatabaseField(canBeNull = false)
@@ -27,17 +27,17 @@ public class DBShopSale {
         // required for ORMLite
     }
     
-    public DBShopSale(byte[] items, UUID ownerUUID, double price, int amount, UUID saleUuid) {
+    public DBShopSale(byte[] items, UUID ownerUUID, double price, int amount, UUID saleUUID) {
         this.items = items;
         this.ownerUUID = ownerUUID;
         this.price = price;
         this.amount = amount;
-        this.saleUuid = saleUuid;
+        this.saleUUID = saleUUID;
     }
 
     public ShopItem deserialize() {
         ItemStack item = ItemStack.deserializeBytes(items);
-        ShopItem shopItem = new ShopItem(item, price, saleUuid);
+        ShopItem shopItem = new ShopItem(item, price, saleUUID);
         shopItem.setAmount(amount);
         return shopItem;
     }

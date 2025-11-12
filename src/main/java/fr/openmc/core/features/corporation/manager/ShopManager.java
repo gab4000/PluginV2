@@ -7,8 +7,8 @@ import com.j256.ormlite.table.TableUtils;
 import fr.openmc.api.hooks.ItemsAdderHook;
 import fr.openmc.core.OMCPlugin;
 import fr.openmc.core.features.corporation.ItemsAdderIntegration;
-import fr.openmc.core.features.corporation.models.DBShop;
 import fr.openmc.core.features.corporation.models.DBShopItem;
+import fr.openmc.core.features.corporation.models.DBShopLocation;
 import fr.openmc.core.features.corporation.models.DBShopSale;
 import fr.openmc.core.features.corporation.models.ShopSupplier;
 import fr.openmc.core.features.corporation.shops.Shop;
@@ -29,10 +29,10 @@ public class ShopManager {
     private static final Map<UUID, Shop.Multiblock> multiblocks = new HashMap<>();
     private static final Map<Location, Shop> shopsByLocation = new HashMap<>();
     
-    private static Dao<DBShop, UUID> shopsDao;
-    private static Dao<DBShopItem, UUID> itemsDao;
-    private static Dao<DBShopSale, UUID> salesDao;
-    private static Dao<ShopSupplier, UUID> suppliersDao;
+    private static Dao<DBShopLocation, UUID> shopLocationDao;
+    private static Dao<DBShopItem, UUID> shopItemsDao;
+    private static Dao<DBShopSale, UUID> shopSalesDao;
+    private static Dao<ShopSupplier, UUID> shopSuppliersDao;
 
     /**
      * Registers a shop's multiblock structure and maps its key locations.
@@ -123,16 +123,36 @@ public class ShopManager {
     }
     
     public static void initDB(ConnectionSource connectionSource) throws SQLException {
-        TableUtils.createTableIfNotExists(connectionSource, DBShop.class);
-        shopsDao = DaoManager.createDao(connectionSource, DBShop.class);
+        TableUtils.createTableIfNotExists(connectionSource, DBShopLocation.class);
+        shopLocationDao = DaoManager.createDao(connectionSource, DBShopLocation.class);
         
         TableUtils.createTableIfNotExists(connectionSource, DBShopSale.class);
-        salesDao = DaoManager.createDao(connectionSource, DBShopSale.class);
+        shopSalesDao = DaoManager.createDao(connectionSource, DBShopSale.class);
         
         TableUtils.createTableIfNotExists(connectionSource, DBShopItem.class);
-        itemsDao = DaoManager.createDao(connectionSource, DBShopItem.class);
+        shopItemsDao = DaoManager.createDao(connectionSource, DBShopItem.class);
         
         TableUtils.createTableIfNotExists(connectionSource, ShopSupplier.class);
-        suppliersDao = DaoManager.createDao(connectionSource, ShopSupplier.class);
+        shopSuppliersDao = DaoManager.createDao(connectionSource, ShopSupplier.class);
+    }
+    
+    public static boolean saveShopLocation(DBShopLocation dbShopLocation) {
+	    try {
+		    shopLocationDao.createOrUpdate(dbShopLocation);
+            return true;
+	    } catch (SQLException e) {
+		    OMCPlugin.getInstance().getSLF4JLogger().error("Error saving shop location for owner UUID: " + dbShopLocation.getOwnerUUID().toString(), e);
+            return false;
+	    }
+    }
+    
+    public static boolean deleteShopLocation(UUID ownerUUID) {
+        try {
+            shopLocationDao.deleteById(ownerUUID);
+            return true;
+        } catch (SQLException e) {
+            OMCPlugin.getInstance().getSLF4JLogger().error("Error deleting shop location for owner UUID: " + ownerUUID.toString(), e);
+            return false;
+        }
     }
 }

@@ -42,7 +42,7 @@ public class PlayerShopManager {
                 new ItemStack(Material.BARREL),
                 "shop:shop_creator",
                 300,
-                "Vous avez reçu un baril pour poser votre shop",
+                "Vous avez reçu un tonneau pour poser votre shop",
                 "§cCréation de shop annulée",
                 location -> {
                     if (location == null) return false;
@@ -60,6 +60,16 @@ public class PlayerShopManager {
         
         Block barrel = location.getBlock();
         Block cashBlock = location.add(0, 1, 0).getBlock();
+        
+        if (barrel.getType() != Material.AIR) {
+            MessagesManager.sendMessage(player, Component.text("§cImpossible de créer le shop ici, l'espace du tonneau doit être libre"), Prefix.SHOP, MessageType.ERROR, true);
+            return false;
+        }
+        
+        if (cashBlock.getType() != Material.AIR) {
+            MessagesManager.sendMessage(player, Component.text("§cImpossible de créer le shop ici, l'espace au-dessus du tonneau doit être libre"), Prefix.SHOP, MessageType.ERROR, true);
+            return false;
+        }
         
         try {
             ShopManager.registerMultiblock(shop, new Shop.Multiblock(barrel.getLocation(), cashBlock.getLocation()));
@@ -107,11 +117,12 @@ public class PlayerShopManager {
         }
         
         if (!ShopManager.removeShop(shop)) {
-            MessagesManager.sendMessage(player, Component.text("§cCaisse introuvable (appelez un admin)"), Prefix.SHOP, MessageType.ERROR, false);
+            MessagesManager.sendMessage(player, Component.text("§cShop introuvable (appelez un admin)"), Prefix.SHOP, MessageType.ERROR, false);
             return;
         }
         
         playerShops.remove(player.getUniqueId());
+        
         EconomyManager.addBalance(player.getUniqueId(), 400);
         MessagesManager.sendMessage(player, Component.text("§6Votre shop a bien été supprimé !"), Prefix.SHOP, MessageType.SUCCESS, false);
         MessagesManager.sendMessage(player, Component.text("§a400" + EconomyManager.getEconomyIcon() + " remboursés sur votre compte personnel"), Prefix.SHOP, MessageType.SUCCESS, true);

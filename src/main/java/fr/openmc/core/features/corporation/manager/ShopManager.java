@@ -104,8 +104,8 @@ public class ShopManager {
         Block stockBlock = multiblock.stockBlock().getBlock();
 
         if (ItemsAdderHook.isHasItemAdder()) {
-            if (! ItemsAdderIntegration.hasFurniture(cashBlock)) return false;
-            if (! ItemsAdderIntegration.removeShopFurniture(cashBlock)) return false;
+            if (!ItemsAdderIntegration.hasFurniture(cashBlock)) return false;
+            if (!ItemsAdderIntegration.removeShopFurniture(cashBlock)) return false;
         } else {
             if ((cashBlock.getType() != Material.OAK_SIGN && cashBlock.getType() != Material.BARRIER) || stockBlock.getType() != Material.BARREL) {
                 return false;

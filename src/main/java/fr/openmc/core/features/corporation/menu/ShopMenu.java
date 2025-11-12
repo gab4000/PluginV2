@@ -303,7 +303,7 @@ public class ShopMenu extends Menu {
         getOwner().closeInventory();
     }
 
-    private void accept () {
+    private void accept() {
         if (shop == null) {
             MessagesManager.sendMessage(getOwner(), Component.text("§cShop introuvable, impossible de le supprimer"), Prefix.SHOP, MessageType.INFO, false);
             getOwner().closeInventory();

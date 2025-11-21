@@ -3,9 +3,8 @@ package fr.openmc.core.features.corporation.manager;
 import fr.openmc.api.hooks.ItemsAdderHook;
 import fr.openmc.api.input.location.ItemInteraction;
 import fr.openmc.core.OMCPlugin;
-import fr.openmc.core.features.corporation.ItemsAdderIntegration;
-import fr.openmc.core.features.corporation.models.DBShopLocation;
-import fr.openmc.core.features.corporation.shops.Shop;
+import fr.openmc.core.features.corporation.ShopFurniture;
+import fr.openmc.core.features.corporation.models.Shop;
 import fr.openmc.core.features.economy.EconomyManager;
 import fr.openmc.core.utils.messages.MessageType;
 import fr.openmc.core.utils.messages.MessagesManager;
@@ -37,7 +36,10 @@ public class PlayerShopManager {
      * @param player the player who creates it
      */
     public static void startCreatingShop(Player player) {
-        if (!EconomyManager.withdrawBalance(player.getUniqueId(), 500)) return;
+        if (!EconomyManager.withdrawBalance(player.getUniqueId(), 500)) {
+			MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas assez d'argent pour créer un shop (500 " + EconomyManager.getEconomyIcon() + " requis)"), Prefix.SHOP, MessageType.ERROR, true);
+			return;
+        }
         
         ItemInteraction.runLocationInteraction(
                 player,
@@ -48,7 +50,7 @@ public class PlayerShopManager {
                 "§cCréation de shop annulée",
                 location -> {
                     if (location == null) return false;
-                    return createShop(player, location);
+	                return createShop(player, location);
                 },
                 () -> {
                     EconomyManager.addBalance(player.getUniqueId(), 500, "Annulation création shop");
@@ -58,7 +60,7 @@ public class PlayerShopManager {
     }
     
     private static boolean createShop(Player player, Location location) {
-        Shop shop = new Shop(player.getUniqueId(), location);
+        Shop shop = new Shop(player.getUniqueId(), location.setRotation(0, 0));
         
         Block barrel = location.getBlock();
         Block cashBlock = location.add(0, 1, 0).getBlock();
@@ -73,14 +75,6 @@ public class PlayerShopManager {
             return false;
         }
         
-        try {
-            ShopManager.registerMultiblock(shop, new Shop.Multiblock(barrel.getLocation(), cashBlock.getLocation()));
-        } catch (RuntimeException e) {
-            MessagesManager.sendMessage(player, Component.text("§cErreur lors de la création du shop (cannot register multiblock) : §bappelez un admin"), Prefix.SHOP, MessageType.ERROR, true);
-            OMCPlugin.getInstance().getSLF4JLogger().error("Error registering multiblock for shop UUID: " + shop.getOwnerUUID().toString(), e);
-            return false;
-        }
-        
         if (ShopManager.placeShop(player, shop)) {
             barrel.setType(Material.BARREL);
             BlockData barrelData = barrel.getBlockData();
@@ -88,11 +82,11 @@ public class PlayerShopManager {
                 directional.setFacing(WorldUtils.getYaw(player).getOpposite().toBlockFace());
                 barrel.setBlockData(barrelData);
             }
-            
-            playerShops.put(player.getUniqueId(), shop);
+			
+			playerShops.put(player.getUniqueId(), shop);
             
             Bukkit.getScheduler().runTaskAsynchronously(OMCPlugin.getInstance(), () -> {
-                if (!ShopManager.saveShopLocation(new DBShopLocation(shop.getOwnerUUID(), barrel.getX(), barrel.getY(), barrel.getZ()))) {
+                if (!ShopDatabaseManager.saveShop(shop)) {
                     MessagesManager.sendMessage(player, Component.text("§cErreur lors de la création du shop (cannot save shop location) : §bappelez un admin"), Prefix.SHOP, MessageType.ERROR, false);
                     deleteShop(player, true);
                 }
@@ -103,7 +97,7 @@ public class PlayerShopManager {
             return true;
         } else {
             if (ItemsAdderHook.isHasItemAdder())
-                if (ItemsAdderIntegration.removeShopFurniture(cashBlock)) {
+                if (ShopFurniture.removeShopFurniture(cashBlock)) {
                     cashBlock.setType(Material.AIR);
                     barrel.setType(Material.AIR);
                 } else {
@@ -126,7 +120,7 @@ public class PlayerShopManager {
         }
         
         if (!ShopManager.removeShop(shop)) {
-            MessagesManager.sendMessage(player, Component.text("§cShop introuvable (appelez un admin)"), Prefix.SHOP, MessageType.ERROR, false);
+            MessagesManager.sendMessage(player, Component.text("§cShop introuvable (faites un screen de votre shop actuellement et appelez un admin)"), Prefix.SHOP, MessageType.ERROR, false);
             return;
         }
         
@@ -134,7 +128,7 @@ public class PlayerShopManager {
         
         if (!fromError) {
             Bukkit.getScheduler().runTaskAsynchronously(OMCPlugin.getInstance(), () -> {
-                if (!ShopManager.deleteShopLocation(player.getUniqueId())) {
+                if (!ShopDatabaseManager.deleteShop(shop)) {
                     MessagesManager.sendMessage(player, Component.text("§cErreur lors de la suppression du shop (appelez un admin)"), Prefix.SHOP, MessageType.ERROR, false);
                 }
             });

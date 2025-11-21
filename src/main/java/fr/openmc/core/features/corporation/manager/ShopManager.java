@@ -1,61 +1,25 @@
 package fr.openmc.core.features.corporation.manager;
 
-import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.dao.DaoManager;
-import com.j256.ormlite.support.ConnectionSource;
-import com.j256.ormlite.table.TableUtils;
 import fr.openmc.api.hooks.ItemsAdderHook;
 import fr.openmc.core.OMCPlugin;
-import fr.openmc.core.features.corporation.ItemsAdderIntegration;
-import fr.openmc.core.features.corporation.models.DBShopItem;
-import fr.openmc.core.features.corporation.models.DBShopLocation;
-import fr.openmc.core.features.corporation.models.DBShopSale;
-import fr.openmc.core.features.corporation.models.ShopSupplier;
-import fr.openmc.core.features.corporation.shops.Shop;
+import fr.openmc.core.features.corporation.ShopFurniture;
+import fr.openmc.core.features.corporation.models.Shop;
 import fr.openmc.core.utils.world.WorldUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class ShopManager {
 
-    private static final Map<UUID, Shop.Multiblock> multiblocks = new HashMap<>();
     private static final Map<Location, Shop> shopsByLocation = new HashMap<>();
     
-    private static Dao<DBShopLocation, UUID> shopLocationDao;
-    private static Dao<DBShopItem, UUID> shopItemsDao;
-    private static Dao<DBShopSale, UUID> shopSalesDao;
-    private static Dao<ShopSupplier, UUID> shopSuppliersDao;
-
-    /**
-     * Registers a shop's multiblock structure and maps its key locations.
-     *
-     * @param shop The shop to register.
-     * @param multiblock The multiblock structure associated with the shop.
-     */
-    public static void registerMultiblock(Shop shop, Shop.Multiblock multiblock) {
-        multiblocks.put(shop.getOwnerUUID(), multiblock);
-        Location stockLoc = multiblock.stockBlock();
-        Location cashLoc = multiblock.cashBlock();
-        shopsByLocation.put(stockLoc, shop);
-        shopsByLocation.put(cashLoc, shop);
-    }
-
-    /**
-     * Retrieves the multiblock structure associated with a given UUID.
-     *
-     * @param uuid The UUID of the shop.
-     * @return The multiblock structure if it exists, otherwise null.
-     */
-    public static Shop.Multiblock getMultiblock(UUID uuid) {
-        return multiblocks.get(uuid);
+    public static void init() {
     }
 
     /**
@@ -65,8 +29,20 @@ public class ShopManager {
      * @return The shop found at that location, or null if none exists.
      */
     public static Shop getShopAt(Location location) {
-        return shopsByLocation.get(location);
+        return shopsByLocation.get(location.setRotation(0, 0));
     }
+	
+	/**
+	 * Retrieves a shop located at a given location.
+	 *
+	 * @param x The x-coordinate of the location.
+	 * @param y The y-coordinate of the location.
+	 * @param z The z-coordinate of the location.
+	 * @return The shop found at that location, or null if none exists.
+	 */
+	public static Shop getShopAt(int x, int y, int z) {
+		return shopsByLocation.get(new Location(Bukkit.getWorld("world"), x, y, z, 0, 0));
+	}
 
     /**
      * Places the shop block (sign or ItemsAdder furniture) in the world,
@@ -74,18 +50,20 @@ public class ShopManager {
      *
      * @param player The player placing the shop.
      * @param shop The shop to place.
+     * @return true if successfully placed, false otherwise.
      */
     public static boolean placeShop(Player player, Shop shop) {
-        Shop.Multiblock multiblock = multiblocks.get(shop.getOwnerUUID());
+        Shop.Multiblock multiblock = shop.getMultiblock();
         if (multiblock == null) return false;
         
         Block cashBlock = multiblock.cashBlock().getBlock();
+		
+		shopsByLocation.put(shop.getLocation(), shop);
         
-        if (ItemsAdderHook.isHasItemAdder()) {
-            if (!ItemsAdderIntegration.placeShopFurniture(cashBlock, WorldUtils.getYaw(player)))
-                cashBlock.setType(Material.OAK_SIGN);
-        } else cashBlock.setType(Material.OAK_SIGN);
-        
+        if (ItemsAdderHook.isHasItemAdder())
+            if (!ShopFurniture.placeShopFurniture(cashBlock, WorldUtils.getYaw(player))) cashBlock.setType(Material.OAK_SIGN);
+		else cashBlock.setType(Material.OAK_SIGN);
+		
         return true;
     }
 
@@ -94,65 +72,32 @@ public class ShopManager {
      * Handles both ItemsAdder and fallback vanilla types.
      *
      * @param shop The shop to remove.
-     * @return True if successfully removed, false otherwise.
+     * @return true if successfully removed, false otherwise.
      */
     public static boolean removeShop(Shop shop) {
-        Shop.Multiblock multiblock = multiblocks.get(shop.getOwnerUUID());
+        Shop.Multiblock multiblock = shop.getMultiblock();
         if (multiblock == null) return false;
+	    
+	    World world = Bukkit.getWorld("world");
+		if (world == null) {
+			OMCPlugin.getInstance().getSLF4JLogger().error("World 'world' not found while removing shop at location: {}", shop.getLocation());
+			return false;
+		}
         
-        Block cashBlock = multiblock.cashBlock().getBlock();
-        Block stockBlock = multiblock.stockBlock().getBlock();
+        Block cashBlock = world.getBlockAt(multiblock.cashBlock());
+        Block stockBlock = world.getBlockAt(multiblock.stockBlock());
 
         if (ItemsAdderHook.isHasItemAdder()) {
-            if (!ItemsAdderIntegration.hasFurniture(cashBlock)) return false;
-            if (!ItemsAdderIntegration.removeShopFurniture(cashBlock)) return false;
-        } else {
-            if ((cashBlock.getType() != Material.OAK_SIGN && cashBlock.getType() != Material.BARRIER) || stockBlock.getType() != Material.BARREL) {
-                return false;
-            }
+            if (!ShopFurniture.hasFurniture(cashBlock)) return false;
+            if (!ShopFurniture.removeShopFurniture(cashBlock)) return false;
         }
-
+        else if ((cashBlock.getType() != Material.OAK_SIGN && cashBlock.getType() != Material.BARRIER) || stockBlock.getType() != Material.BARREL) return false;
+	    cashBlock.setType(Material.AIR); // Remove sign or furniture block
         stockBlock.setType(Material.AIR); // Remove barrel block
         
         // Async cleanup of location mappings
-        multiblocks.remove(shop.getOwnerUUID());
-        cashBlock.setType(Material.AIR); // Remove sign or furniture block
         Bukkit.getScheduler().runTaskAsynchronously(OMCPlugin.getInstance(), () ->
                 shopsByLocation.entrySet().removeIf(entry -> entry.getValue().getOwnerUUID().equals(shop.getOwnerUUID())));
         return true;
-    }
-    
-    public static void initDB(ConnectionSource connectionSource) throws SQLException {
-        TableUtils.createTableIfNotExists(connectionSource, DBShopLocation.class);
-        shopLocationDao = DaoManager.createDao(connectionSource, DBShopLocation.class);
-        
-        TableUtils.createTableIfNotExists(connectionSource, DBShopSale.class);
-        shopSalesDao = DaoManager.createDao(connectionSource, DBShopSale.class);
-        
-        TableUtils.createTableIfNotExists(connectionSource, DBShopItem.class);
-        shopItemsDao = DaoManager.createDao(connectionSource, DBShopItem.class);
-        
-        TableUtils.createTableIfNotExists(connectionSource, ShopSupplier.class);
-        shopSuppliersDao = DaoManager.createDao(connectionSource, ShopSupplier.class);
-    }
-    
-    public static boolean saveShopLocation(DBShopLocation dbShopLocation) {
-	    try {
-		    shopLocationDao.createOrUpdate(dbShopLocation);
-            return true;
-	    } catch (SQLException e) {
-		    OMCPlugin.getInstance().getSLF4JLogger().error("Error saving shop location for owner UUID: " + dbShopLocation.getOwnerUUID().toString(), e);
-            return false;
-	    }
-    }
-    
-    public static boolean deleteShopLocation(UUID ownerUUID) {
-        try {
-            shopLocationDao.deleteById(ownerUUID);
-            return true;
-        } catch (SQLException e) {
-            OMCPlugin.getInstance().getSLF4JLogger().error("Error deleting shop location for owner UUID: " + ownerUUID.toString(), e);
-            return false;
-        }
     }
 }

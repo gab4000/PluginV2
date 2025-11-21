@@ -1,5 +1,7 @@
-package fr.openmc.core.features.corporation.shops;
+package fr.openmc.core.features.corporation.models;
 
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
 import fr.openmc.core.utils.ItemUtils;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
@@ -10,14 +12,29 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.UUID;
 
-@Getter
-public class ShopItem {
+import static com.j256.ormlite.field.DataType.BYTE_ARRAY;
 
-    private final UUID itemID;
-    private final ItemStack item;
-    private final double pricePerItem;
-    private double price;
+@Getter
+@DatabaseTable(tableName = "shop_items")
+public class ShopItem {
+    
+    @DatabaseField(id = true, columnName = "owner_uuid", canBeNull = false)
+    private UUID ownerUUID;
+    @DatabaseField(canBeNull = false, columnName = "item_uuid")
+    private UUID itemUUID;
+    @DatabaseField(canBeNull = false)
+    private double pricePerItem;
+    @DatabaseField(canBeNull = false)
     private int amount;
+    @DatabaseField(canBeNull = false, dataType = BYTE_ARRAY)
+    private byte[] itemBytes;
+    
+    private double price;
+    private ItemStack item;
+    
+    ShopItem() {
+        // required for ORMLite
+    }
 
     public ShopItem(ItemStack item, double pricePerItem) {
         this(item, pricePerItem, UUID.randomUUID());
@@ -29,7 +46,15 @@ public class ShopItem {
         this.item.setAmount(1);
         this.price = pricePerItem * amount;
         this.amount = 0;
-        this.itemID = itemID;
+        this.itemUUID = itemID;
+    }
+    
+    public ShopItem(byte[] itemBytes, UUID ownerUUID, double price, int amount, UUID itemUUID) {
+        this.itemBytes = itemBytes;
+        this.ownerUUID = ownerUUID;
+        this.price = price;
+        this.amount = amount;
+        this.itemUUID = itemUUID;
     }
 
     /**
@@ -76,5 +101,10 @@ public class ShopItem {
      */
     public double getPrice(int amount) {
         return pricePerItem * amount;
+    }
+    
+    public ShopItem deserialize() {
+        ItemStack item = ItemStack.deserializeBytes(itemBytes);
+        return new ShopItem(item, price, itemUUID).setAmount(amount);
     }
 }

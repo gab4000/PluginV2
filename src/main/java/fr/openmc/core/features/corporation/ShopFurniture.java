@@ -3,13 +3,14 @@ package fr.openmc.core.features.corporation;
 import dev.lone.itemsadder.api.CustomFurniture;
 import dev.lone.itemsadder.api.CustomStack;
 import fr.openmc.core.utils.world.Yaw;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 
-public class ItemsAdderIntegration {
+public class ShopFurniture {
 	
 	public static boolean placeShopFurniture(Block block, Yaw playerYaw) {
 		CustomStack customFurniture = CustomFurniture.getInstance("omc_company:caisse");
-		if (customFurniture == null || block.getType() != org.bukkit.Material.AIR) return false;
+		if (customFurniture == null || block.getType() != Material.AIR) return false;
 		
 		CustomFurniture furniture = CustomFurniture.spawn("omc_company:caisse", block);
 		furniture.getEntity().setRotation(playerYaw.getPlayerYaw(), 0);

@@ -12,7 +12,7 @@ import fr.openmc.core.disabled.corporation.models.DBCompany;
 import fr.openmc.core.features.city.City;
 import fr.openmc.core.features.city.CityManager;
 import fr.openmc.core.features.city.CityPermission;
-import fr.openmc.core.features.corporation.shops.Shop;
+import fr.openmc.core.features.corporation.models.Shop;
 import fr.openmc.core.features.corporation.shops.ShopOwner;
 import fr.openmc.core.features.economy.EconomyManager;
 import fr.openmc.core.utils.Queue;

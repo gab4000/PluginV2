@@ -218,6 +218,9 @@ public class OMCPlugin extends JavaPlugin {
 
         // - Cooldowns
         DynamicCooldownManager.saveCooldowns();
+        
+        // - Shops
+        ShopManager.shutdown();
 
 
         if (!OMCPlugin.isUnitTestVersion()) {

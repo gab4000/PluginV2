@@ -10,25 +10,19 @@ import fr.openmc.core.utils.messages.MessageType;
 import fr.openmc.core.utils.messages.MessagesManager;
 import fr.openmc.core.utils.messages.Prefix;
 import fr.openmc.core.utils.world.WorldUtils;
-import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
 public class PlayerShopManager {
 
-    @Getter
-    private static final Map<UUID, Shop> playerShops = new HashMap<>();
 
     /**
      * Create a shop if the player has enough money and does not already have one
@@ -83,7 +77,7 @@ public class PlayerShopManager {
                 barrel.setBlockData(barrelData);
             }
 			
-			playerShops.put(player.getUniqueId(), shop);
+			ShopManager.getPlayerShops().put(player.getUniqueId(), shop);
             
             Bukkit.getScheduler().runTaskAsynchronously(OMCPlugin.getInstance(), () -> {
                 if (!ShopDatabaseManager.saveShop(shop)) {
@@ -113,7 +107,7 @@ public class PlayerShopManager {
      * @param player The player who deletes the shop
      */
     public static void deleteShop(Player player, boolean fromError) {
-        Shop shop = getPlayerShop(player.getUniqueId());
+        Shop shop = ShopManager.getPlayerShop(player.getUniqueId());
         if (!fromError && !shop.getItems().isEmpty()) {
             MessagesManager.sendMessage(player, Component.text("§cVotre shop n'est pas vide"), Prefix.SHOP, MessageType.WARNING, false);
             return;
@@ -124,7 +118,7 @@ public class PlayerShopManager {
             return;
         }
         
-        playerShops.remove(player.getUniqueId());
+        ShopManager.getPlayerShops().remove(player.getUniqueId());
         
         if (!fromError) {
             Bukkit.getScheduler().runTaskAsynchronously(OMCPlugin.getInstance(), () -> {
@@ -139,24 +133,25 @@ public class PlayerShopManager {
         EconomyManager.addBalance(player.getUniqueId(), 400);
         MessagesManager.sendMessage(player, Component.text("§a400" + EconomyManager.getEconomyIcon() + " remboursés sur votre compte personnel"), Prefix.SHOP, MessageType.SUCCESS, true);
     }
-
-    /**
-     * Get a shop from the UUID of a player
-     *
-     * @param playerUUID the UUID of the player to check
-     * @return the Shop if found
-     */
-    public static Shop getPlayerShop(UUID playerUUID) {
-        return playerShops.get(playerUUID);
-    }
-
-    /**
-     * Check if a player has a shop
-     *
-     * @param playerUUID the UUID of the player to check
-     * @return true if a shop is found
-     */
-    public static boolean hasShop(UUID playerUUID) {
-        return getPlayerShop(playerUUID) != null;
+    
+    public static void adminDeleteShop(OfflinePlayer player, Player admin) {
+        Shop shop = ShopManager.getPlayerShop(player.getUniqueId());
+        if (shop == null) return;
+        
+        if (!ShopManager.removeShop(shop)) {
+            MessagesManager.sendMessage(admin, Component.text("§cShop introuvable"), Prefix.SHOP, MessageType.ERROR, false);
+            return;
+        }
+        ShopManager.getPlayerShops().remove(player.getUniqueId());
+        
+        Bukkit.getScheduler().runTaskAsynchronously(OMCPlugin.getInstance(), () -> {
+            if (!ShopDatabaseManager.deleteShop(shop)) {
+                MessagesManager.sendMessage(admin, Component.text("§cErreur lors de la suppression du shop"), Prefix.SHOP, MessageType.ERROR, false);
+            }
+        });
+        
+        MessagesManager.sendMessage(admin, Component.text("§6Le shop a bien été supprimé !"), Prefix.SHOP, MessageType.SUCCESS, false);
+        EconomyManager.addBalance(player.getUniqueId(), 400);
+        MessagesManager.sendMessage(player, Component.text("§a400" + EconomyManager.getEconomyIcon() + " remboursés sur votre compte personnel"), Prefix.SHOP, MessageType.SUCCESS, true);
     }
 }

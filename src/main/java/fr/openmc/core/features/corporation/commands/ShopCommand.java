@@ -1,6 +1,7 @@
 package fr.openmc.core.features.corporation.commands;
 
 import fr.openmc.core.features.corporation.manager.PlayerShopManager;
+import fr.openmc.core.features.corporation.manager.ShopManager;
 import fr.openmc.core.features.corporation.menu.ShopMenu;
 import fr.openmc.core.features.corporation.menu.ShopSearchMenu;
 import fr.openmc.core.features.economy.EconomyManager;
@@ -19,7 +20,7 @@ public class ShopCommand {
     
     @CommandPlaceholder
     public void onCommand(Player player) {
-        if (!PlayerShopManager.hasShop(player.getUniqueId())) {
+        if (!ShopManager.hasShop(player.getUniqueId())) {
             MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas de shop"), Prefix.SHOP, MessageType.INFO, false);
             return;
         }
@@ -51,7 +52,7 @@ public class ShopCommand {
     @Subcommand("create")
     @Description("Create a shop")
     public void createShop(Player player) {
-        if (PlayerShopManager.hasShop(player.getUniqueId())) {
+        if (ShopManager.hasShop(player.getUniqueId())) {
             MessagesManager.sendMessage(player, Component.text("§cVous avez déjà un shop"), Prefix.SHOP, MessageType.INFO, false);
             return;
         }
@@ -72,7 +73,7 @@ public class ShopCommand {
     @Subcommand("delete")
     @Description("Delete a shop")
     public void deleteShop(Player player) {
-        if (!PlayerShopManager.hasShop(player.getUniqueId())) {
+        if (!ShopManager.hasShop(player.getUniqueId())) {
             MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas de shop"), Prefix.SHOP, MessageType.WARNING, false);
             return;
         }

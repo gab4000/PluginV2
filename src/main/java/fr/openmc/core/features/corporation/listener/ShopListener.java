@@ -98,20 +98,18 @@ public class ShopListener implements Listener {
     
     @EventHandler
     public void onFurnitureInteract(FurnitureInteractEvent e) {
-        if (e.getFurniture() == null) return;
+		CustomFurniture furniture = e.getFurniture();
+		
+        if (furniture == null) return;
         
-        if (!e.getFurniture().getNamespacedID().equals("omc_company:caisse")) return;
+        if (!furniture.getNamespacedID().equals("omc_company:caisse")) return;
 	    
-	    if (e.getFurniture().getEntity() == null) {
+	    if (furniture.getEntity() == null) {
 		    MessagesManager.sendMessage(e.getPlayer(), Component.text("§cErreur lors de l'ouverture du shop, veuillez contacter le staff. (Entity is null)"), Prefix.SHOP, MessageType.ERROR, true);
 		    return;
 	    }
 	    
-	    int x = e.getFurniture().getEntity().getLocation().getBlockX();
-	    int y = e.getFurniture().getEntity().getLocation().getBlockY();
-	    int z = e.getFurniture().getEntity().getLocation().getBlockZ();
-	    
-	    Shop shop = ShopManager.getShopAt(x, y, z);
+	    Shop shop = ShopManager.getShopAt(furniture.getEntity().getLocation().subtract(0, 1, 0).toBlockLocation());
 	    if (shop == null) {
 		    MessagesManager.sendMessage(e.getPlayer(), Component.text("§cErreur lors de l'ouverture du shop, veuillez contacter le staff. (Shop is null)"), Prefix.SHOP, MessageType.ERROR, true);
 			return;

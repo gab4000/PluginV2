@@ -49,7 +49,6 @@ public class PlayerSleepListener implements Listener {
 
     @EventHandler
     public void onNightSkip(TimeSkipEvent event) {
-
         for (UUID uuid : playersDreaming) {
             Player player = Bukkit.getPlayer(uuid);
             if (player == null) continue;
@@ -65,6 +64,6 @@ public class PlayerSleepListener implements Listener {
                 }
             }.runTaskLater(OMCPlugin.getInstance(), 20L * 5);
         }
-        if (event.getSkipReason() == TimeSkipEvent.SkipReason.NIGHT_SKIP) playersDreaming.clear();
+        playersDreaming.clear();
     }
 }

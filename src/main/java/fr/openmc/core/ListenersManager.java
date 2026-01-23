@@ -42,7 +42,8 @@ public class ListenersManager {
 		            new ShopListener(),
                 new NoMoreRabbit(),
                 new ArmorListener(),
-                new SpawnerExtractorListener()
+                new SpawnerExtractorListener(),
+                new BlockBreakListener()
         );
 
         if (!OMCPlugin.isUnitTestVersion()) {

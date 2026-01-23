@@ -7,12 +7,14 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class CustomItem {
-	public abstract @NotNull ItemStack getVanilla();
-    @Getter private final String name;
+    @Getter
+    private final String name;
 
     public CustomItem(String name) {
         this.name = name;
     }
+
+    public abstract @NotNull ItemStack getVanilla();
 
     public ItemStack getItemsAdder() {
         CustomStack stack = CustomStack.getInstance(getName());
@@ -43,6 +45,7 @@ public abstract class CustomItem {
      * Order:
      * 1. ItemsAdder
      * 2. Vanilla
+     *
      * @return Best ItemStack to use for the server
      */
     public @NotNull ItemStack getBest() {

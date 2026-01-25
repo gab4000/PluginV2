@@ -120,7 +120,7 @@ public class DreamItemRegistry {
         registerDreamItem(new PyjamaBoots("omc_dream:pyjama_boots"));
 
         // # TOOLS
-        registerDreamItem(new CrystalizedPickaxe("omc_dream:crystalized_pickaxe"));
+        registerDreamItem(new CrystalizedPickaxe("omc_dream:crystallized_pickaxe"));
         registerDreamItem(new MecanicPickaxe("omc_dream:mecanic_pickaxe"));
         registerDreamItem(new SoulAxe("omc_dream:soul_axe"));
         registerDreamItem(new OldCreakingAxe("omc_dream:old_creaking_axe"));

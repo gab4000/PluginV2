@@ -28,9 +28,8 @@ public class PlayerSleepListener implements Listener {
         if (!event.getBedEnterResult().equals(PlayerBedEnterEvent.BedEnterResult.OK)) return;
 
         if (playersDreaming.contains(player.getUniqueId())) return;
-
-        Random random = new Random();
-        double randomValue = random.nextDouble();
+		
+        double randomValue = new Random().nextDouble();
 
         if (randomValue < DreamManager.calculateDreamProbability(player)) return;
 
@@ -43,8 +42,6 @@ public class PlayerSleepListener implements Listener {
                 false
         ));
         playersDreaming.add(player.getUniqueId());
-         
-
     }
 
     @EventHandler

@@ -7,7 +7,6 @@ import fr.openmc.core.features.city.City;
 import fr.openmc.core.features.city.CityManager;
 import fr.openmc.core.features.city.menu.NoCityMenu;
 import fr.openmc.core.features.city.sub.milestone.menu.CityMilestoneMenu;
-import fr.openmc.core.features.milestones.MilestoneType;
 import fr.openmc.core.features.milestones.MilestonesManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
@@ -53,15 +52,11 @@ public class MainMilestonesMenu extends Menu {
         Player player = getOwner();
 
         MilestonesManager.getRegisteredMilestones().forEach(milestone -> {
-            if (milestone.getType().equals(MilestoneType.TUTORIAL)) {
-                inventory.put(10, new ItemBuilder(this, milestone.getIcon(), itemMeta -> {
-                    itemMeta.displayName(Component.text(milestone.getName()));
-                    itemMeta.lore(milestone.getDescription());
-                    itemMeta.setEnchantmentGlintOverride(MilestonesManager.getPlayerStep(milestone.getType(), player) + 1 >= milestone.getSteps().size());
-                }).setOnClick(event -> {
-                    milestone.getMenu(player).open();
-                }));
-            }
+			inventory.put(10 + (milestone.getType().ordinal() * 2), new ItemBuilder(this, milestone.getIcon(), itemMeta -> {
+				itemMeta.displayName(Component.text(milestone.getName()));
+				itemMeta.lore(milestone.getDescription());
+				itemMeta.setEnchantmentGlintOverride(MilestonesManager.getPlayerStep(milestone.getType(), player) + 1 >= milestone.getSteps().size());
+			}).setOnClick(event -> milestone.getMenu(player).open()));
         });
 
         List<Component> loreMilestoneVille = new ArrayList<>();
@@ -82,7 +77,7 @@ public class MainMilestonesMenu extends Menu {
             loreMilestoneVille.add(Component.text("§e§lCLIQUEZ ICI POUR ACCEDER A VOTRE MILESTONE"));
         }
 
-        inventory.put(12, new ItemBuilder(this, Material.SEA_LANTERN, itemMeta -> {
+        inventory.put(14, new ItemBuilder(this, Material.SEA_LANTERN, itemMeta -> {
             itemMeta.displayName(Component.text("§3Milestone des villes"));
             itemMeta.lore(loreMilestoneVille);
         }).setOnClick(event -> {
@@ -91,10 +86,6 @@ public class MainMilestonesMenu extends Menu {
             } else {
                 new CityMilestoneMenu(player, playerCity).open();
             }
-        }));
-
-        inventory.put(14, new ItemBuilder(this, Material.SCULK, itemMeta -> {
-            itemMeta.displayName(Component.text(" §kd §r§cComming soon §kr"));
         }));
 
         inventory.put(16, new ItemBuilder(this, Material.DEAD_BUBBLE_CORAL_BLOCK, itemMeta -> {

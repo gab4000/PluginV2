@@ -3,9 +3,9 @@ package fr.openmc.core.features.milestones.tutorial.quests;
 import fr.openmc.api.menulib.events.OpenMenuEvent;
 import fr.openmc.core.features.adminshop.menus.AdminShopMenu;
 import fr.openmc.core.features.milestones.MilestoneType;
+import fr.openmc.core.features.milestones.MilestoneUtils;
 import fr.openmc.core.features.milestones.MilestonesManager;
 import fr.openmc.core.features.milestones.tutorial.TutorialStep;
-import fr.openmc.core.features.milestones.tutorial.utils.TutorialUtils;
 import fr.openmc.core.features.quests.objects.Quest;
 import fr.openmc.core.features.quests.objects.QuestTier;
 import fr.openmc.core.features.quests.rewards.QuestMethodsReward;
@@ -47,7 +47,7 @@ public class OpenAdminShopMenuQuest extends Quest implements Listener {
                         MessageType.SUCCESS
                 ),
                 new QuestMethodsReward(
-                        player -> TutorialUtils.completeStep(type, player, step)
+                        player -> MilestoneUtils.completeStep(type, player, step.ordinal())
                 )
         ));
     }

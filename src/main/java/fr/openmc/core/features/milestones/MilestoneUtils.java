@@ -1,22 +1,22 @@
-package fr.openmc.core.features.milestones.tutorial.utils;
+package fr.openmc.core.features.milestones;
 
 import fr.openmc.core.features.displays.bossbar.BossbarManager;
 import fr.openmc.core.features.displays.bossbar.BossbarsType;
-import fr.openmc.core.features.milestones.MilestoneType;
-import fr.openmc.core.features.milestones.MilestonesManager;
 import fr.openmc.core.features.milestones.tutorial.TutorialBossBar;
 import fr.openmc.core.features.milestones.tutorial.TutorialStep;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 
-public class TutorialUtils {
-    public static void completeStep(MilestoneType type, Player player, TutorialStep step) {
-        int stepInt = step.ordinal() + 1;
+public class MilestoneUtils {
+    public static void completeStep(MilestoneType type, Player player, int step) {
+        int stepInt = step + 1;
 
         if (MilestonesManager.getPlayerStep(type, player) >= stepInt) return;
 
         MilestonesManager.setPlayerStep(type, player, stepInt);
 
+		if (!type.isBossBar()) return; // If type = TutorialType
+		
         int maxStep = TutorialStep.values().length;
 
         if (stepInt >= maxStep) {

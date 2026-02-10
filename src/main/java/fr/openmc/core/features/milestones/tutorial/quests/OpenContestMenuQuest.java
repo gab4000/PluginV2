@@ -3,9 +3,9 @@ package fr.openmc.core.features.milestones.tutorial.quests;
 import fr.openmc.core.OMCPlugin;
 import fr.openmc.core.features.mailboxes.MailboxManager;
 import fr.openmc.core.features.milestones.MilestoneType;
+import fr.openmc.core.features.milestones.MilestoneUtils;
 import fr.openmc.core.features.milestones.MilestonesManager;
 import fr.openmc.core.features.milestones.tutorial.TutorialStep;
-import fr.openmc.core.features.milestones.tutorial.utils.TutorialUtils;
 import fr.openmc.core.features.quests.objects.Quest;
 import fr.openmc.core.features.quests.objects.QuestTier;
 import fr.openmc.core.features.quests.rewards.QuestMethodsReward;
@@ -53,7 +53,7 @@ public class OpenContestMenuQuest extends Quest implements Listener {
                 ),
                 new QuestMethodsReward(
                         player -> {
-                            TutorialUtils.completeStep(type, player, step);
+                            MilestoneUtils.completeStep(type, player, step.ordinal());
 
                             List<ItemStack> items = new ArrayList<>();
                             ItemStack aywenite = CustomItemRegistry.getByName("omc_items:aywenite").getBest();

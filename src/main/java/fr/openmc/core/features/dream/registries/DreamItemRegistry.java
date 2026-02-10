@@ -61,7 +61,7 @@ public class DreamItemRegistry {
         registerDreamItem(new CorruptedString("omc_dream:corrupted_string"));
         registerDreamItem(new CreakingHeart("omc_dream:creaking_heart"));
         registerDreamItem(new Soul("omc_dream:soul"));
-        registerDreamItem(new Soul("omc_dream:cloud_key"));
+        registerDreamItem(new CloudKey("omc_dream:cloud_key"));
         registerDreamItem(new CorruptedSculk("omc_dream:corrupted_sculk"));
         registerDreamItem(new OldPaleOakWood("omc_dream:old_pale_oak"));
         registerDreamItem(new Glacite("omc_dream:glacite"));
@@ -124,7 +124,7 @@ public class DreamItemRegistry {
         registerDreamItem(new MecanicPickaxe("omc_dream:mecanic_pickaxe"));
         registerDreamItem(new SoulAxe("omc_dream:soul_axe"));
         registerDreamItem(new OldCreakingAxe("omc_dream:old_creaking_axe"));
-        registerDreamItem(new OldCreakingAxe("omc_dream:cloud_fishing_rod"));
+        registerDreamItem(new CloudFishingRod("omc_dream:cloud_fishing_rod"));
         registerDreamItem(new MeteoWand("omc_dream:meteo_wand"));
         registerDreamItem(new MetalDetector("omc_dream:metal_detector"));
 

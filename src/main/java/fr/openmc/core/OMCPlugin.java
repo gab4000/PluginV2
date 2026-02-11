@@ -151,8 +151,8 @@ public class OMCPlugin extends JavaPlugin {
     public void loadWithItemsAdder() {
         CustomItemRegistry.init();
         CustomUsableItemRegistry.init();
-        MilestonesManager.init();
-        QuestsManager.init();
+	    MilestonesManager.init();
+	    QuestsManager.init();
         CityManager.init();
         ContestManager.init();
         DreamManager.init();

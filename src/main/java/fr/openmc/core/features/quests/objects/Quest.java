@@ -134,6 +134,16 @@ public class Quest {
     public int getProgress(UUID playerUUID) {
         return this.progress.getOrDefault(playerUUID, 0);
     }
+	
+	/**
+	 * Set the quest progress for a player
+	 * @param playerUUID The UUID of the player
+	 * @param progress The progression value
+	 */
+	public void setProgress(UUID playerUUID, int progress) {
+		this.progress.remove(playerUUID);
+		this.progress.put(playerUUID, progress);
+	}
 
     /**
      * Get the current tier index of the quest for a player.
@@ -518,23 +528,24 @@ public class Quest {
     public void incrementProgress(UUID playerUUID, int amount, boolean authorizeDream) {
         if (!this.isFullyCompleted(playerUUID) && !this.progressLock.getOrDefault(playerUUID, false)) {
             this.progressLock.put(playerUUID, true);
-            
+			
             try {
                 Player onlinePlayer = Bukkit.getPlayer(playerUUID);
-                if (onlinePlayer != null
-                        && onlinePlayer.isOnline()
-                        && (!onlinePlayer.getGameMode().equals(GameMode.SURVIVAL) || (DreamUtils.isInDreamWorld(onlinePlayer)) && !authorizeDream)) return;
+				if (onlinePlayer == null) return;
+				if (!onlinePlayer.isOnline()) return;
+                if ((!onlinePlayer.getGameMode().equals(GameMode.SURVIVAL)
+                        || (DreamUtils.isInDreamWorld(onlinePlayer)) && !authorizeDream)) return;
 
                 int currentProgress = this.progress.getOrDefault(playerUUID, 0);
                 int newProgress = currentProgress + amount;
                 int currentTarget = this.getCurrentTarget(playerUUID);
 
                 if (newProgress >= currentTarget) newProgress = currentTarget;
-
-                if (currentProgress < currentTarget) {
-                    this.progress.put(playerUUID, newProgress);
+	            
+	            if (currentProgress < currentTarget) {
+					this.progress.put(playerUUID, newProgress);
                     this.checkTierCompletion(playerUUID);
-                    if (onlinePlayer != null && onlinePlayer.isOnline()) {
+                    if (onlinePlayer.isOnline()) {
                         if (this.isLargeActionBar && newProgress % 50 != 0) return;
                         Component actionBar = Component.text()
                                 .append(Prefix.QUEST.getPrefix())

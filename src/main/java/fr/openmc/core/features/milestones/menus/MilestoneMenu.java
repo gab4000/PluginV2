@@ -4,9 +4,8 @@ import fr.openmc.api.menulib.Menu;
 import fr.openmc.api.menulib.utils.InventorySize;
 import fr.openmc.api.menulib.utils.ItemBuilder;
 import fr.openmc.core.features.milestones.Milestone;
-import fr.openmc.core.features.milestones.MilestoneSnake;
+import fr.openmc.core.features.milestones.MilestoneQuest;
 import fr.openmc.core.features.milestones.MilestonesManager;
-import fr.openmc.core.features.quests.objects.Quest;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -22,13 +21,17 @@ import java.util.Map;
 public class MilestoneMenu extends Menu {
 
     private final Milestone milestone;
-    private final List<Quest> steps;
+    private final List<MilestoneQuest> steps;
     private int offset = 0;
 
     private static final int START_ROW = 0;
     private static final int END_ROW = 4;
     private static final int[] COLS = {0, 2, 4, 6, 8};
     private static final int MAX_VISIBLE_NODES = 2 * COLS.length;
+
+    private static int slotAt(int row, int col) {
+        return row * 9 + col;
+    }
 
     private static int rowOf(int slot) {
         return slot / 9;
@@ -73,11 +76,11 @@ public class MilestoneMenu extends Menu {
         int remaining = Math.max(0, steps.size() - offset);
         int visible = Math.min(MAX_VISIBLE_NODES, remaining);
 
-        MilestoneSnake snake = MilestoneSnake.buildSnake(visible, COLS, START_ROW, END_ROW);
+        Snake snake = buildSnake(visible);
 
         for (int i = 0; i < visible; i++) {
             int stepIndex = offset + i;
-            Quest quest = steps.get(stepIndex);
+            MilestoneQuest quest = steps.get(stepIndex);
 
             boolean completed = stepIndex < currentStep;
             boolean active = stepIndex == currentStep;
@@ -86,7 +89,7 @@ public class MilestoneMenu extends Menu {
             quest.getDescription(player.getUniqueId()).forEach(line -> stepLore.add(Component.text(line)));
 
 
-            int slot = snake.nodes().get(i);
+            int slot = snake.nodes.get(i);
             content.put(slot, new ItemBuilder(this, quest.getIcon(), meta -> {
                 meta.displayName(Component.text(
                         (completed ? "§a" : active ? "§e" : "§7") + quest.getName()
@@ -96,13 +99,13 @@ public class MilestoneMenu extends Menu {
             }));
         }
 
-        for (int j = 0; j < snake.links().size(); j++) {
-            int a = snake.links().get(j);
+        for (int j = 0; j < snake.links.size(); j++) {
+            int a = snake.links.get(j);
 
             int segmentIndex = -1;
-            for (int i = 0; i + 1 < snake.nodes().size(); i++) {
-                int n1 = snake.nodes().get(i);
-                int n2 = snake.nodes().get(i + 1);
+            for (int i = 0; i + 1 < snake.nodes.size(); i++) {
+                int n1 = snake.nodes.get(i);
+                int n2 = snake.nodes.get(i + 1);
 
                 if ((colOf(n1) == colOf(n2) && colOf(n1) == colOf(a) && rowOf(a) > Math.min(rowOf(n1), rowOf(n2)) && rowOf(a) < Math.max(rowOf(n1), rowOf(n2)))
                         || (rowOf(n1) == rowOf(n2) && rowOf(n1) == rowOf(a) && colOf(a) > Math.min(colOf(n1), colOf(n2)) && colOf(a) < Math.max(colOf(n1), colOf(n2)))) {
@@ -153,5 +156,64 @@ public class MilestoneMenu extends Menu {
     @Override
     public List<Integer> getTakableSlot() {
         return List.of();
+    }
+
+	// ============================== SNAKE ============================== //
+	
+    private record Snake(List<Integer> nodes, List<Integer> links) {
+    }
+
+    private Snake buildSnake(int count) {
+        List<Integer> nodes = new ArrayList<>();
+        List<Integer> links = new ArrayList<>();
+        int placed = 0;
+
+        for (int colIdx = 0; colIdx < COLS.length && placed < count; colIdx++) {
+            int col = COLS[colIdx];
+            int nextPrimary = (colIdx + 1 < COLS.length) ? COLS[colIdx + 1] : -1;
+            boolean topDown = (colIdx % 2 == 0);
+
+            if (topDown) {
+                // haut
+                if (placed < count) {
+                    nodes.add(slotAt(START_ROW, col));
+                    placed++;
+                    if (placed < count) {
+                        for (int r = START_ROW + 1; r <= END_ROW - 1; r++)
+                            links.add(slotAt(r, col));
+                    }
+                }
+                // bas
+                if (placed < count) {
+                    nodes.add(slotAt(END_ROW, col));
+                    placed++;
+                    if (placed < count && nextPrimary != -1) {
+                        for (int c = col + 1; c < nextPrimary; c++)
+                            links.add(slotAt(END_ROW, c));
+                    }
+                }
+            } else {
+                // bas
+                if (placed < count) {
+                    nodes.add(slotAt(END_ROW, col));
+                    placed++;
+                    if (placed < count) {
+                        for (int r = END_ROW - 1; r >= START_ROW + 1; r--)
+                            links.add(slotAt(r, col));
+                    }
+                }
+
+                // haut
+                if (placed < count) {
+                    nodes.add(slotAt(START_ROW, col));
+                    placed++;
+                    if (placed < count && nextPrimary != -1) {
+                        for (int c = col + 1; c < nextPrimary; c++)
+                            links.add(slotAt(START_ROW, c));
+                    }
+                }
+            }
+        }
+        return new Snake(nodes, links);
     }
 }

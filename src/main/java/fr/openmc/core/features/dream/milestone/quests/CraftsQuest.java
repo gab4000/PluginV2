@@ -2,12 +2,10 @@ package fr.openmc.core.features.dream.milestone.quests;
 
 import fr.openmc.core.features.dream.DreamUtils;
 import fr.openmc.core.features.dream.milestone.DreamSteps;
+import fr.openmc.core.features.milestones.MilestoneQuest;
 import fr.openmc.core.features.milestones.MilestoneType;
-import fr.openmc.core.features.milestones.MilestoneUtils;
 import fr.openmc.core.features.milestones.MilestonesManager;
-import fr.openmc.core.features.quests.objects.Quest;
 import fr.openmc.core.features.quests.objects.QuestTier;
-import fr.openmc.core.features.quests.rewards.QuestMethodsReward;
 import fr.openmc.core.features.quests.rewards.QuestTextReward;
 import fr.openmc.core.utils.messages.MessageType;
 import fr.openmc.core.utils.messages.Prefix;
@@ -19,7 +17,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 import java.util.List;
 
-public class CraftsQuest extends Quest implements Listener {
+public class CraftsQuest extends MilestoneQuest implements Listener {
 	public CraftsQuest() {
 		super(
 				"Apprendre de nouveaux crafts",
@@ -27,14 +25,15 @@ public class CraftsQuest extends Quest implements Listener {
 						"§fFaire §d/crafts §fpour voir les crafts disponibles",
 						"§8§oCette dimension a ses propres règles, je dois les apprendre pour y survivre"
 				),
-				Material.BOOK
+				Material.BOOK,
+				MilestoneType.DREAM,
+				DreamSteps.CRAFTS,
+				new QuestTier(
+						1,
+						new QuestTextReward("Ce monde sombre et nouveau semble complexe. Mais cela ressemble à une survie normale, non ? " +
+								"Alors commençons par les bases, la table de craft.", Prefix.DREAM, MessageType.SUCCESS)
+				)
 		);
-		
-		this.addTier(new QuestTier(
-				1,
-				new QuestTextReward("Ce monde sombre et nouveau semble complexe. Mais cela ressemble à une survie normale, non ? Alors commençons par les bases, la table de craft.", Prefix.DREAM, MessageType.SUCCESS),
-				new QuestMethodsReward(player -> MilestoneUtils.completeStep(MilestoneType.DREAM, player, DreamSteps.CRAFTS.ordinal()))
-		));
 	}
 	
 	@EventHandler

@@ -5,12 +5,10 @@ import fr.openmc.core.features.dream.milestone.DreamSteps;
 import fr.openmc.core.features.dream.models.registry.items.DreamItem;
 import fr.openmc.core.features.dream.registries.DreamItemRegistry;
 import fr.openmc.core.features.dream.registries.items.loots.Soul;
+import fr.openmc.core.features.milestones.MilestoneQuest;
 import fr.openmc.core.features.milestones.MilestoneType;
-import fr.openmc.core.features.milestones.MilestoneUtils;
 import fr.openmc.core.features.milestones.MilestonesManager;
-import fr.openmc.core.features.quests.objects.Quest;
 import fr.openmc.core.features.quests.objects.QuestTier;
-import fr.openmc.core.features.quests.rewards.QuestMethodsReward;
 import fr.openmc.core.features.quests.rewards.QuestTextReward;
 import fr.openmc.core.utils.messages.MessageType;
 import fr.openmc.core.utils.messages.Prefix;
@@ -22,7 +20,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 
-public class SoulsQuest extends Quest implements Listener {
+public class SoulsQuest extends MilestoneQuest implements Listener {
 	public SoulsQuest() {
 		super(
 				"Mes amis viennent de l'au-delà",
@@ -30,15 +28,15 @@ public class SoulsQuest extends Quest implements Listener {
 						"§fRécuérer §d20 §fâmes",
 						"§8§oIl me semble avoir vu des créatures volantes rôder vers les grands arbres sombres."
 				),
-				DreamItemRegistry.getByName("omc_dream:soul").getBest()
+				DreamItemRegistry.getByName("omc_dream:soul").getBest(),
+				MilestoneType.DREAM,
+				DreamSteps.SOULS,
+				new QuestTier(
+						20,
+						new QuestTextReward("Quelles sont ces créatures ? Des joueurs morts ?? \n" +
+								"A vrai dire, je n'ai pas vraiment envie d'y penser, il me faut cette nouvelle orbe.", Prefix.DREAM, MessageType.SUCCESS)
+				)
 		);
-		
-		this.addTier(new QuestTier(
-				20,
-				new QuestTextReward("Quelles sont ces créatures ? Des joueurs morts ?? \n" +
-						"A vrai dire, je n'ai pas vraiment envie d'y penser, il me faut cette nouvelle orbe.", Prefix.DREAM, MessageType.SUCCESS),
-				new QuestMethodsReward(player -> MilestoneUtils.completeStep(MilestoneType.DREAM, player, DreamSteps.SOULS.ordinal()))
-		));
 	}
 	
 	@EventHandler

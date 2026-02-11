@@ -4,12 +4,10 @@ import fr.openmc.core.features.dream.milestone.DreamSteps;
 import fr.openmc.core.features.dream.models.registry.items.DreamItem;
 import fr.openmc.core.features.dream.registries.DreamItemRegistry;
 import fr.openmc.core.features.dream.registries.items.tools.OldCreakingAxe;
+import fr.openmc.core.features.milestones.MilestoneQuest;
 import fr.openmc.core.features.milestones.MilestoneType;
-import fr.openmc.core.features.milestones.MilestoneUtils;
 import fr.openmc.core.features.milestones.MilestonesManager;
-import fr.openmc.core.features.quests.objects.Quest;
 import fr.openmc.core.features.quests.objects.QuestTier;
-import fr.openmc.core.features.quests.rewards.QuestMethodsReward;
 import fr.openmc.core.features.quests.rewards.QuestTextReward;
 import fr.openmc.core.utils.messages.MessageType;
 import fr.openmc.core.utils.messages.Prefix;
@@ -21,7 +19,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 
-public class OldAxeQuest extends Quest implements Listener {
+public class OldAxeQuest extends MilestoneQuest implements Listener {
 	
 	public OldAxeQuest() {
 		super(
@@ -30,14 +28,14 @@ public class OldAxeQuest extends Quest implements Listener {
 						"§fFabriquer une §dVieille hache du Creaking",
 						"§8§oNotre meilleur ami dans ce monde !"
 				),
-				DreamItemRegistry.getByName("omc_dream:old_creaking_axe").getBestTransferable()
+				DreamItemRegistry.getByName("omc_dream:old_creaking_axe").getBest(),
+				MilestoneType.DREAM,
+				DreamSteps.OLD_AXE,
+				new QuestTier(
+						1,
+						new QuestTextReward("Une hâche, c'est déjà ça. Il faut collecter les orbes qui sont au nombre de 5. La première est d'ailleurs craftable...", Prefix.DREAM, MessageType.SUCCESS)
+				)
 		);
-		
-		this.addTier(new QuestTier(
-				1,
-				new QuestTextReward("Une hâche, c'est déjà ça. Il faut collecter les orbes qui sont au nombre de 5. La première est d'ailleurs craftable...", Prefix.DREAM, MessageType.SUCCESS),
-				new QuestMethodsReward(player -> MilestoneUtils.completeStep(MilestoneType.DREAM, player, DreamSteps.OLD_AXE.ordinal()))
-		));
 	}
 	
 	@EventHandler

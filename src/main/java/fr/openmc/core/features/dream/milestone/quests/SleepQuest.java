@@ -2,12 +2,10 @@ package fr.openmc.core.features.dream.milestone.quests;
 
 import fr.openmc.core.features.dream.events.DreamEnterEvent;
 import fr.openmc.core.features.dream.milestone.DreamSteps;
+import fr.openmc.core.features.milestones.MilestoneQuest;
 import fr.openmc.core.features.milestones.MilestoneType;
-import fr.openmc.core.features.milestones.MilestoneUtils;
 import fr.openmc.core.features.milestones.MilestonesManager;
-import fr.openmc.core.features.quests.objects.Quest;
 import fr.openmc.core.features.quests.objects.QuestTier;
-import fr.openmc.core.features.quests.rewards.QuestMethodsReward;
 import fr.openmc.core.features.quests.rewards.QuestTextReward;
 import fr.openmc.core.utils.messages.MessageType;
 import fr.openmc.core.utils.messages.Prefix;
@@ -18,7 +16,7 @@ import org.bukkit.event.Listener;
 
 import java.util.List;
 
-public class SleepQuest extends Quest implements Listener {
+public class SleepQuest extends MilestoneQuest implements Listener {
 	
 	public SleepQuest() {
 		super(
@@ -27,17 +25,16 @@ public class SleepQuest extends Quest implements Listener {
 						"§fEntrer dans la §ddimension des rêves",
 						"§8§oQue c'est bon de dormir pour se reposer de la dure vie des villes..."
 				),
-				Material.RED_BED
+				Material.RED_BED,
+				MilestoneType.DREAM,
+				DreamSteps.SLEEP,
+				new QuestTier(
+						1,
+						new QuestTextReward("ZZZzzz... que se passe-t-il ? Je vois un monde sombre rempli de créatures étranges. Suis-je en train de rêver ? " +
+								"Ce monde est si différent de l'overworld, il faut que je m'adapte et que je comprenne ce monde.\n" +
+								"§d/milestone §opour voir la suite du guide", Prefix.DREAM, MessageType.SUCCESS)
+				)
 		);
-		
-		this.addTier(new QuestTier(
-				1,
-				new QuestTextReward("ZZZzzz... que se passe-t-il ? Je vois un monde sombre rempli de créatures étranges. Suis-je en train de rêver ? " +
-						"Ce monde est si différent de l'overworld, il faut que je m'adapte et que je comprenne ce monde.\n" +
-						"§d/milestone §opour voir la suite du guide", Prefix.DREAM, MessageType.SUCCESS),
-				new QuestMethodsReward(player -> MilestoneUtils.completeStep(MilestoneType.DREAM, player, DreamSteps.SLEEP.ordinal()))
-		)); //TODO Revoir les récompenses
-		
 	}
 	
 	@EventHandler

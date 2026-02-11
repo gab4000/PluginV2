@@ -5,12 +5,10 @@ import fr.openmc.core.features.dream.milestone.DreamSteps;
 import fr.openmc.core.features.dream.models.registry.items.DreamItem;
 import fr.openmc.core.features.dream.registries.DreamItemRegistry;
 import fr.openmc.core.features.dream.registries.items.loots.CreakingHeart;
+import fr.openmc.core.features.milestones.MilestoneQuest;
 import fr.openmc.core.features.milestones.MilestoneType;
-import fr.openmc.core.features.milestones.MilestoneUtils;
 import fr.openmc.core.features.milestones.MilestonesManager;
-import fr.openmc.core.features.quests.objects.Quest;
 import fr.openmc.core.features.quests.objects.QuestTier;
-import fr.openmc.core.features.quests.rewards.QuestMethodsReward;
 import fr.openmc.core.features.quests.rewards.QuestTextReward;
 import fr.openmc.core.utils.messages.MessageType;
 import fr.openmc.core.utils.messages.Prefix;
@@ -22,7 +20,7 @@ import org.bukkit.event.entity.EntityPickupItemEvent;
 
 import java.util.List;
 
-public class GetHeartQuest extends Quest implements Listener {
+public class GetHeartQuest extends MilestoneQuest implements Listener {
 	
 	public GetHeartQuest() {
 		super(
@@ -31,14 +29,15 @@ public class GetHeartQuest extends Quest implements Listener {
 						"§fRécupérer un §dCoeur de Creaking",
 						"§8§oOn cherche la résine ou le coeur ?"
 				),
-				Material.RESIN_CLUMP
+				Material.RESIN_CLUMP,
+				MilestoneType.DREAM,
+				DreamSteps.GET_HEART,
+				new QuestTier(
+						1,
+						new QuestTextReward("Ah ! Mais c'est vrai qu'il protègent leurs coeurs, qui va mettre bien utile par la suite. " +
+								"Mais bref, trêve de tergiversation, il me faut des outils.", Prefix.DREAM, MessageType.SUCCESS)
+				)
 		);
-		
-		this.addTier(new QuestTier(
-				1,
-				new QuestTextReward("Ah ! Mais c'est vrai qu'il protègent leurs coeurs, qui va mettre bien utile par la suite. Mais bref, trêve de tergiversation, il me faut des outils.", Prefix.DREAM, MessageType.SUCCESS),
-				new QuestMethodsReward(player -> MilestoneUtils.completeStep(MilestoneType.DREAM, player, DreamSteps.GET_HEART.ordinal()))
-		));
 	}
 	
 	@EventHandler

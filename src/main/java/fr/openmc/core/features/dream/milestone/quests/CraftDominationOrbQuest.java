@@ -4,12 +4,10 @@ import fr.openmc.core.features.dream.milestone.DreamSteps;
 import fr.openmc.core.features.dream.models.registry.items.DreamItem;
 import fr.openmc.core.features.dream.registries.DreamItemRegistry;
 import fr.openmc.core.features.dream.registries.items.orb.DominationOrb;
+import fr.openmc.core.features.milestones.MilestoneQuest;
 import fr.openmc.core.features.milestones.MilestoneType;
-import fr.openmc.core.features.milestones.MilestoneUtils;
 import fr.openmc.core.features.milestones.MilestonesManager;
-import fr.openmc.core.features.quests.objects.Quest;
 import fr.openmc.core.features.quests.objects.QuestTier;
-import fr.openmc.core.features.quests.rewards.QuestMethodsReward;
 import fr.openmc.core.features.quests.rewards.QuestTextReward;
 import fr.openmc.core.utils.messages.MessageType;
 import fr.openmc.core.utils.messages.Prefix;
@@ -21,7 +19,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 
-public class CraftDominationOrbQuest extends Quest implements Listener {
+public class CraftDominationOrbQuest extends MilestoneQuest implements Listener {
 	public CraftDominationOrbQuest() {
 		super(
 				"Dominer, c'est cool",
@@ -29,13 +27,15 @@ public class CraftDominationOrbQuest extends Quest implements Listener {
 						"§fFabriquer l'§dOrbe de Domination",
 						"§8§o1 sur 5 pour les dominer tous !"
 				),
-				DreamItemRegistry.getByName("omc_dream:domination_orb").getBest()
+				DreamItemRegistry.getByName("omc_dream:domination_orb").getBest(),
+				MilestoneType.DREAM,
+				DreamSteps.DOMINATION_ORB,
+				new QuestTier(
+						1,
+						new QuestTextReward("Et d'une ! Et cela me donne accès à une nouvelle zone. " +
+								"Il faut que je récupère les autres pour avoir accès à l'ensemble de mes rêves.", Prefix.DREAM, MessageType.SUCCESS)
+				)
 		);
-		this.addTier(new QuestTier(
-				1,
-				new QuestTextReward("Et d'une ! Et cela me donne accès à une nouvelle zone. Il faut que je récupère les autres pour avoir accès à l'ensemble de mes rêves.", Prefix.DREAM, MessageType.SUCCESS),
-				new QuestMethodsReward(player -> MilestoneUtils.completeStep(MilestoneType.DREAM, player, DreamSteps.DOMINATION_ORB.ordinal()))
-		));
 	}
 	
 	@EventHandler

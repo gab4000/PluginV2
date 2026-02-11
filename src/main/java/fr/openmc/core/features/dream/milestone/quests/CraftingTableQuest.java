@@ -2,12 +2,10 @@ package fr.openmc.core.features.dream.milestone.quests;
 
 import fr.openmc.core.features.dream.DreamUtils;
 import fr.openmc.core.features.dream.milestone.DreamSteps;
+import fr.openmc.core.features.milestones.MilestoneQuest;
 import fr.openmc.core.features.milestones.MilestoneType;
-import fr.openmc.core.features.milestones.MilestoneUtils;
 import fr.openmc.core.features.milestones.MilestonesManager;
-import fr.openmc.core.features.quests.objects.Quest;
 import fr.openmc.core.features.quests.objects.QuestTier;
-import fr.openmc.core.features.quests.rewards.QuestMethodsReward;
 import fr.openmc.core.features.quests.rewards.QuestTextReward;
 import fr.openmc.core.utils.messages.MessageType;
 import fr.openmc.core.utils.messages.Prefix;
@@ -20,7 +18,7 @@ import org.bukkit.inventory.Recipe;
 
 import java.util.List;
 
-public class CraftingTableQuest extends Quest implements Listener {
+public class CraftingTableQuest extends MilestoneQuest implements Listener {
 	public CraftingTableQuest() {
 		super(
 				"Une nouvelle survie ?",
@@ -28,14 +26,15 @@ public class CraftingTableQuest extends Quest implements Listener {
 						"§fFabriquer une §dtable de craft",
 						"§8§oBizarre cette survie de nuit... on ne voit pas en dehors des pleines de sculks"
 				),
-				Material.CRAFTING_TABLE
+				Material.CRAFTING_TABLE,
+				MilestoneType.DREAM,
+				DreamSteps.CRAFTING_TABLE,
+				new QuestTier(
+						1,
+						new QuestTextReward("Bon, maintenant que j'ai la table, cherchons de quoi faire des outils et... " +
+								"comment se fait-il qu'il y ait des Creakings ici !?", Prefix.DREAM, MessageType.SUCCESS)
+				)
 		);
-		
-		this.addTier(new QuestTier(
-				1,
-				new QuestTextReward("Bon, maintenant que j'ai la table, cherchons de quoi faire des outils et... comment se fait-il qu'il y ait des Creakings ici !?", Prefix.DREAM, MessageType.SUCCESS),
-				new QuestMethodsReward(player -> MilestoneUtils.completeStep(MilestoneType.DREAM, player, DreamSteps.CRAFTING_TABLE.ordinal()))
-		));
 	}
 	
 	@EventHandler

@@ -1,7 +1,7 @@
 package fr.openmc.core.features.dream.milestone;
 
 import fr.openmc.core.features.dream.milestone.quests.*;
-import fr.openmc.core.features.quests.objects.Quest;
+import fr.openmc.core.features.milestones.MilestoneQuest;
 import lombok.Getter;
 
 @Getter
@@ -19,9 +19,9 @@ public enum DreamSteps {
 	SOUL_ORB(null),
 	;
 	
-	private Quest quest;
+	private MilestoneQuest quest;
 	
-	DreamSteps(Quest quest) {
+	DreamSteps(MilestoneQuest quest) {
 		this.quest = quest;
 	}
 	

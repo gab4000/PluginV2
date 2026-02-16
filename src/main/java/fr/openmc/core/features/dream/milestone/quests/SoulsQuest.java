@@ -48,8 +48,9 @@ public class SoulsQuest extends MilestoneQuest implements Listener {
 			DreamItem item = DreamItemRegistry.getByItemStack(baseItem);
 			if (item == null) return;
 			if (item instanceof Soul) {
-				if (MilestonesManager.getPlayerStep(MilestoneType.DREAM, player) != DreamSteps.SOULS.ordinal()) return;
+				if (MilestonesManager.getPlayerStep(getType(), player) != getStep().ordinal()) return;
 				this.incrementProgressInDream(player.getUniqueId(), baseItem.getAmount());
+				getType().getMilestone().getPlayerData().get(player.getUniqueId()).incrementProgress(baseItem.getAmount());
 			}
 		}
 	}

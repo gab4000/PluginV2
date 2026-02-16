@@ -1,7 +1,10 @@
 package fr.openmc.core.features.dream.milestone.quests;
 
 import fr.openmc.core.features.dream.DreamUtils;
+import fr.openmc.core.features.dream.events.TakeFromSingularityEvent;
 import fr.openmc.core.features.dream.milestone.DreamSteps;
+import fr.openmc.core.features.dream.models.registry.items.DreamItem;
+import fr.openmc.core.features.dream.registries.DreamItemRegistry;
 import fr.openmc.core.features.milestones.MilestoneQuest;
 import fr.openmc.core.features.milestones.MilestoneType;
 import fr.openmc.core.features.milestones.MilestonesManager;
@@ -13,37 +16,38 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 
-public class CraftsQuest extends MilestoneQuest implements Listener {
-	public CraftsQuest() {
+public class TransferableObjectQuest extends MilestoneQuest implements Listener {
+	
+	public TransferableObjectQuest() {
 		super(
-				"Apprendre de nouveaux crafts",
+				"Ce n'était qu'un rêve ?",
 				List.of(
-						"§fFaire §d/crafts §fpour voir les crafts disponibles",
-						"§8§oCette dimension a ses propres règles, je dois les apprendre pour y survivre"
+						"§fRécupérer un objet §dtransferable §fdans l'Overworld"
 				),
-				Material.BOOK,
+				Material.LAPIS_BLOCK,
 				MilestoneType.DREAM,
-				DreamSteps.CRAFTS,
+				DreamSteps.TRANSFERABLE_OBJECT,
 				new QuestTier(
 						1,
-						new QuestTextReward("Ce monde sombre et nouveau semble complexe. Mais cela ressemble à une survie normale, non ? " +
-								"Alors commençons par les bases, la table de craft.", Prefix.DREAM, MessageType.SUCCESS)
+						new QuestTextReward("", Prefix.DREAM, MessageType.SUCCESS)
 				)
 		);
 	}
 	
 	@EventHandler
-	public void onCommand(PlayerCommandPreprocessEvent e) {
-		String s = e.getMessage();
-		if (!s.equals("/crafts")) return;
-		
+	public void onTakeItem(TakeFromSingularityEvent e) {
 		Player player = e.getPlayer();
-		if (!DreamUtils.isInDreamWorld(player)) return;
+		if (DreamUtils.isInDreamWorld(player)) return;
 		
+		ItemStack item = e.getItem();
+		if (item == null) return;
+		
+		DreamItem dreamItem = DreamItemRegistry.getByItemStack(item);
+		if (dreamItem == null) return;
 		if (MilestonesManager.getPlayerStep(getType(), player) != getStep().ordinal()) return;
 		this.incrementProgressInDream(player.getUniqueId());
 	}

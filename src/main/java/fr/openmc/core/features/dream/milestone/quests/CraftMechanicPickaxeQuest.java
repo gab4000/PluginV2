@@ -4,7 +4,7 @@ import fr.openmc.core.features.dream.DreamUtils;
 import fr.openmc.core.features.dream.milestone.DreamSteps;
 import fr.openmc.core.features.dream.models.registry.items.DreamItem;
 import fr.openmc.core.features.dream.registries.DreamItemRegistry;
-import fr.openmc.core.features.dream.registries.items.orb.DominationOrb;
+import fr.openmc.core.features.dream.registries.items.tools.MecanicPickaxe;
 import fr.openmc.core.features.milestones.MilestoneQuest;
 import fr.openmc.core.features.milestones.MilestoneType;
 import fr.openmc.core.features.milestones.MilestonesManager;
@@ -20,21 +20,20 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 
-public class CraftDominationOrbQuest extends MilestoneQuest implements Listener {
-	public CraftDominationOrbQuest() {
+public class CraftMechanicPickaxeQuest extends MilestoneQuest implements Listener {
+	
+	public CraftMechanicPickaxeQuest() {
 		super(
-				"Dominer, c'est cool",
+				"Révolution industrielle",
 				List.of(
-						"§fFabriquer l'§dOrbe de Domination",
-						"§8§o1 sur 5 pour les dominer tous !"
+						"§fCrafter la §dPioche Mécanique"
 				),
-				DreamItemRegistry.getByName("omc_dream:domination_orb").getBest(),
+				DreamItemRegistry.getByName("omc_dream:mecanic_pickaxe").getBest(),
 				MilestoneType.DREAM,
-				DreamSteps.DOMINATION_ORB,
+				DreamSteps.MECHANIC_PICKAXE,
 				new QuestTier(
 						1,
-						new QuestTextReward("Et d'une ! Et cela me donne accès à une nouvelle zone. " +
-								"Il faut que je récupère les autres pour avoir accès à l'ensemble de mes rêves.", Prefix.DREAM, MessageType.SUCCESS)
+						new QuestTextReward("", Prefix.DREAM, MessageType.SUCCESS)
 				)
 		);
 	}
@@ -49,7 +48,7 @@ public class CraftDominationOrbQuest extends MilestoneQuest implements Listener 
 			
 			DreamItem dreamItem = DreamItemRegistry.getByItemStack(item);
 			if (dreamItem == null) return;
-			if (dreamItem instanceof DominationOrb) {
+			if (dreamItem instanceof MecanicPickaxe) {
 				if (MilestonesManager.getPlayerStep(getType(), player) != getStep().ordinal()) return;
 				this.incrementProgressInDream(player.getUniqueId());
 			}

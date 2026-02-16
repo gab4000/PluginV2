@@ -16,15 +16,16 @@ public class MilestoneQuest extends Quest {
 	protected final Enum step;
 	
 	public MilestoneQuest(String name, List<String> baseDescription, Material icon, MilestoneType type, Enum step, QuestTier quest) {
+		this(name, baseDescription, new ItemStack(icon), type, step, quest);
+		
+	}
+	
+	public MilestoneQuest(String name, List<String> baseDescription, ItemStack icon, MilestoneType type, Enum step, QuestTier quest) {
 		super(name, baseDescription, icon);
 		this.type = type;
 		this.step = step;
 		this.addTier(quest.addReward(
 				new QuestMethodsReward(player -> MilestoneUtils.completeStep(type, player, step))
 		));
-	}
-	
-	public MilestoneQuest(String name, List<String> baseDescription, ItemStack icon, MilestoneType type, Enum step, QuestTier quest) {
-		this(name, baseDescription, icon.getType(), type, step, quest);
 	}
 }

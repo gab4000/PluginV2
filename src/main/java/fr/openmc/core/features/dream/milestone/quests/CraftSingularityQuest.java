@@ -4,7 +4,7 @@ import fr.openmc.core.features.dream.DreamUtils;
 import fr.openmc.core.features.dream.milestone.DreamSteps;
 import fr.openmc.core.features.dream.models.registry.items.DreamItem;
 import fr.openmc.core.features.dream.registries.DreamItemRegistry;
-import fr.openmc.core.features.dream.registries.items.loots.CreakingHeart;
+import fr.openmc.core.features.dream.registries.items.orb.Singularity;
 import fr.openmc.core.features.milestones.MilestoneQuest;
 import fr.openmc.core.features.milestones.MilestoneType;
 import fr.openmc.core.features.milestones.MilestonesManager;
@@ -12,43 +12,44 @@ import fr.openmc.core.features.quests.objects.QuestTier;
 import fr.openmc.core.features.quests.rewards.QuestTextReward;
 import fr.openmc.core.utils.messages.MessageType;
 import fr.openmc.core.utils.messages.Prefix;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 
-public class GetHeartQuest extends MilestoneQuest implements Listener {
+public class CraftSingularityQuest extends MilestoneQuest implements Listener {
 	
-	public GetHeartQuest() {
+	public CraftSingularityQuest() {
 		super(
-				"La résine n'a pas de coeur",
+				"La finalité ?",
 				List.of(
-						"§fRécupérer un §dCoeur de Creaking",
-						"§8§oOn cherche la résine ou le coeur ?"
+						"§fCrafter la §dSingularité"
 				),
-				Material.RESIN_CLUMP,
+				DreamItemRegistry.getByName("omc_dream:singularity").getBest(),
 				MilestoneType.DREAM,
-				DreamSteps.GET_HEART,
+				DreamSteps.SINGULARITY,
 				new QuestTier(
 						1,
-						new QuestTextReward("Ah ! Mais c'est vrai qu'il protègent leurs coeurs, qui va mettre bien utile par la suite. " +
-								"Mais bref, trêve de tergiversation, il me faut des outils.", Prefix.DREAM, MessageType.SUCCESS)
+						new QuestTextReward("", Prefix.DREAM, MessageType.SUCCESS)
 				)
 		);
 	}
 	
 	@EventHandler
-	public void onPickUp(EntityPickupItemEvent e) {
-		if (e.getEntity() instanceof Player player) {
+	public void onCraft(CraftItemEvent e) {
+		if (e.getWhoClicked() instanceof Player player) {
 			if (!DreamUtils.isInDreamWorld(player)) return;
 			
-			DreamItem item = DreamItemRegistry.getByItemStack(e.getItem().getItemStack());
+			ItemStack item = e.getCurrentItem();
 			if (item == null) return;
-			if (item instanceof CreakingHeart) {
-				if (MilestonesManager.getPlayerStep(MilestoneType.DREAM, player) != DreamSteps.GET_HEART.ordinal()) return;
+			
+			DreamItem dreamItem = DreamItemRegistry.getByItemStack(item);
+			if (dreamItem == null) return;
+			if (dreamItem instanceof Singularity) {
+				if (MilestonesManager.getPlayerStep(getType(), player) != getStep().ordinal()) return;
 				this.incrementProgressInDream(player.getUniqueId());
 			}
 		}

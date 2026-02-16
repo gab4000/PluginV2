@@ -19,8 +19,8 @@ import org.bukkit.event.Listener;
 
 import java.util.List;
 
-public class AltarDominationOrbQuest extends MilestoneQuest implements Listener {
-	public AltarDominationOrbQuest() {
+public class AltarQuest extends MilestoneQuest implements Listener {
+	public AltarQuest() {
 		super(
 				"Début du rituel",
 				List.of(
@@ -29,7 +29,7 @@ public class AltarDominationOrbQuest extends MilestoneQuest implements Listener 
 				),
 				Material.ENCHANTING_TABLE,
 				MilestoneType.DREAM,
-				DreamSteps.ALTAR_DOMINATION,
+				DreamSteps.ALTAR,
 				new QuestTier(
 						1,
 						new QuestTextReward("Hmmm... avec cette table étrange, il est visiblement possible de transformer l'Orbe de Domination. Mais pour en faire quoi !? \n" +
@@ -46,7 +46,7 @@ public class AltarDominationOrbQuest extends MilestoneQuest implements Listener 
 		DreamItem item = e.getItem();
 		if (item == null) return;
 		if (item instanceof DominationOrb) {
-			if (MilestonesManager.getPlayerStep(MilestoneType.DREAM, player) != DreamSteps.ALTAR_DOMINATION.ordinal()) return;
+			if (MilestonesManager.getPlayerStep(getType(), player) != getStep().ordinal()) return;
 			
 			this.incrementProgressInDream(player.getUniqueId());
 		}

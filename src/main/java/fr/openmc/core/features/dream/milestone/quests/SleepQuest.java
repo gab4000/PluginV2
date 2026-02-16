@@ -41,7 +41,7 @@ public class SleepQuest extends MilestoneQuest implements Listener {
 	public void onDreamEnter(DreamEnterEvent e) {
 		Player player = e.getPlayer();
 		
-		if (MilestonesManager.getPlayerStep(MilestoneType.DREAM, player) != DreamSteps.SLEEP.ordinal()) return;
+		if (MilestonesManager.getPlayerStep(getType(), player) != getStep().ordinal()) return;
 		
 		this.incrementProgressInDream(player.getUniqueId());
 	}

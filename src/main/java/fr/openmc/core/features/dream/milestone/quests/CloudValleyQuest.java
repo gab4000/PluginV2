@@ -1,6 +1,7 @@
 package fr.openmc.core.features.dream.milestone.quests;
 
-import fr.openmc.core.features.dream.DreamUtils;
+import fr.openmc.core.features.dream.events.PlayerEnterBiomeEvent;
+import fr.openmc.core.features.dream.generation.DreamBiome;
 import fr.openmc.core.features.dream.milestone.DreamSteps;
 import fr.openmc.core.features.milestones.MilestoneQuest;
 import fr.openmc.core.features.milestones.MilestoneType;
@@ -13,36 +14,33 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 import java.util.List;
 
-public class CraftsQuest extends MilestoneQuest implements Listener {
-	public CraftsQuest() {
+public class CloudValleyQuest extends MilestoneQuest implements Listener {
+	public CloudValleyQuest() {
 		super(
-				"Apprendre de nouveaux crafts",
+				"Montée au septième ciel",
 				List.of(
-						"§fFaire §d/crafts §fpour voir les crafts disponibles",
-						"§8§oCette dimension a ses propres règles, je dois les apprendre pour y survivre"
+						"§fDécouvrir la §dVallée des Nuages",
+						"§8§oCes nuages de ce rêve doivent bien cacher quelque chose..."
 				),
-				Material.BOOK,
+				Material.SNOW_BLOCK,
 				MilestoneType.DREAM,
-				DreamSteps.CRAFTS,
+				DreamSteps.CLOUD_VALLEY,
 				new QuestTier(
 						1,
-						new QuestTextReward("Ce monde sombre et nouveau semble complexe. Mais cela ressemble à une survie normale, non ? " +
-								"Alors commençons par les bases, la table de craft.", Prefix.DREAM, MessageType.SUCCESS)
+						new QuestTextReward("Ces nuages sont comme une nouvelle plaine, on peut courir dessus, sauter de nuage en nuage, et si on tombe, ça ne fait même pas mal.\n" +
+								"Tiens, c'est quoi ça, au loin ? Le château que j'ai cru avoir aperçu tout à l'heure ?", Prefix.DREAM, MessageType.SUCCESS)
 				)
 		);
 	}
 	
 	@EventHandler
-	public void onCommand(PlayerCommandPreprocessEvent e) {
-		String s = e.getMessage();
-		if (!s.equals("/crafts")) return;
-		
+	public void onEnterBiome(PlayerEnterBiomeEvent e) {
 		Player player = e.getPlayer();
-		if (!DreamUtils.isInDreamWorld(player)) return;
+		
+		if (!e.getBiome().equals(DreamBiome.CLOUD_LAND.getBiome())) return;
 		
 		if (MilestonesManager.getPlayerStep(getType(), player) != getStep().ordinal()) return;
 		this.incrementProgressInDream(player.getUniqueId());

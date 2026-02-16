@@ -4,7 +4,7 @@ import fr.openmc.core.features.dream.DreamUtils;
 import fr.openmc.core.features.dream.milestone.DreamSteps;
 import fr.openmc.core.features.dream.models.registry.items.DreamItem;
 import fr.openmc.core.features.dream.registries.DreamItemRegistry;
-import fr.openmc.core.features.dream.registries.items.orb.DominationOrb;
+import fr.openmc.core.features.dream.registries.items.tools.CrystalizedPickaxe;
 import fr.openmc.core.features.milestones.MilestoneQuest;
 import fr.openmc.core.features.milestones.MilestoneType;
 import fr.openmc.core.features.milestones.MilestonesManager;
@@ -15,41 +15,36 @@ import fr.openmc.core.utils.messages.Prefix;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.CraftItemEvent;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 
 import java.util.List;
 
-public class CraftDominationOrbQuest extends MilestoneQuest implements Listener {
-	public CraftDominationOrbQuest() {
+public class CrystallizedPickaxeQuest extends MilestoneQuest implements Listener {
+	
+	public CrystallizedPickaxeQuest() {
 		super(
-				"Dominer, c'est cool",
+				"Le cristal n'est pas un métal",
 				List.of(
-						"§fFabriquer l'§dOrbe de Domination",
-						"§8§o1 sur 5 pour les dominer tous !"
+						"§fObtenir la §dPioche Cristallisée"
 				),
-				DreamItemRegistry.getByName("omc_dream:domination_orb").getBest(),
+				DreamItemRegistry.getByName("omc_dream:crystallized_pickaxe").getBest(),
 				MilestoneType.DREAM,
-				DreamSteps.DOMINATION_ORB,
+				DreamSteps.CRYSTALLIZED_PICKAXE,
 				new QuestTier(
 						1,
-						new QuestTextReward("Et d'une ! Et cela me donne accès à une nouvelle zone. " +
-								"Il faut que je récupère les autres pour avoir accès à l'ensemble de mes rêves.", Prefix.DREAM, MessageType.SUCCESS)
+						new QuestTextReward("", Prefix.DREAM, MessageType.SUCCESS)
 				)
 		);
 	}
 	
 	@EventHandler
-	public void onCraft(CraftItemEvent e) {
-		if (e.getWhoClicked() instanceof Player player) {
-			if (!DreamUtils.isInDreamWorld(player)) return;
+	public void onPickUp(EntityPickupItemEvent e) {
+		if (e.getEntity() instanceof Player player) {
+			if (! DreamUtils.isInDreamWorld(player)) return;
 			
-			ItemStack item = e.getCurrentItem();
+			DreamItem item = DreamItemRegistry.getByItemStack(e.getItem().getItemStack());
 			if (item == null) return;
-			
-			DreamItem dreamItem = DreamItemRegistry.getByItemStack(item);
-			if (dreamItem == null) return;
-			if (dreamItem instanceof DominationOrb) {
+			if (item instanceof CrystalizedPickaxe) {
 				if (MilestonesManager.getPlayerStep(getType(), player) != getStep().ordinal()) return;
 				this.incrementProgressInDream(player.getUniqueId());
 			}

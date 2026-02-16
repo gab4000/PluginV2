@@ -23,7 +23,8 @@ public class CubeTempleQuest extends MilestoneQuest implements Listener {
 				"Vénérer le Cube des Ämes",
 				List.of(
 						"§fEntrer dans le §dTemple des Âmes",
-						"§8§oA la recherche du monument du Cube des Âmes... on est malgré tout dans Minecraft, même dans un rêve !"
+						"§8§oA la recherche du monument du Cube des Âmes...",
+						"on est malgré tout dans Minecraft, même dans un rêve !"
 				),
 				Material.POLISHED_BLACKSTONE_BRICKS,
 				MilestoneType.DREAM,
@@ -41,7 +42,7 @@ public class CubeTempleQuest extends MilestoneQuest implements Listener {
 		if (e.getStructure().type() != DreamStructure.DreamType.SOUL_ALTAR) return;
 		Player player = e.getPlayer();
 		
-		if (MilestonesManager.getPlayerStep(MilestoneType.DREAM, player) != DreamSteps.CUBE_TEMPLE.ordinal()) return;
+		if (MilestonesManager.getPlayerStep(getType(), player) != getStep().ordinal()) return;
 		this.incrementProgressInDream(player.getUniqueId());
 	}
 }

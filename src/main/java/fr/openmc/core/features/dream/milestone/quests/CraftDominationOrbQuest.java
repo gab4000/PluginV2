@@ -9,9 +9,6 @@ import fr.openmc.core.features.milestones.MilestoneQuest;
 import fr.openmc.core.features.milestones.MilestoneType;
 import fr.openmc.core.features.milestones.MilestonesManager;
 import fr.openmc.core.features.quests.objects.QuestTier;
-import fr.openmc.core.features.quests.rewards.QuestTextReward;
-import fr.openmc.core.utils.messages.MessageType;
-import fr.openmc.core.utils.messages.Prefix;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -31,10 +28,13 @@ public class CraftDominationOrbQuest extends MilestoneQuest implements Listener 
 				DreamItemRegistry.getByName("omc_dream:domination_orb").getBest(),
 				MilestoneType.DREAM,
 				DreamSteps.DOMINATION_ORB,
-				new QuestTier(
-						1,
-						new QuestTextReward("Et d'une ! Et cela me donne accès à une nouvelle zone. " +
-								"Il faut que je récupère les autres pour avoir accès à l'ensemble de mes rêves.", Prefix.DREAM, MessageType.SUCCESS)
+				new QuestTier(1),
+				List.of(
+						"§6Voilà l'orbe, que dois-je faire avec ?",
+						"§3Voyageur : Cette orbe est la première d'une série de §d5§3. Chacune d'elles permet de survivre dans la §dzone suivante§3, " +
+								"permettant de récupérer une nouvelle orbe et ainsi de suite pour ma euh... notre quête !",
+						"§6Je dois donc explorer un nouveau biome...",
+						"§3Voyageur : C'est exact ! Il va falloir trouver le §dTemple §3du maître des lieux. Tu ne devrais pas le louper je pense..."
 				)
 		);
 	}

@@ -9,9 +9,6 @@ import fr.openmc.core.features.milestones.MilestoneQuest;
 import fr.openmc.core.features.milestones.MilestoneType;
 import fr.openmc.core.features.milestones.MilestonesManager;
 import fr.openmc.core.features.quests.objects.QuestTier;
-import fr.openmc.core.features.quests.rewards.QuestTextReward;
-import fr.openmc.core.utils.messages.MessageType;
-import fr.openmc.core.utils.messages.Prefix;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -32,10 +29,13 @@ public class CreakingHeartQuest extends MilestoneQuest implements Listener {
 				Material.RESIN_CLUMP,
 				MilestoneType.DREAM,
 				DreamSteps.GET_HEART,
-				new QuestTier(
-						1,
-						new QuestTextReward("Ah ! Mais c'est vrai qu'il protègent leurs coeurs, qui va mettre bien utile par la suite. " +
-								"Mais bref, trêve de tergiversation, il me faut des outils.", Prefix.DREAM, MessageType.SUCCESS)
+				new QuestTier(1),
+				List.of(
+						"§6Ah ! Mais c'est vrai qu'il protègent leurs coeurs.",
+						"§3Voyageur : Oui, et ceux-ci nous seront utiles par la suite, les crafts de ce monde en utilisent beaucoup. " +
+								"Que ce soit pour les outils, armures, ou objets divers de ce monde. Commence par te faire une §dhache§3.",
+						"§6Mais quel est le but de ce monde ??",
+						"§3Voyageur : Je t'expliquerai bientôt, je n'ai pas envie que tu finisses comme moi..."
 				)
 		);
 	}

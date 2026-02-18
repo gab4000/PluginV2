@@ -6,9 +6,6 @@ import fr.openmc.core.features.milestones.MilestoneQuest;
 import fr.openmc.core.features.milestones.MilestoneType;
 import fr.openmc.core.features.milestones.MilestonesManager;
 import fr.openmc.core.features.quests.objects.QuestTier;
-import fr.openmc.core.features.quests.rewards.QuestTextReward;
-import fr.openmc.core.utils.messages.MessageType;
-import fr.openmc.core.utils.messages.Prefix;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -28,11 +25,13 @@ public class SleepQuest extends MilestoneQuest implements Listener {
 				Material.RED_BED,
 				MilestoneType.DREAM,
 				DreamSteps.SLEEP,
-				new QuestTier(
-						1,
-						new QuestTextReward("ZZZzzz... que se passe-t-il ? Je vois un monde sombre rempli de créatures étranges. Suis-je en train de rêver ? " +
-								"Ce monde est si différent de l'overworld, il faut que je m'adapte et que je comprenne ce monde.\n" +
-								"§d/milestone §opour voir la suite du guide", Prefix.DREAM, MessageType.SUCCESS)
+				new QuestTier(1),
+				List.of(
+						"§6ZZZzzz... que se passe-t-il !? Suis-je en train de rêver ? Ce... monde à l'air si différent de l'Overworld !",
+						"§3Voyageur : Que..? Comment est-ce possible ??! Je pensais être le seul ici. Et cela fait si longtemps que je n'ai vu personne ici...",
+						"§6Mais, qui es-tu ? Ou es-tu ? et pourquoi me parles-tu ??",
+						"§3Voyageur : Et bien, bienvenue. Mais chaque chose en son temps. Temps qui va d'ailleurs nous manquer, il faut faire vite, je t'expliquerai tout au fur et à mesure. " +
+								"Pour l'heure, il faut que tu comprennes cette dimension, apprends ses règles et ses §dcrafts§3."
 				)
 		);
 	}

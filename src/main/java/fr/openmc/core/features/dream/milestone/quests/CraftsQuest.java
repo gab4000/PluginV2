@@ -6,9 +6,6 @@ import fr.openmc.core.features.milestones.MilestoneQuest;
 import fr.openmc.core.features.milestones.MilestoneType;
 import fr.openmc.core.features.milestones.MilestonesManager;
 import fr.openmc.core.features.quests.objects.QuestTier;
-import fr.openmc.core.features.quests.rewards.QuestTextReward;
-import fr.openmc.core.utils.messages.MessageType;
-import fr.openmc.core.utils.messages.Prefix;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -28,10 +25,12 @@ public class CraftsQuest extends MilestoneQuest implements Listener {
 				Material.BOOK,
 				MilestoneType.DREAM,
 				DreamSteps.CRAFTS,
-				new QuestTier(
-						1,
-						new QuestTextReward("Ce monde sombre et nouveau semble complexe. Mais cela ressemble à une survie normale, non ? " +
-								"Alors commençons par les bases, la table de craft.", Prefix.DREAM, MessageType.SUCCESS)
+				new QuestTier(1),
+				List.of(
+						"§6Cela ressemble à une survie normale, non ?",
+						"§3Voyageur : En effet, ce monde a beau être sombre, nouveau et complexe, il n'est pas si différent de l'Overworld. Mais une dimension se rajoute : le §dtemps §3! " +
+								"Pour le moment, tu ne peux qu'accéder à la §dPleine de Sculk§3, mais les autres biomes seront bientôt accessibles.",
+						"§6Hmmm, cela m'intrigue. Mais tu as dis que l'on manque de temps, alors ne traînons pas. Il me faut une §dtable de craft§6."
 				)
 		);
 	}

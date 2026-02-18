@@ -284,6 +284,7 @@ public class Quest {
 
                     if (hasEnoughSpace) {
                         reward.giveReward(player);
+	                    System.out.println(reward);
                     } else {
                         addPendingRewards(uuid, tierIndex, tier.getRewards());
                         MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas assez de place dans votre inventaire pour recevoir la récompense !"), Prefix.QUEST, MessageType.WARNING, false);
@@ -313,6 +314,7 @@ public class Quest {
                 player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.2F);
                 player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.7F, 1.1F);
                 MessagesManager.sendMessage(player, Component.text(message), Prefix.QUEST, MessageType.SUCCESS, true);
+	            System.out.println("title");
             } else {
                 addPendingRewards(uuid, tierIndex, tier.getRewards());
             }
@@ -494,27 +496,6 @@ public class Quest {
 	 */
 	public void incrementProgress(UUID playerUUID, int amount) {
 		incrementProgress(playerUUID, amount, false);
-	}
-	
-	/**
-	 * Increment the progress for the quest for a player authorizing Dream world
-	 *
-	 * @param playerUUID The UUID of the player
-	 */
-	public void incrementProgressInDream(UUID playerUUID) {
-		incrementProgress(playerUUID, 1, true);
-	}
-	
-	
-	/**
-	 * Increment the progress of the quest for a player by a specified amount authorizing Dream world.
-	 * <p>
-	 * This method will check if the quest is fully completed, and if not, it will increase the progress.
-	 * @param playerUUID The UUID of the player
-	 * @param amount The amount to increment the progress by
-	 */
-	public void incrementProgressInDream(UUID playerUUID, int amount) {
-		incrementProgress(playerUUID, amount, true);
 	}
 
     /**

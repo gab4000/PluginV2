@@ -8,9 +8,6 @@ import fr.openmc.core.features.milestones.MilestoneQuest;
 import fr.openmc.core.features.milestones.MilestoneType;
 import fr.openmc.core.features.milestones.MilestonesManager;
 import fr.openmc.core.features.quests.objects.QuestTier;
-import fr.openmc.core.features.quests.rewards.QuestTextReward;
-import fr.openmc.core.utils.messages.MessageType;
-import fr.openmc.core.utils.messages.Prefix;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -31,9 +28,14 @@ public class OldAxeQuest extends MilestoneQuest implements Listener {
 				DreamItemRegistry.getByName("omc_dream:old_creaking_axe").getBest(),
 				MilestoneType.DREAM,
 				DreamSteps.OLD_AXE,
-				new QuestTier(
-						1,
-						new QuestTextReward("Une hâche, c'est déjà ça. Il faut collecter les orbes qui sont au nombre de 5. La première est d'ailleurs craftable...", Prefix.DREAM, MessageType.SUCCESS)
+				new QuestTier(1),
+				List.of(
+						"§3Voyageur : Une hâche, c'est déjà ça.",
+						"§6Et maintenant ?",
+						"§3Voyageur : Maintenant, il faut obtenir l'§dOrbe de Domination§3, puis je t'en expliquerai plus sur ce monde.",
+						"§6Mais comment obtenir cette Orbe ?",
+						"§3Voyageur : Ce n'est pas compliqué : elle se fabrique avec la §dtable de craft§3. Fais §d/crafts §3si tu as oublié comment. " +
+								"Elle te permettra de pouvoir explorer une nouvelle zone de ce rêve."
 				)
 		);
 	}

@@ -19,8 +19,8 @@ public enum AltarRecipes {
             10
     ),
     SOUL_CHESTPLATE(
-            DreamItemRegistry.getByName("omc_dream:old_creaking_chesplate"),
-            DreamItemRegistry.getByName("omc_dream:soul_chesplate"),
+            DreamItemRegistry.getByName("omc_dream:old_creaking_chestplate"),
+            DreamItemRegistry.getByName("omc_dream:soul_chestplate"),
             10
     ),
     SOUL_LEGGINGS(

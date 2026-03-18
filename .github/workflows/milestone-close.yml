@@ -45,7 +45,7 @@ jobs:
           path: builds/
 
       - name: Create GitHub Release
-        uses: ospfranco/action-gh-release@2.3.4
+        uses: softprops/action-gh-release@v2.6.1
         with:
           tag_name: ${{ github.event.milestone.title }} 
           name: Release milestone ${{ github.event.milestone.title }} 

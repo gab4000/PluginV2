@@ -1,7 +1,9 @@
 name: Release to Discord
 on:
-  release:
-    types: [published]
+  workflow_run:
+    workflows: [Handle closing a milestone]
+    types:
+      - completed
 
 jobs:
   github-releases-to-discord:

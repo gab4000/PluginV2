@@ -4,9 +4,6 @@ on:
   milestone:
     types: [closed]
 
-permissions:
-  contents: write
-
 jobs:
   build-release:
     name: Release

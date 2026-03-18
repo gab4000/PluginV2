@@ -68,4 +68,4 @@ jobs:
           server-id: ${{ secrets.SERVER_ID }}
           source: OpenMC.jar
           target: "./plugins/update/OpenMC.jar"
-          command: "omcrestart"
+          command: omcrestart

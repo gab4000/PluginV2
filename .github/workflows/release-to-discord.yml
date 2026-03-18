@@ -1,7 +1,7 @@
 name: Release to Discord
 on:
   release:
-    types: ["published"]
+    types: [published]
 
 jobs:
   github-releases-to-discord:

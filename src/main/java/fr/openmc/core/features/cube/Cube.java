@@ -235,7 +235,7 @@ public class Cube extends MultiBlock {
 
                     if (isPartOf(new Location(origin.getWorld(), x, y, z))) continue;
 
-                    Location loc = center.add(x, y, z);
+                    Location loc = center.clone().add(x, y, z);
                     Block block = loc.getBlock();
                     Material type = block.getType();
 

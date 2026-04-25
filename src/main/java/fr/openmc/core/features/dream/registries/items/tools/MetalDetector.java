@@ -22,6 +22,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.UUID;
@@ -50,7 +51,7 @@ public class MetalDetector extends DreamItem implements UsableItem {
     }
 
     @Override
-    public ItemStack getVanilla() {
+    public @NonNull ItemStack getVanilla() {
         ItemStack item = new ItemStack(Material.STICK);
 
         item.getItemMeta().itemName(Component.text("Détecteur à métaux"));

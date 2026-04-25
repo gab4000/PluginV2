@@ -158,13 +158,13 @@ public class OMCPlugin extends JavaPlugin {
         CustomLootTableRegistry.init();
 
         // ** FEATURES **
-	    MilestonesManager.init();
 	    QuestsManager.init();
         CityManager.init();
         ContestManager.init();
         WeeklyEventsManager.init();
         DreamManager.init();
         MultiBlockManager.init();
+	    MilestonesManager.init();
         if (WorldGuardHook.isHasWorldGuard()) {
             ParticleUtils.spawnParticlesInRegion("spawn", Bukkit.getWorld("world"), Particle.CHERRY_LEAVES, 50, 70, 130);
             ParticleUtils.spawnContestParticlesInRegion("spawn", Bukkit.getWorld("world"), 10, 70, 135);

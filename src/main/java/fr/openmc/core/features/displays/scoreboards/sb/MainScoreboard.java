@@ -3,17 +3,21 @@ package fr.openmc.core.features.displays.scoreboards.sb;
 import de.oliver.fancynpcs.api.FancyNpcsPlugin;
 import de.oliver.fancynpcs.api.Npc;
 import de.oliver.fancynpcs.api.NpcManager;
-import fr.openmc.api.hooks.LuckPermsHook;
-import fr.openmc.api.hooks.WorldGuardHook;
 import fr.openmc.api.scoreboard.SternalBoard;
 import fr.openmc.core.features.city.City;
 import fr.openmc.core.features.city.CityManager;
-import fr.openmc.core.features.contest.managers.ContestManager;
-import fr.openmc.core.features.contest.models.Contest;
 import fr.openmc.core.features.displays.scoreboards.BaseScoreboard;
 import fr.openmc.core.features.economy.EconomyManager;
-import fr.openmc.core.features.events.halloween.managers.HalloweenManager;
-import fr.openmc.core.utils.DateUtils;
+import fr.openmc.core.features.events.contents.halloween.managers.HalloweenManager;
+import fr.openmc.core.features.events.contents.weeklyevents.WeeklyEventsManager;
+import fr.openmc.core.features.events.contents.weeklyevents.contents.contest.Contest;
+import fr.openmc.core.features.events.contents.weeklyevents.contents.contest.ContestPhase;
+import fr.openmc.core.features.events.contents.weeklyevents.contents.contest.managers.ContestManager;
+import fr.openmc.core.features.events.contents.weeklyevents.contents.contest.models.ContestData;
+import fr.openmc.core.hooks.FancyNpcsHook;
+import fr.openmc.core.hooks.LuckPermsHook;
+import fr.openmc.core.hooks.WorldGuardHook;
+import fr.openmc.core.utils.text.DateUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -25,7 +29,7 @@ import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.List;
 
-import static fr.openmc.core.utils.messages.MessagesManager.textToSmall;
+import static fr.openmc.core.utils.text.messages.MessagesManager.textToSmall;
 import static net.kyori.adventure.text.Component.*;
 
 public class MainScoreboard extends BaseScoreboard {
@@ -39,19 +43,21 @@ public class MainScoreboard extends BaseScoreboard {
         List<Component> lines = new ArrayList<>(getDefaultLines(player));
 
         // Contest
-        Contest data = ContestManager.data;
-        if (data.getPhase() != 1) {
-            lines.add(MiniMessage.miniMessage().deserialize("<gradient:#FFB800:#F0DF49>%s</gradient>".formatted(textToSmall("contest"))).decoration(TextDecoration.BOLD, true));
-            lines.add(text("  • ", NamedTextColor.DARK_GRAY)
-                    .append(text(textToSmall(data.getCamp1()), data.getColor1AsNamedTextColor()))
-                    .append(text(textToSmall(" VS "), NamedTextColor.GRAY))
-                    .append(text(textToSmall(data.getCamp2()), data.getColor2AsNamedTextColor()))
-            );
-            lines.add(Component.text("  • ", NamedTextColor.DARK_GRAY)
-                    .append(Component.text(textToSmall("fin:"), NamedTextColor.GRAY))
-                    .appendSpace()
-                    .append(text(DateUtils.getTimeUntilNextDay(DayOfWeek.MONDAY), TextColor.color(0xFF8F06)))
-            );
+        if (WeeklyEventsManager.getCurrentEvent() instanceof Contest) {
+            ContestData data = ContestManager.data;
+            if (WeeklyEventsManager.getCurrentPhase() != ContestPhase.VOTE_CAMP.getPhase()) {
+                lines.add(MiniMessage.miniMessage().deserialize("<gradient:#FFB800:#F0DF49>%s</gradient>".formatted(textToSmall("contest"))).decoration(TextDecoration.BOLD, true));
+                lines.add(text("  • ", NamedTextColor.DARK_GRAY)
+                        .append(text(textToSmall(data.getCamp1()), data.getColor1AsNamedTextColor()))
+                        .append(text(textToSmall(" VS "), NamedTextColor.GRAY))
+                        .append(text(textToSmall(data.getCamp2()), data.getColor2AsNamedTextColor()))
+                );
+                lines.add(Component.text("  • ", NamedTextColor.DARK_GRAY)
+                        .append(Component.text(textToSmall("fin:"), NamedTextColor.GRAY))
+                        .appendSpace()
+                        .append(text(DateUtils.getTimeUntilNextDay(DayOfWeek.MONDAY), TextColor.color(0xFF8F06)))
+                );
+            }
         }
 
         lines.add(empty());
@@ -61,12 +67,10 @@ public class MainScoreboard extends BaseScoreboard {
     }
 
     public static List<Component> getDefaultLines(Player player) {
-        NpcManager npcManager = FancyNpcsPlugin.get().getNpcManager();
-        Npc halloweenNPC = npcManager.getNpc("halloween_pumpkin_deposit_npc");
-
-        Component rank = LuckPermsHook.isHasLuckPerms()
+        Component rank = LuckPermsHook.isEnable()
                 ? Component.text(LuckPermsHook.getFormattedPAPIPrefix(player))
                 : Component.text(textToSmall("aucun")).color(TextColor.color(0xFF1FCC));
+
 
         City city = CityManager.getPlayerCity(player.getUniqueId());
         City chunkCity = CityManager.getCityFromChunk(player.getChunk().getX(), player.getChunk().getZ());
@@ -102,13 +106,18 @@ public class MainScoreboard extends BaseScoreboard {
                 .appendSpace()
                 .append(text(textToSmall(location)).color(TextColor.color(0xFF06DC)))
         );
-        if (halloweenNPC != null) {
-            String pumpkinCount = EconomyManager.getFormattedSimplifiedNumber(HalloweenManager.getPumpkinCount(player.getUniqueId()));
-            lines.add(text("  • ", NamedTextColor.DARK_GRAY)
-                    .append(text(textToSmall("citrouilles:"), NamedTextColor.GRAY))
-                    .appendSpace()
-                    .append(text(textToSmall(pumpkinCount)).color(TextColor.color(0xFF7518)))
-            );
+
+        if (FancyNpcsHook.isEnable()) {
+            NpcManager npcManager = FancyNpcsPlugin.get().getNpcManager();
+            Npc halloweenNPC = npcManager.getNpc("halloween_pumpkin_deposit_npc");
+            if (halloweenNPC != null) {
+                String pumpkinCount = EconomyManager.getFormattedSimplifiedNumber(HalloweenManager.getPumpkinCount(player.getUniqueId()));
+                lines.add(text("  • ", NamedTextColor.DARK_GRAY)
+                        .append(text(textToSmall("citrouilles:"), NamedTextColor.GRAY))
+                        .appendSpace()
+                        .append(text(textToSmall(pumpkinCount)).color(TextColor.color(0xFF7518)))
+                );
+            }
         }
 
         lines.add(newline());

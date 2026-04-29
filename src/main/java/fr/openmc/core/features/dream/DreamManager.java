@@ -6,6 +6,9 @@ import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import fr.openmc.core.CommandsManager;
 import fr.openmc.core.OMCPlugin;
+import fr.openmc.core.bootstrap.features.Feature;
+import fr.openmc.core.bootstrap.features.types.DatabaseFeature;
+import fr.openmc.core.bootstrap.features.types.LoadAfterItemsAdder;
 import fr.openmc.core.commands.utils.SpawnManager;
 import fr.openmc.core.features.city.City;
 import fr.openmc.core.features.city.CityManager;
@@ -18,7 +21,6 @@ import fr.openmc.core.features.dream.generation.DreamDimensionManager;
 import fr.openmc.core.features.dream.generation.listeners.CloudStructureDispenserListener;
 import fr.openmc.core.features.dream.generation.listeners.ReplaceBlockListener;
 import fr.openmc.core.features.dream.generation.structures.DreamStructuresManager;
-import fr.openmc.core.features.dream.listeners.armors.DreamArmorImplListener;
 import fr.openmc.core.features.dream.listeners.biomes.PlayerEnteredBiome;
 import fr.openmc.core.features.dream.listeners.dream.*;
 import fr.openmc.core.features.dream.listeners.orb.PlayerObtainOrb;
@@ -26,6 +28,8 @@ import fr.openmc.core.features.dream.listeners.others.CraftingConvertorListener;
 import fr.openmc.core.features.dream.listeners.others.PlayerEatSomnifere;
 import fr.openmc.core.features.dream.listeners.others.SingularityCraftListener;
 import fr.openmc.core.features.dream.listeners.registry.DreamItemEquipListener;
+import fr.openmc.core.features.dream.listeners.strctures.PlayerEnterStructureListener;
+import fr.openmc.core.features.dream.listeners.strctures.PlayerExitStructureListener;
 import fr.openmc.core.features.dream.mecanism.cloudfishing.CloudFishingManager;
 import fr.openmc.core.features.dream.mecanism.cold.ColdManager;
 import fr.openmc.core.features.dream.mecanism.metaldetector.MetalDetectorManager;
@@ -36,8 +40,8 @@ import fr.openmc.core.features.dream.models.db.DBPlayerSave;
 import fr.openmc.core.features.dream.models.db.DreamPlayer;
 import fr.openmc.core.features.dream.models.registry.items.DreamItem;
 import fr.openmc.core.features.dream.registries.*;
-import fr.openmc.core.utils.LocationUtils;
-import fr.openmc.core.utils.serializer.BukkitSerializer;
+import fr.openmc.core.utils.bukkit.serializer.BukkitSerializer;
+import fr.openmc.core.utils.world.LocationUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -51,7 +55,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class DreamManager {
+public class DreamManager extends Feature implements DatabaseFeature, LoadAfterItemsAdder {
     // ** CONSTANTS **
     public static final Long BASE_DREAM_TIME = 300L;
 
@@ -59,11 +63,12 @@ public class DreamManager {
 
     private static final HashMap<UUID, DreamPlayer> dreamPlayerData = new HashMap<>();
     public static final HashMap<UUID, DBDreamPlayer> cacheDreamPlayer = new HashMap<>();
-
+    
     private static Dao<DBDreamPlayer, String> dreamPlayerDao;
     private static Dao<DBPlayerSave, String> savePlayerDao;
 
-    public static void init() {
+    @Override
+    public void init() {
         // ** LISTENERS **
         OMCPlugin.registerEvents(
                 new PlayerChangeWorldListener(),
@@ -81,12 +86,12 @@ public class DreamManager {
                 new CloudStructureDispenserListener(),
                 new CraftingConvertorListener(),
                 new DreamItemEquipListener(),
-                new DreamArmorImplListener(),
-                new SingularityCraftListener()
+                new SingularityCraftListener(),
+		        new PlayerEnterStructureListener(),
+		        new PlayerExitStructureListener()
         );
 
         // ** MANAGERS **
-        DreamEnchantementRegistry.init();
         DreamDimensionManager.init();
         GlaciteNpcManager.init();
         DreamStructuresManager.init();
@@ -111,7 +116,16 @@ public class DreamManager {
         loadAllPlayerSaveData();
     }
 
-    public static void initDB(ConnectionSource connectionSource) throws SQLException {
+    @Override
+    public void save() {
+        DreamManager.saveAllPlayerSaveData();
+        DreamManager.saveAllDreamPlayerData();
+
+        SingularityManager.disable();
+    }
+
+    @Override
+    public void initDB(ConnectionSource connectionSource) throws SQLException {
         TableUtils.createTableIfNotExists(connectionSource, DBDreamPlayer.class);
         dreamPlayerDao = DaoManager.createDao(connectionSource, DBDreamPlayer.class);
 
@@ -119,13 +133,6 @@ public class DreamManager {
         savePlayerDao = DaoManager.createDao(connectionSource, DBPlayerSave.class);
 
         SingularityManager.initDB(connectionSource);
-    }
-
-    public static void disable() {
-        DreamManager.saveAllPlayerSaveData();
-        DreamManager.saveAllDreamPlayerData();
-
-        SingularityManager.disable();
     }
 
     private static void loadAllPlayerSaveData() {
@@ -213,6 +220,8 @@ public class DreamManager {
     }
 
     public static void addDreamPlayer(Player player, Location oldLocation) throws IOException {
+        player.clearActivePotionEffects(); // supprime tout les effets (ex effets des armures dans l'overworld)
+
         PlayerInventory playerInv = player.getInventory();
 
         ItemStack[] oldInv = playerInv.getContents().clone();
@@ -232,6 +241,9 @@ public class DreamManager {
     }
 
     public static void removeDreamPlayer(Player player, Location dreamLocation) {
+        player.closeInventory();
+        player.clearActivePotionEffects(); // supprime les effets des armures des reves
+
         DreamPlayer dreamPlayer = dreamPlayerData.remove(player.getUniqueId());
         playerSaveData.remove(player.getUniqueId());
 
@@ -318,7 +330,7 @@ public class DreamManager {
                 )
         );
     }
-
+    
     public static void setMaxTime(Player player, long maxTime) {
         DBDreamPlayer cache = DreamManager.getCacheDreamPlayer(player);
 

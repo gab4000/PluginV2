@@ -4,15 +4,18 @@ import fr.openmc.api.cooldown.CooldownInterceptor;
 import fr.openmc.core.commands.admin.freeze.FreezeCommand;
 import fr.openmc.core.commands.debug.ChronometerCommand;
 import fr.openmc.core.commands.debug.CooldownCommand;
+import fr.openmc.core.commands.debug.CustomItemCommand;
 import fr.openmc.core.commands.fun.Diceroll;
 import fr.openmc.core.commands.fun.Playtime;
 import fr.openmc.core.commands.utils.*;
 import fr.openmc.core.features.adminshop.AdminShopCommand;
+import fr.openmc.core.features.animations.DebugAnimationCommand;
 import fr.openmc.core.features.corporation.commands.ShopAdminCommand;
 import fr.openmc.core.features.corporation.commands.ShopCommand;
 import fr.openmc.core.features.credits.CreditsCommand;
 import fr.openmc.core.features.cube.CubeCommands;
-import fr.openmc.core.features.events.halloween.commands.HalloweenCommands;
+import fr.openmc.core.features.events.commands.EventCommand;
+import fr.openmc.core.features.events.contents.halloween.commands.HalloweenCommands;
 import fr.openmc.core.features.friend.FriendCommand;
 import fr.openmc.core.features.mailboxes.MailboxCommand;
 import fr.openmc.core.features.mainmenu.commands.MainMenuCommand;
@@ -25,10 +28,17 @@ import lombok.Getter;
 import revxrsal.commands.Lamp;
 import revxrsal.commands.bukkit.BukkitLamp;
 
+/**
+ * Enregistrement des commandes globales du plugin.
+ * Initialise Lamp et ajoute l'ensemble des commandes exposees.
+ */
 public class CommandsManager {
     @Getter
     static Lamp handler;
 
+    /**
+     * Initialise le handler de commandes et enregistre les commandes.
+     */
     public static void init() {
         handler = BukkitLamp.builder(OMCPlugin.getInstance())
                 .commandCondition(new CooldownInterceptor())
@@ -37,6 +47,9 @@ public class CommandsManager {
         registerCommands();
     }
 
+    /**
+     * Enregistre toutes les commandes du plugin sur le handler.
+     */
     private static void registerCommands() {
         handler.register(
                 new Socials(),
@@ -61,9 +74,12 @@ public class CommandsManager {
                 new Cooldowns(),
                 new CreditsCommand(),
                 new CubeCommands(),
+                new HalloweenCommands(),
+                new DebugAnimationCommand(),
+                new EventCommand(),
+                new CustomItemCommand(),
                 new ShopCommand(),
-                new ShopAdminCommand(),
-                new HalloweenCommands()
+                new ShopAdminCommand()
         );
     }
 }

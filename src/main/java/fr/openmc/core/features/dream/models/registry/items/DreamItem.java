@@ -1,30 +1,25 @@
 package fr.openmc.core.features.dream.models.registry.items;
 
-import dev.lone.itemsadder.api.CustomStack;
-import fr.openmc.api.hooks.ItemsAdderHook;
-import fr.openmc.core.features.dream.registries.DreamItemRegistry;
-import fr.openmc.core.utils.ItemUtils;
+import fr.openmc.core.hooks.ItemsAdderHook;
+import fr.openmc.core.registry.items.CustomItem;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Getter
-public abstract class DreamItem {
-    public abstract ItemStack getVanilla();
-
-    private final String name;
-
+public abstract class DreamItem extends CustomItem {
     /**
      * Creates a new DreamItem with the specified name.
      *
      * @param name The namespaced ID of the item, e.g., "omc_dream:orb".
      */
     protected DreamItem(String name) {
-        this.name = name;
+        super(name);
     }
 
     public abstract DreamRarity getRarity();
@@ -33,35 +28,10 @@ public abstract class DreamItem {
 
     public abstract ItemStack getTransferableItem();
 
-    public ItemStack getItemsAdder() {
-        CustomStack stack = CustomStack.getInstance(getName());
-        return stack != null ? stack.getItemStack() : null;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        if (object instanceof ItemStack anotherItem) {
-            DreamItem citem = DreamItemRegistry.getByItemStack(anotherItem);
-
-            if (citem == null) return false;
-            return citem.getName().equals(this.getName());
-        }
-
-        if (object instanceof String otherObjectName) {
-            return this.getName().equals(otherObjectName);
-        }
-
-        if (object instanceof DreamItem citem) {
-            return citem.getName().equals(this.getName());
-        }
-
-        return false;
-    }
-
     private List<Component> getGeneratedLore() {
         ItemStack baseItem;
 
-        if (!ItemsAdderHook.isHasItemAdder() || getItemsAdder() == null) {
+        if (!ItemsAdderHook.isEnable() || getItemsAdder() == null) {
             baseItem = getVanilla();
         } else {
             baseItem = getItemsAdder();
@@ -95,7 +65,7 @@ public abstract class DreamItem {
     private List<Component> getGeneratedLoreTransferable() {
         ItemStack baseItem;
 
-        if (!ItemsAdderHook.isHasItemAdder() || getItemsAdder() == null) {
+        if (!ItemsAdderHook.isEnable() || getItemsAdder() == null) {
             baseItem = getVanilla();
         } else {
             baseItem = getItemsAdder();
@@ -123,14 +93,7 @@ public abstract class DreamItem {
      * @return Best ItemStack to use for the server
      */
     public ItemStack getBestTransferable() {
-        ItemStack item;
-        if (!ItemsAdderHook.isHasItemAdder() || getItemsAdder() == null) {
-            item = getVanilla();
-        } else {
-            item = getItemsAdder();
-        }
-
-        ItemUtils.setTag(item, DreamItemRegistry.CUSTOM_NAME_KEY, this.getName());
+        ItemStack item = super.getBest();
         item.lore(this.getGeneratedLoreTransferable());
 
         return item;
@@ -143,22 +106,11 @@ public abstract class DreamItem {
      *
      * @return Best ItemStack to use for the server
      */
+    @Override
     public ItemStack getBest() {
-        ItemStack item;
-        if (!ItemsAdderHook.isHasItemAdder() || getItemsAdder() == null) {
-            item = getVanilla();
-        } else {
-            item = getItemsAdder();
-        }
-
-        ItemUtils.setTag(item, DreamItemRegistry.CUSTOM_NAME_KEY, this.getName());
+        ItemStack item = super.getBest();
         item.lore(this.getGeneratedLore());
 
         return item;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name);
     }
 }

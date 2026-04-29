@@ -1,12 +1,19 @@
 package fr.openmc.core.features.dream.registries.items.armors.dream;
 
 import fr.openmc.core.features.dream.models.registry.items.DreamEquipableItem;
+import fr.openmc.core.features.dream.models.registry.items.DreamItem;
 import fr.openmc.core.features.dream.models.registry.items.DreamRarity;
+import fr.openmc.core.registry.items.options.EquipableItem;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.jspecify.annotations.NonNull;
+import java.util.HashMap;
+import java.util.Set;
 
-public class DreamLeggings extends DreamEquipableItem {
+public class DreamLeggings extends DreamItem implements DreamEquipableItem, EquipableItem {
     public DreamLeggings(String name) {
         super(name);
     }
@@ -37,10 +44,17 @@ public class DreamLeggings extends DreamEquipableItem {
     }
 
     @Override
-    public ItemStack getVanilla() {
+    public @NonNull ItemStack getVanilla() {
         ItemStack item = new ItemStack(Material.NETHERITE_LEGGINGS);
 
         item.getItemMeta().itemName(Component.text("Jambières Oniriques"));
         return item;
+    }
+
+    @Override
+    public HashMap<PotionEffectType, Integer> getEffects() {
+        return new HashMap<>(){{
+            put(PotionEffectType.SPEED, 0);
+        }};
     }
 }

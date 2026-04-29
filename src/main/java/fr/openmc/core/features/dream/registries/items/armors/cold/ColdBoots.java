@@ -1,12 +1,14 @@
 package fr.openmc.core.features.dream.registries.items.armors.cold;
 
 import fr.openmc.core.features.dream.models.registry.items.DreamEquipableItem;
+import fr.openmc.core.features.dream.models.registry.items.DreamItem;
 import fr.openmc.core.features.dream.models.registry.items.DreamRarity;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.jspecify.annotations.NonNull;
 
-public class ColdBoots extends DreamEquipableItem {
+public class ColdBoots extends DreamItem implements DreamEquipableItem {
     public ColdBoots(String name) {
         super(name);
     }
@@ -37,7 +39,7 @@ public class ColdBoots extends DreamEquipableItem {
     }
 
     @Override
-    public ItemStack getVanilla() {
+    public @NonNull ItemStack getVanilla() {
         ItemStack item = new ItemStack(Material.DIAMOND_BOOTS);
 
         item.getItemMeta().itemName(Component.text("Bottes Glacées"));

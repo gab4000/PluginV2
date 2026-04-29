@@ -111,7 +111,8 @@ public class OMCPlugin extends JavaPlugin {
             new LeaderboardManager(),
             new MainMenu(),
             new HologramLoader(),
-            new HomeIconCacheManager()
+            new HomeIconCacheManager(),
+            new ShopManager()
     ));
 
     // ** Registry of OMC Plugin Hooks
@@ -175,7 +176,7 @@ public class OMCPlugin extends JavaPlugin {
                 .filter(f -> !(f instanceof LoadAfterItemsAdder))
                 .forEachOrdered(Feature::startInit);
 
-        // * Si ItemsAdder est pas présent, alors on charge les dernieres features maintenant
+        // * Si ItemsAdder n'est pas présent, alors on charge les dernières features maintenant
         if (!ItemsAdderHook.isEnable()) {
             loadAfterItemsAdder();
         }

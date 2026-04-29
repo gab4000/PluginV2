@@ -1,14 +1,14 @@
 package fr.openmc.core.features.corporation.manager;
 
-import fr.openmc.api.hooks.ItemsAdderHook;
 import fr.openmc.api.input.location.ItemInteraction;
 import fr.openmc.core.OMCPlugin;
 import fr.openmc.core.features.corporation.ShopFurniture;
 import fr.openmc.core.features.corporation.models.Shop;
 import fr.openmc.core.features.economy.EconomyManager;
-import fr.openmc.core.utils.messages.MessageType;
-import fr.openmc.core.utils.messages.MessagesManager;
-import fr.openmc.core.utils.messages.Prefix;
+import fr.openmc.core.hooks.ItemsAdderHook;
+import fr.openmc.core.utils.text.messages.MessageType;
+import fr.openmc.core.utils.text.messages.MessagesManager;
+import fr.openmc.core.utils.text.messages.Prefix;
 import fr.openmc.core.utils.world.WorldUtils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -90,7 +90,7 @@ public class PlayerShopManager {
             MessagesManager.sendMessage(player, Component.text("§c500" + EconomyManager.getEconomyIcon() + " retirés de votre compte personnel"), Prefix.SHOP, MessageType.SUCCESS, false);
             return true;
         } else {
-            if (ItemsAdderHook.isHasItemAdder())
+            if (ItemsAdderHook.isEnable())
                 if (ShopFurniture.removeShopFurniture(cashBlock)) {
                     cashBlock.setType(Material.AIR);
                     barrel.setType(Material.AIR);

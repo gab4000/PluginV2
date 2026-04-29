@@ -1,32 +1,43 @@
 package fr.openmc.core.features.corporation.manager;
 
-import fr.openmc.api.hooks.ItemsAdderHook;
+import com.j256.ormlite.support.ConnectionSource;
 import fr.openmc.core.OMCPlugin;
+import fr.openmc.core.bootstrap.features.Feature;
+import fr.openmc.core.bootstrap.features.types.DatabaseFeature;
+import fr.openmc.core.bootstrap.features.types.LoadAfterItemsAdder;
 import fr.openmc.core.features.corporation.ShopFurniture;
 import fr.openmc.core.features.corporation.models.Shop;
+import fr.openmc.core.hooks.ItemsAdderHook;
 import fr.openmc.core.utils.world.WorldUtils;
 import lombok.Getter;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public class ShopManager {
+public class ShopManager extends Feature implements LoadAfterItemsAdder, DatabaseFeature {
 	
 	@Getter
 	private static final Map<UUID, Shop> playerShops = new HashMap<>();
     private static Map<Location, Shop> shopsByLocation;
     
-    public static void init() {
+	protected void init() {
 		loadShops();
     }
 	
-	public static void shutdown() {
+	@Override
+	protected void save() {
 		saveShops();
+	}
+	
+	@Override
+	public void initDB(ConnectionSource connectionSource) throws SQLException {
+		ShopDatabaseManager.initDB(connectionSource);
 	}
 	
 	public static boolean loadShops() {
@@ -122,7 +133,7 @@ public class ShopManager {
 		
 		shopsByLocation.put(shop.getLocation(), shop);
         
-        if (ItemsAdderHook.isHasItemAdder())
+        if (ItemsAdderHook.isEnable())
             if (!ShopFurniture.placeShopFurniture(cashBlock, WorldUtils.getYaw(player))) cashBlock.setType(Material.OAK_SIGN);
 		else cashBlock.setType(Material.OAK_SIGN);
 		
@@ -149,7 +160,7 @@ public class ShopManager {
         Block cashBlock = world.getBlockAt(multiblock.cashBlock());
         Block stockBlock = world.getBlockAt(multiblock.stockBlock());
 
-        if (ItemsAdderHook.isHasItemAdder()) {
+        if (ItemsAdderHook.isEnable()) {
             if (!ShopFurniture.hasFurniture(cashBlock)) return false;
             if (!ShopFurniture.removeShopFurniture(cashBlock)) return false;
         }
@@ -163,14 +174,32 @@ public class ShopManager {
         return true;
     }
 	
+	/**
+	 * Returns all registered shops
+	 *
+	 * @return a set of shops
+	 */
 	public static Set<Shop> getAllShops() {
 		return Set.copyOf(shopsByLocation.values());
 	}
 	
+	
+	/**
+	 * Returns a shop of a player
+	 *
+	 * @param playerUUID the UUID of the player
+	 * @return the shop if exists, null otherwise
+	 */
 	public static Shop getPlayerShop(UUID playerUUID) {
 		return playerShops.get(playerUUID);
 	}
 	
+	/**
+	 * Assign a shop to a player if any shop was already assigned
+	 *
+	 * @param playerUUID the UUID of the player
+	 * @param shop the shop
+	 */
 	public static void setPlayerShop(UUID playerUUID, Shop shop) {
 		playerShops.put(playerUUID, shop);
 	}

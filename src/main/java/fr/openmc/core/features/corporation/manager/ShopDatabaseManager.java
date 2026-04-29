@@ -21,12 +21,8 @@ public class ShopDatabaseManager {
 	private static Dao<Shop, UUID> shopDao;
 	
 	public static void initDB(ConnectionSource connectionSource) throws SQLException {
-		try {
-			TableUtils.createTableIfNotExists(connectionSource, Shop.class);
-			shopDao = DaoManager.createDao(connectionSource, Shop.class);
-		} catch (SQLException e) {
-			throw new SQLException(e);
-		}
+		TableUtils.createTableIfNotExists(connectionSource, Shop.class);
+		shopDao = DaoManager.createDao(connectionSource, Shop.class);
 	}
 	
 	public static @Nullable Map<Location, Shop> loadShops() {

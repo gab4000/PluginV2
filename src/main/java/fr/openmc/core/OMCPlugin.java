@@ -52,7 +52,6 @@ import fr.openmc.core.registry.items.CustomItemRegistry;
 import fr.openmc.core.registry.loottable.CustomLootTableRegistry;
 import fr.openmc.core.utils.bukkit.ParticleUtils;
 import fr.openmc.core.utils.text.MotdUtils;
-import fr.openmc.core.utils.text.TranslationManager;
 import io.papermc.paper.datapack.Datapack;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -104,13 +103,12 @@ public class OMCPlugin extends JavaPlugin {
             new HalloweenManager(),
             new QuestProgressSaveManager(),
             new MotdUtils(),
-            new TranslationManager(new File(this.getDataFolder(), "translations"), "fr"),
-            new DynamicCooldownManager(),
             new MascotsManager(),
             new PlayerSettingsManager(),
             new MailboxManager(),
             new QuestsManager(),
             new CityManager(),
+            new DynamicCooldownManager(),
             new ContestManager(),
             new WeeklyEventsManager(),
             new CalendarManager(),
@@ -133,9 +131,6 @@ public class OMCPlugin extends JavaPlugin {
             new FancyNpcsHook()
     ));
 
-    /**
-     * Désactive les logs de ORMLite venant de TableUtils
-     */
     @Override
     public void onLoad() {
         LoggerFactory.setLogBackendFactory(DatabaseManager.ShutUpOrmLite::new);

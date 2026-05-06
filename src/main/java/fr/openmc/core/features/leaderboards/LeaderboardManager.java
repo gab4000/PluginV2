@@ -1,8 +1,8 @@
 package fr.openmc.core.features.leaderboards;
 
 import fr.openmc.core.OMCPlugin;
-import fr.openmc.core.bootstrap.annotations.Credit;
 import fr.openmc.core.bootstrap.features.Feature;
+import fr.openmc.core.bootstrap.features.annotations.Credit;
 import fr.openmc.core.bootstrap.features.types.HasCommands;
 import fr.openmc.core.bootstrap.features.types.LoadAfterItemsAdder;
 import fr.openmc.core.bootstrap.features.types.NotInUnitTest;
@@ -14,6 +14,7 @@ import fr.openmc.core.features.economy.models.EconomyPlayer;
 import fr.openmc.core.features.events.contents.halloween.managers.HalloweenManager;
 import fr.openmc.core.features.events.contents.halloween.models.HalloweenData;
 import fr.openmc.core.features.leaderboards.commands.LeaderboardCommands;
+import fr.openmc.core.utils.cache.PlayerNameCache;
 import fr.openmc.core.utils.text.DateUtils;
 import fr.openmc.core.utils.world.entities.TextDisplay;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
@@ -520,7 +521,7 @@ public class LeaderboardManager extends Feature implements NotInUnitTest, LoadAf
                 .sorted((entry1, entry2) -> Double.compare(entry2.getValue(), entry1.getValue()))
                 .limit(10)
                 .toList()) {
-            String playerName = Bukkit.getOfflinePlayer(entry.getKey()).getName();
+            String playerName = PlayerNameCache.getName(entry.getKey());
             String formattedBalance = EconomyManager.getFormattedSimplifiedNumber(entry.getValue());
             playerMoneyMap.put(rank++, new AbstractMap.SimpleEntry<>(playerName, formattedBalance));
         }
@@ -567,7 +568,7 @@ public class LeaderboardManager extends Feature implements NotInUnitTest, LoadAf
                 .sorted((entry1, entry2) -> Double.compare(entry2.getValue().getPumpkinCount(), entry1.getValue().getPumpkinCount()))
                 .limit(10)
                 .toList()) {
-            String playerName = Bukkit.getOfflinePlayer(entry.getKey()).getName();
+            String playerName = PlayerNameCache.getName(entry.getKey());
             String formattedPumpkinCount = EconomyManager.getFormattedSimplifiedNumber(entry.getValue().getPumpkinCount());
             pumpkinCountMap.put(rank++, new AbstractMap.SimpleEntry<>(playerName, formattedPumpkinCount));
         }

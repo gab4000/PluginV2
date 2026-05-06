@@ -10,6 +10,7 @@ import fr.openmc.core.OMCPlugin;
 import fr.openmc.core.bootstrap.features.Feature;
 import fr.openmc.core.bootstrap.features.types.DatabaseFeature;
 import fr.openmc.core.bootstrap.features.types.HasCommands;
+import fr.openmc.core.bootstrap.features.types.LoadAfterItemsAdder;
 import fr.openmc.core.commands.debug.DebugCooldownCommand;
 import fr.openmc.core.commands.utils.CooldownCommand;
 import org.bukkit.Bukkit;
@@ -22,16 +23,18 @@ import java.util.*;
 /**
  * Main class for managing cooldowns
  */
-public class DynamicCooldownManager extends Feature implements DatabaseFeature, HasCommands {
+public class DynamicCooldownManager extends Feature implements LoadAfterItemsAdder, DatabaseFeature, HasCommands {
 
     /**
      * Represents a single cooldown with duration and last use time
      */
     @DatabaseTable(tableName = "cooldowns")
     public static class Cooldown {
-        @DatabaseField(id = true)
+        @DatabaseField(generatedId = true)
+        private int id;
+        @DatabaseField(uniqueCombo = true, canBeNull = false)
         private UUID uniqueId;
-        @DatabaseField(canBeNull = false)
+        @DatabaseField(uniqueCombo = true, canBeNull = false)
         private String group;
         @DatabaseField(canBeNull = false)
         private long duration;
@@ -142,6 +145,12 @@ public class DynamicCooldownManager extends Feature implements DatabaseFeature, 
                 if (!cooldown.isReady()) {
                     try {
                         cooldownDao.createOrUpdate(cooldown);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    try {
+                        cooldownDao.delete(cooldown);
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
                     }

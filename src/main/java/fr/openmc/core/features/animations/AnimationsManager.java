@@ -14,7 +14,7 @@ import fr.openmc.core.bootstrap.features.types.NotInUnitTest;
 import fr.openmc.core.features.animations.commands.DebugAnimationCommand;
 import fr.openmc.core.features.animations.listeners.EmoteListener;
 import fr.openmc.core.features.animations.listeners.PlayerFinishJoiningListener;
-import fr.openmc.core.hooks.ItemsAdderHook;
+import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import org.bukkit.event.Listener;
 import org.bukkit.util.Vector;
 

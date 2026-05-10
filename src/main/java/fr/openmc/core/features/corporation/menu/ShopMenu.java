@@ -1,5 +1,6 @@
 package fr.openmc.core.features.corporation.menu;
 
+import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.api.menulib.Menu;
 import fr.openmc.api.menulib.template.ConfirmMenu;
 import fr.openmc.api.menulib.utils.InventorySize;
@@ -42,7 +43,7 @@ public class ShopMenu extends Menu {
 
     @Override
     public String getTexture() {
-		return "§r§f:offset_-11::" + this.texture + ":";
+		return FontImageWrapper.replaceFontImages("§r§f:offset_-11::" + this.texture + ":");
     }
 
     @Override

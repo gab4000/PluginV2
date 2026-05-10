@@ -6,6 +6,7 @@ import fr.openmc.core.bootstrap.features.Feature;
 import fr.openmc.core.bootstrap.features.types.DatabaseFeature;
 import fr.openmc.core.bootstrap.features.types.LoadAfterItemsAdder;
 import fr.openmc.core.features.corporation.ShopFurniture;
+import fr.openmc.core.features.corporation.listener.ShopListener;
 import fr.openmc.core.features.corporation.models.Shop;
 import fr.openmc.core.hooks.ItemsAdderHook;
 import fr.openmc.core.utils.world.WorldUtils;
@@ -26,9 +27,11 @@ public class ShopManager extends Feature implements LoadAfterItemsAdder, Databas
 	private static final Map<UUID, Shop> playerShops = new HashMap<>();
     private static Map<Location, Shop> shopsByLocation;
     
+	@Override
 	protected void init() {
 		loadShops();
-    }
+		OMCPlugin.registerEvents(new ShopListener(isInitialized()));
+	}
 	
 	@Override
 	protected void save() {
@@ -42,15 +45,15 @@ public class ShopManager extends Feature implements LoadAfterItemsAdder, Databas
 	
 	public static boolean loadShops() {
 		if (shopsByLocation != null) shopsByLocation.clear();
-		OMCPlugin.getInstance().getSLF4JLogger().info("Loading shops from database...");
-		shopsByLocation = ShopDatabaseManager.loadShops();
-		if (shopsByLocation == null) {
-			OMCPlugin.getInstance().getSLF4JLogger().error("Failed to initialize ShopManager due to database load failure. No shops loaded.");
-			shopsByLocation = new HashMap<>();
-			return false;
+		try {
+			shopsByLocation = ShopDatabaseManager.loadDBShops();
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
 		}
+		if (shopsByLocation == null) return false;
+		
 		shopsByLocation.values().forEach(shop -> setPlayerShop(shop.getOwnerUUID(), shop));
-		OMCPlugin.getInstance().getSLF4JLogger().info("Loaded {} shops from database.", shopsByLocation.size());
+		OMCPlugin.getInstance().getSLF4JLogger().info("Successfully loaded {} shops from database.", playerShops.size());
 		return true;
 	}
 	
@@ -69,14 +72,11 @@ public class ShopManager extends Feature implements LoadAfterItemsAdder, Databas
 	}
 	
 	public static boolean saveShops() {
-		OMCPlugin.getInstance().getSLF4JLogger().info("Saving all shops to database...");
 		for (Shop shop : playerShops.values()) {
 			if (!ShopDatabaseManager.saveShop(shop)) {
-				OMCPlugin.getInstance().getSLF4JLogger().error("Failed to save all shops to database.");
-				return false;
+				OMCPlugin.getInstance().getSLF4JLogger().error("Failed to save " + shop.getName() + " to database.");
 			}
 		}
-		OMCPlugin.getInstance().getSLF4JLogger().info("All shops saved to database successfully. {} shops saved.", playerShops.size());
 		return true;
 	}
 	
@@ -84,7 +84,7 @@ public class ShopManager extends Feature implements LoadAfterItemsAdder, Databas
 		OMCPlugin.getInstance().getSLF4JLogger().info("Saving shop for player {} to database...", player.getName());
 		Shop shop = getPlayerShop(player.getUniqueId());
 		if (shop == null) {
-			OMCPlugin.getInstance().getSLF4JLogger().info("No shop found for player {} to save.", player.getName());
+			OMCPlugin.getInstance().getSLF4JLogger().info("No shop found for player {}.", player.getName());
 			return false;
 		}
 		if (!ShopDatabaseManager.saveShop(shop)) {
@@ -129,13 +129,15 @@ public class ShopManager extends Feature implements LoadAfterItemsAdder, Databas
         Shop.Multiblock multiblock = shop.getMultiblock();
         if (multiblock == null) return false;
         
-        Block cashBlock = multiblock.cashBlock().getBlock();
+        Block cashBlock = multiblock.cashBlockLoc().getBlock();
 		
 		shopsByLocation.put(shop.getLocation(), shop);
         
-        if (ItemsAdderHook.isEnable())
-            if (!ShopFurniture.placeShopFurniture(cashBlock, WorldUtils.getYaw(player))) cashBlock.setType(Material.OAK_SIGN);
-		else cashBlock.setType(Material.OAK_SIGN);
+        if (ItemsAdderHook.isEnable()) {
+	        if (!ShopFurniture.placeShopFurniture(cashBlock, WorldUtils.getYaw(player))) cashBlock.setType(Material.OAK_SIGN);
+        } else {
+			cashBlock.setType(Material.OAK_SIGN);
+        }
 		
         return true;
     }
@@ -149,16 +151,19 @@ public class ShopManager extends Feature implements LoadAfterItemsAdder, Databas
      */
     public static boolean removeShop(Shop shop) {
         Shop.Multiblock multiblock = shop.getMultiblock();
-        if (multiblock == null) return false;
+        if (multiblock == null) {
+	        OMCPlugin.getInstance().getSLF4JLogger().error("Multiblock for {} is null!", shop.getName());
+			return false;
+        }
 	    
 	    World world = Bukkit.getWorld("world");
 		if (world == null) {
-			OMCPlugin.getInstance().getSLF4JLogger().error("World 'world' not found while removing shop at location: {}", shop.getLocation());
+			OMCPlugin.getInstance().getSLF4JLogger().error("World 'world' not found while removing {} at location: {}", shop.getName(), shop.getLocation());
 			return false;
 		}
         
-        Block cashBlock = world.getBlockAt(multiblock.cashBlock());
-        Block stockBlock = world.getBlockAt(multiblock.stockBlock());
+        Block cashBlock = world.getBlockAt(multiblock.cashBlockLoc());
+        Block stockBlock = world.getBlockAt(multiblock.stockBlockLoc());
 
         if (ItemsAdderHook.isEnable()) {
             if (!ShopFurniture.hasFurniture(cashBlock)) return false;

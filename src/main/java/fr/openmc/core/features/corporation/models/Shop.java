@@ -5,6 +5,7 @@ import com.j256.ormlite.table.DatabaseTable;
 import fr.openmc.api.menulib.Menu;
 import fr.openmc.api.menulib.utils.ItemBuilder;
 import fr.openmc.core.features.corporation.MethodState;
+import fr.openmc.core.features.corporation.ShopFurniture;
 import fr.openmc.core.features.corporation.manager.ShopManager;
 import fr.openmc.core.features.economy.EconomyManager;
 import fr.openmc.core.utils.bukkit.ItemUtils;
@@ -41,7 +42,7 @@ public class Shop {
     @DatabaseField(canBeNull = false)
     private int z;
     
-    private final List<ShopItem> items = new ArrayList<>();
+    private ShopItem item;
     private final List<ShopItem> sales = new ArrayList<>();
 	
     private Location location;
@@ -76,7 +77,7 @@ public class Shop {
 
         if (multiblock == null) return;
 
-        Block stockBlock = multiblock.stockBlock().getBlock();
+        Block stockBlock = multiblock.stockBlockLoc().getBlock();
         if (stockBlock.getType() != Material.BARREL) {
             ShopManager.removeShop(this);
             return;
@@ -107,38 +108,8 @@ public class Shop {
         return ownerUUID.equals(uuid);
     }
 
-    public void addItem(ShopItem item){
-        items.add(item);
-    }
-
     public void addSales(ShopItem item){
         sales.add(item);
-    }
-
-    /**
-     * get an item from the shop
-     *
-     * @param index index of the item
-     */
-    public ShopItem getItem(int index) {
-        return items.get(index);
-    }
-
-    /**
-     * add an item to the shop
-     *
-     * @param itemStack the item
-     * @param price the price
-     * @param amount the amount of it
-     */
-    public boolean addItem(ItemStack itemStack, double price, int amount, UUID itemID) {
-        ShopItem item = itemID == null ? new ShopItem(itemStack, price) : new ShopItem(itemStack, price, itemID);
-        for (ShopItem shopItem : items) if (shopItem.getItem().isSimilar(itemStack)) return true;
-        
-        if (amount > 1) item.setAmount(amount);
-        
-        items.add(item);
-        return false;
     }
 
     /**
@@ -194,12 +165,16 @@ public class Shop {
             itemMeta.lore(lore);
         });
     }
-
-    public int getAllItemsAmount() {
-        int amount = 0;
-        for (ShopItem item : items) amount += item.getAmount();
-        return amount;
+    
+    public boolean setMultiblock(Multiblock multiblock) {
+        if (multiblock.stockBlockLoc.getBlock().getType() != Material.BARREL
+            || (multiblock.cashBlockLoc.getBlock().getType() != Material.OAK_SIGN
+            && !ShopFurniture.hasFurniture(multiblock.cashBlockLoc.getBlock()))) {
+            return false;
+        }
+        this.multiblock = multiblock;
+        return true;
     }
 
-    public record Multiblock(Location stockBlock, Location cashBlock) {}
+    public record Multiblock(Location stockBlockLoc, Location cashBlockLoc) {}
 }

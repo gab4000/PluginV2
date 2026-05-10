@@ -56,8 +56,8 @@ public class PlayerShopManager {
     private static boolean createShop(Player player, Location location) {
         Shop shop = new Shop(player.getUniqueId(), location.setRotation(0, 0));
         
-        Block barrel = location.getBlock();
-        Block cashBlock = location.add(0, 1, 0).getBlock();
+        Block barrel = shop.getMultiblock().stockBlockLoc().getBlock();
+        Block cashBlock = shop.getMultiblock().cashBlockLoc().getBlock();
         
         if (barrel.getType() != Material.AIR) {
             MessagesManager.sendMessage(player, Component.text("§cImpossible de créer le shop ici, l'espace du tonneau doit être libre"), Prefix.SHOP, MessageType.ERROR, true);
@@ -76,15 +76,16 @@ public class PlayerShopManager {
                 directional.setFacing(WorldUtils.getYaw(player).getOpposite().toBlockFace());
                 barrel.setBlockData(barrelData);
             }
-			
-			ShopManager.getPlayerShops().put(player.getUniqueId(), shop);
             
             Bukkit.getScheduler().runTaskAsynchronously(OMCPlugin.getInstance(), () -> {
                 if (!ShopDatabaseManager.saveShop(shop)) {
                     MessagesManager.sendMessage(player, Component.text("§cErreur lors de la création du shop (cannot save shop location) : §bappelez un admin"), Prefix.SHOP, MessageType.ERROR, false);
-                    deleteShop(player, true);
+	                OMCPlugin.getInstance().getSLF4JLogger().error("Error when saving shop location for player {}! Trying to remove shop...", player.getName());
+                    ShopManager.removeShop(shop);
                 }
+                else ShopManager.getPlayerShops().put(player.getUniqueId(), shop);
             });
+            
             
             MessagesManager.sendMessage(player, Component.text("§aVotre shop a été créé avec succès ! Vous pouvez maintenant y ajouter des articles"), Prefix.SHOP, MessageType.SUCCESS, true);
             MessagesManager.sendMessage(player, Component.text("§c500" + EconomyManager.getEconomyIcon() + " retirés de votre compte personnel"), Prefix.SHOP, MessageType.SUCCESS, false);
@@ -106,9 +107,14 @@ public class PlayerShopManager {
      *
      * @param player The player who deletes the shop
      */
-    public static void deleteShop(Player player, boolean fromError) {
+    public static void deleteShop(Player player) {
         Shop shop = ShopManager.getPlayerShop(player.getUniqueId());
-        if (!fromError && !shop.getItems().isEmpty()) {
+        if (shop == null) {
+	        OMCPlugin.getInstance().getSLF4JLogger().error("Shop for player {} is null!", player.getName());
+            return;
+        }
+        
+        if (shop.getItem() != null && shop.getItem().getAmount() > 0) {
             MessagesManager.sendMessage(player, Component.text("§cVotre shop n'est pas vide"), Prefix.SHOP, MessageType.WARNING, false);
             return;
         }
@@ -120,15 +126,13 @@ public class PlayerShopManager {
         
         ShopManager.getPlayerShops().remove(player.getUniqueId());
         
-        if (!fromError) {
-            Bukkit.getScheduler().runTaskAsynchronously(OMCPlugin.getInstance(), () -> {
-                if (!ShopDatabaseManager.deleteShop(shop)) {
-                    MessagesManager.sendMessage(player, Component.text("§cErreur lors de la suppression du shop (appelez un admin)"), Prefix.SHOP, MessageType.ERROR, false);
-                }
-            });
-            
-            MessagesManager.sendMessage(player, Component.text("§6Votre shop a bien été supprimé !"), Prefix.SHOP, MessageType.SUCCESS, false);
-        }
+        Bukkit.getScheduler().runTaskAsynchronously(OMCPlugin.getInstance(), () -> {
+            if (!ShopDatabaseManager.deleteShop(shop)) {
+                MessagesManager.sendMessage(player, Component.text("§cErreur lors de la suppression du shop (appelez un admin)"), Prefix.SHOP, MessageType.ERROR, false);
+            }
+        });
+        
+        MessagesManager.sendMessage(player, Component.text("§6Votre shop a bien été supprimé !"), Prefix.SHOP, MessageType.SUCCESS, false);
         
         EconomyManager.addBalance(player.getUniqueId(), 400);
         MessagesManager.sendMessage(player, Component.text("§a400" + EconomyManager.getEconomyIcon() + " remboursés sur votre compte personnel"), Prefix.SHOP, MessageType.SUCCESS, true);

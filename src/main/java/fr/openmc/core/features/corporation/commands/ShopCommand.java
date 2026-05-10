@@ -4,6 +4,7 @@ import fr.openmc.core.features.corporation.manager.PlayerShopManager;
 import fr.openmc.core.features.corporation.manager.ShopManager;
 import fr.openmc.core.features.corporation.menu.ShopMenu;
 import fr.openmc.core.features.corporation.menu.ShopSearchMenu;
+import fr.openmc.core.features.corporation.models.Shop;
 import fr.openmc.core.features.economy.EconomyManager;
 import fr.openmc.core.utils.text.messages.MessageType;
 import fr.openmc.core.utils.text.messages.MessagesManager;
@@ -20,11 +21,12 @@ public class ShopCommand {
     
     @CommandPlaceholder
     public void onCommand(Player player) {
-        if (!ShopManager.hasShop(player.getUniqueId())) {
+        Shop shop = ShopManager.getPlayerShop(player.getUniqueId());
+        if (shop == null) {
             MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas de shop"), Prefix.SHOP, MessageType.INFO, false);
             return;
         }
-        new ShopMenu(player).open();
+        new ShopMenu(player, shop).open();
     }
 
     @Subcommand("help")
@@ -78,7 +80,7 @@ public class ShopCommand {
             return;
         }
         
-        PlayerShopManager.deleteShop(player, false);
+        PlayerShopManager.deleteShop(player);
     }
 
     @Subcommand("search")

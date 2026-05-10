@@ -1,7 +1,7 @@
 package fr.openmc.core.registry.items;
 
 import dev.lone.itemsadder.api.CustomStack;
-import fr.openmc.core.hooks.ItemsAdderHook;
+import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import fr.openmc.core.utils.bukkit.ItemUtils;
 import lombok.Getter;
 import org.bukkit.inventory.ItemStack;
@@ -9,16 +9,29 @@ import org.jetbrains.annotations.NotNull;
 
 public abstract class CustomItem {
     @Getter
-    private final String name;
+    private final String id;
 
-    public CustomItem(String name) {
-        this.name = name;
+    /**
+     * -- GETTER --
+     *  Méthode à override afin d'ajouter des metas personnalisées
+     */
+    @Getter
+    private CustomItemMeta meta;
+
+    public CustomItem(String id) {
+        this.id = id;
+        this.meta = null;
+    }
+
+    public CustomItem(CustomItemMeta meta) {
+        this.meta = meta;
+        this.id = meta.getId();
     }
 
     public abstract @NotNull ItemStack getVanilla();
 
     public ItemStack getItemsAdder() {
-        CustomStack stack = CustomStack.getInstance(getName());
+        CustomStack stack = CustomStack.getInstance(getId());
         return stack != null ? stack.getItemStack() : null;
     }
 
@@ -28,15 +41,15 @@ public abstract class CustomItem {
             CustomItem citem = CustomItemRegistry.getByItemStack(anotherItem);
 
             if (citem == null) return false;
-            return citem.getName().equals(this.getName());
+            return citem.getId().equals(this.getId());
         }
 
         if (object instanceof String otherObjectName) {
-            return this.getName().equals(otherObjectName);
+            return this.getId().equals(otherObjectName);
         }
 
         if (object instanceof CustomItem citem) {
-            return citem.getName().equals(this.getName());
+            return citem.getId().equals(this.getId());
         }
 
         return false;
@@ -57,7 +70,7 @@ public abstract class CustomItem {
             item = getItemsAdder();
         }
 
-        ItemUtils.setTag(item, CustomItemRegistry.CUSTOM_ITEM_KEY, this.getName());
+        ItemUtils.setTag(item, CustomItemRegistry.CUSTOM_ITEM_KEY, this.getId());
 
         return item;
     }

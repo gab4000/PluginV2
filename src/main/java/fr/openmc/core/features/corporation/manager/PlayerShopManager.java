@@ -2,10 +2,11 @@ package fr.openmc.core.features.corporation.manager;
 
 import fr.openmc.api.input.location.ItemInteraction;
 import fr.openmc.core.OMCPlugin;
+import fr.openmc.core.bootstrap.integration.OMCLogger;
 import fr.openmc.core.features.corporation.ShopFurniture;
 import fr.openmc.core.features.corporation.models.Shop;
 import fr.openmc.core.features.economy.EconomyManager;
-import fr.openmc.core.hooks.ItemsAdderHook;
+import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import fr.openmc.core.utils.text.messages.MessageType;
 import fr.openmc.core.utils.text.messages.MessagesManager;
 import fr.openmc.core.utils.text.messages.Prefix;
@@ -40,8 +41,8 @@ public class PlayerShopManager {
                 new ItemStack(Material.BARREL),
                 "shop:shop_creator",
                 300,
-                "Vous avez reçu un tonneau pour poser votre shop",
-                "§cCréation de shop annulée",
+                Component.text("Vous avez reçu un tonneau pour poser votre shop"),
+                Component.text("§cCréation de shop annulée"),
                 location -> {
                     if (location == null) return false;
 	                return createShop(player, location);
@@ -80,7 +81,7 @@ public class PlayerShopManager {
             Bukkit.getScheduler().runTaskAsynchronously(OMCPlugin.getInstance(), () -> {
                 if (!ShopDatabaseManager.saveShop(shop)) {
                     MessagesManager.sendMessage(player, Component.text("§cErreur lors de la création du shop (cannot save shop location) : §bappelez un admin"), Prefix.SHOP, MessageType.ERROR, false);
-	                OMCPlugin.getInstance().getSLF4JLogger().error("Error when saving shop location for player {}! Trying to remove shop...", player.getName());
+	                OMCLogger.error("Error when saving shop location for player {}! Trying to remove shop...", player.getName());
                     ShopManager.removeShop(shop);
                 }
                 else ShopManager.getPlayerShops().put(player.getUniqueId(), shop);
@@ -110,7 +111,7 @@ public class PlayerShopManager {
     public static void deleteShop(Player player) {
         Shop shop = ShopManager.getPlayerShop(player.getUniqueId());
         if (shop == null) {
-	        OMCPlugin.getInstance().getSLF4JLogger().error("Shop for player {} is null!", player.getName());
+	        OMCLogger.error("Shop for player {} is null!", player.getName());
             return;
         }
         

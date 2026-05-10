@@ -36,8 +36,8 @@ public class ShopMenu extends Menu {
     }
 
     @Override
-    public @NotNull String getName() {
-        return "Menu du shop de " + shop.getName().replace("'s Shop", "");
+    public @NotNull Component getName() {
+        return Component.text("Menu du shop de " + shop.getName().replace("'s Shop", ""));
     }
 
     @Override

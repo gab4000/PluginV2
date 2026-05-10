@@ -5,10 +5,11 @@ import fr.openmc.core.OMCPlugin;
 import fr.openmc.core.bootstrap.features.Feature;
 import fr.openmc.core.bootstrap.features.types.DatabaseFeature;
 import fr.openmc.core.bootstrap.features.types.LoadAfterItemsAdder;
+import fr.openmc.core.bootstrap.integration.OMCLogger;
 import fr.openmc.core.features.corporation.ShopFurniture;
 import fr.openmc.core.features.corporation.listener.ShopListener;
 import fr.openmc.core.features.corporation.models.Shop;
-import fr.openmc.core.hooks.ItemsAdderHook;
+import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import fr.openmc.core.utils.world.WorldUtils;
 import lombok.Getter;
 import org.bukkit.*;
@@ -53,45 +54,45 @@ public class ShopManager extends Feature implements LoadAfterItemsAdder, Databas
 		if (shopsByLocation == null) return false;
 		
 		shopsByLocation.values().forEach(shop -> setPlayerShop(shop.getOwnerUUID(), shop));
-		OMCPlugin.getInstance().getSLF4JLogger().info("Successfully loaded {} shops from database.", playerShops.size());
+		OMCLogger.info("Successfully loaded {} shops from database.", playerShops.size());
 		return true;
 	}
 	
 	public static boolean loadShopFor(OfflinePlayer player) {
-		OMCPlugin.getInstance().getSLF4JLogger().info("Loading shop for player {} from database...", player.getName());
+		OMCLogger.info("Loading shop for player {} from database...", player.getName());
 		Shop shop = ShopDatabaseManager.loadShopFor(player.getUniqueId());
 		if (shop == null) {
-			OMCPlugin.getInstance().getSLF4JLogger().info("No shop found for player {}.", player.getName());
+			OMCLogger.info("No shop found for player {}.", player.getName());
 			return false;
 		}
 		Location loc = new Location(Bukkit.getWorld("world"), shop.getX(), shop.getY(), shop.getZ());
 		shopsByLocation.put(loc, shop);
 		setPlayerShop(player.getUniqueId(), shop);
-		OMCPlugin.getInstance().getSLF4JLogger().info("Loaded shop for player {}.", player.getName());
+		OMCLogger.info("Loaded shop for player {}.", player.getName());
 		return true;
 	}
 	
 	public static boolean saveShops() {
 		for (Shop shop : playerShops.values()) {
 			if (!ShopDatabaseManager.saveShop(shop)) {
-				OMCPlugin.getInstance().getSLF4JLogger().error("Failed to save " + shop.getName() + " to database.");
+				OMCLogger.error("Failed to save " + shop.getName() + " to database.");
 			}
 		}
 		return true;
 	}
 	
 	public static boolean saveShopFor(OfflinePlayer player) {
-		OMCPlugin.getInstance().getSLF4JLogger().info("Saving shop for player {} to database...", player.getName());
+		OMCLogger.info("Saving shop for player {} to database...", player.getName());
 		Shop shop = getPlayerShop(player.getUniqueId());
 		if (shop == null) {
-			OMCPlugin.getInstance().getSLF4JLogger().info("No shop found for player {}.", player.getName());
+			OMCLogger.info("No shop found for player {}.", player.getName());
 			return false;
 		}
 		if (!ShopDatabaseManager.saveShop(shop)) {
-			OMCPlugin.getInstance().getSLF4JLogger().error("Failed to save shop for player {} to database.", player.getName());
+			OMCLogger.error("Failed to save shop for player {} to database.", player.getName());
 			return false;
 		}
-		OMCPlugin.getInstance().getSLF4JLogger().info("Shop for player {} saved to database successfully.", player.getName());
+		OMCLogger.info("Shop for player {} saved to database successfully.", player.getName());
 		return true;
 	}
 
@@ -152,13 +153,13 @@ public class ShopManager extends Feature implements LoadAfterItemsAdder, Databas
     public static boolean removeShop(Shop shop) {
         Shop.Multiblock multiblock = shop.getMultiblock();
         if (multiblock == null) {
-	        OMCPlugin.getInstance().getSLF4JLogger().error("Multiblock for {} is null!", shop.getName());
+	        OMCLogger.error("Multiblock for {} is null!", shop.getName());
 			return false;
         }
 	    
 	    World world = Bukkit.getWorld("world");
 		if (world == null) {
-			OMCPlugin.getInstance().getSLF4JLogger().error("World 'world' not found while removing {} at location: {}", shop.getName(), shop.getLocation());
+			OMCLogger.error("World 'world' not found while removing {} at location: {}", shop.getName(), shop.getLocation());
 			return false;
 		}
         

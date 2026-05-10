@@ -4,7 +4,7 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
-import fr.openmc.core.OMCPlugin;
+import fr.openmc.core.bootstrap.integration.OMCLogger;
 import fr.openmc.core.features.corporation.models.Shop;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -34,7 +34,7 @@ public class ShopDatabaseManager {
 			Location loc = new Location(Bukkit.getWorld("world"), shop.getX(), shop.getY(), shop.getZ());
 			if (shop.getMultiblock() == null) {
 				if (!shop.setMultiblock(new Shop.Multiblock(loc, loc.clone().add(0, 1, 0)))) {
-					OMCPlugin.getInstance().getSLF4JLogger().error("Cannot set multiblock for {}, but shop is registered", shop.getName());
+					OMCLogger.error("Cannot set multiblock for {}, but shop is registered", shop.getName());
 				}
 			}
 			shopsByLocation.put(loc, shop);
@@ -46,7 +46,7 @@ public class ShopDatabaseManager {
 		try {
 			return shopDao.queryForId(ownerUUID);
 		} catch (SQLException e) {
-			OMCPlugin.getInstance().getSLF4JLogger().error("Failed to load shop for owner UUID: {}\nCause: {}", ownerUUID, e.getCause());
+			OMCLogger.error("Failed to load shop for owner UUID: {}\nCause: {}", ownerUUID, e.getCause());
 			return null;
 		}
 	}
@@ -56,7 +56,7 @@ public class ShopDatabaseManager {
 			shopDao.createOrUpdate(shop);
 			return true;
 		} catch (SQLException e) {
-			OMCPlugin.getInstance().getSLF4JLogger().error("Failed to save shop for owner UUID: {}\nCause: {}", shop.getOwnerUUID(), e.getCause());
+			OMCLogger.error("Failed to save shop for owner UUID: {}\nCause: {}", shop.getOwnerUUID(), e.getCause());
 			return false;
 		}
 	}
@@ -66,7 +66,7 @@ public class ShopDatabaseManager {
 			shopDao.delete(shop);
 			return true;
 		} catch (SQLException e) {
-			OMCPlugin.getInstance().getSLF4JLogger().error("Failed to delete shop for owner UUID: {}\nCause: {}", shop.getOwnerUUID(), e.getCause());
+			OMCLogger.error("Failed to delete shop for owner UUID: {}\nCause: {}", shop.getOwnerUUID(), e.getCause());
 			return false;
 		}
 	}

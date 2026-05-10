@@ -5,6 +5,7 @@ import fr.openmc.api.menulib.PaginatedMenu;
 import fr.openmc.api.menulib.utils.InventorySize;
 import fr.openmc.api.menulib.utils.ItemBuilder;
 import fr.openmc.api.menulib.utils.StaticSlots;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -54,8 +55,8 @@ public class ShopCatalogueMenu extends PaginatedMenu {
 	}
 	
 	@Override
-    public @NotNull String getName() {
-        return "Menu du shop ";
+    public @NotNull Component getName() {
+        return Component.text("Menu du shop ");
     }
 
     @Override

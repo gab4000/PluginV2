@@ -1,12 +1,12 @@
 package fr.openmc.core.features.corporation.menu;
 
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.api.menulib.Menu;
 import fr.openmc.api.menulib.template.ConfirmMenu;
 import fr.openmc.api.menulib.utils.InventorySize;
 import fr.openmc.api.menulib.utils.ItemBuilder;
 import fr.openmc.core.features.corporation.manager.PlayerShopManager;
 import fr.openmc.core.features.corporation.models.Shop;
+import fr.openmc.core.features.economy.EconomyManager;
 import fr.openmc.core.registry.items.CustomItemRegistry;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
@@ -43,7 +43,7 @@ public class ShopMenu extends Menu {
 
     @Override
     public String getTexture() {
-		return FontImageWrapper.replaceFontImages("§r§f:offset_-11::" + this.texture + ":");
+		return "§r§f:offset_-11::" + this.texture + ":";
     }
 
     @Override
@@ -138,6 +138,20 @@ public class ShopMenu extends Menu {
             ));
         }).setOnClick(event -> addAmount(64)));
         
+        map.put(isShopOwner ? 30 : 21, new ItemBuilder(this, CustomItemRegistry.getByName("omc_menus:accept_btn").getBest(), itemMeta -> {
+            itemMeta.displayName(Component.text("§aAccepter l'achat"));
+            itemMeta.lore(List.of(
+                    Component.text("§6Cela vous coûtera " + this.shop.getItem().getPrice(this.amountToBuy) + " " + EconomyManager.getEconomyIcon() + " pour " + this.amountToBuy + " items"),
+                    Component.text("§e§lCLIQUEZ ICI POUR ACCEPTER L'ACHAT")
+            ));
+        }).setOnClick(event -> this.shop.buy(getOwner(), this.amountToBuy)));
+        map.put(isShopOwner ? 32 : 23, new ItemBuilder(this, CustomItemRegistry.getByName("omc_menus:refuse_btn").getBest(), itemMeta -> {
+            itemMeta.displayName(Component.text("§cRefuser l'achat"));
+            itemMeta.lore(List.of(
+                    Component.text("§6Vous refusez d'acheter " + this.amountToBuy + " items"),
+                    Component.text("§e§lCLIQUEZ ICI POUR REFUSER L'ACHAT")
+            ));
+        }).setCloseButton());
         return map;
     }
 

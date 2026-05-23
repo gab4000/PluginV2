@@ -4,9 +4,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import fr.openmc.api.menulib.Menu;
 import fr.openmc.api.menulib.utils.ItemBuilder;
-import fr.openmc.core.features.corporation.MethodState;
 import fr.openmc.core.features.corporation.ShopFurniture;
-import fr.openmc.core.features.corporation.manager.ShopManager;
 import fr.openmc.core.features.economy.EconomyManager;
 import fr.openmc.core.utils.bukkit.ItemUtils;
 import fr.openmc.core.utils.cache.CacheOfflinePlayer;
@@ -18,16 +16,10 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Barrel;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Getter
 @DatabaseTable(tableName = "shops")
@@ -43,7 +35,7 @@ public class Shop {
     private int z;
     
     private ShopItem item;
-    private final List<ShopItem> sales = new ArrayList<>();
+    private final Map<LocalDateTime, Map<UUID, ShopItem>> sales = new HashMap<>();
 	
     private Location location;
 	private Multiblock multiblock;
@@ -67,34 +59,6 @@ public class Shop {
 		this.multiblock = new Multiblock(this.location, this.location.clone().add(0, 1, 0));
     }
 
-    /**
-     * requirement : item need the uuid of the player who restock the shop
-
-     * quand un item est vendu un partie du profit reviens a celui qui a approvisionner
-     */
-    public void checkStock() {
-        Multiblock multiblock = getMultiblock();
-
-        if (multiblock == null) return;
-
-        Block stockBlock = multiblock.stockBlockLoc().getBlock();
-        if (stockBlock.getType() != Material.BARREL) {
-            ShopManager.removeShop(this);
-            return;
-        }
-
-        if (stockBlock.getState(false) instanceof Barrel barrel) {
-
-            Inventory inventory = barrel.getInventory();
-            for (ItemStack item : inventory.getContents()) {
-                if (item == null || item.getType() == Material.AIR) continue;
-				
-                ItemMeta itemMeta = item.getItemMeta();
-                if (itemMeta == null) continue;
-            }
-        }
-    }
-
     public String getName() {
         return CacheOfflinePlayer.getOfflinePlayer(ownerUUID).getName() + "'s Shop";
     }
@@ -107,44 +71,30 @@ public class Shop {
     public boolean isOwner(UUID uuid) {
         return ownerUUID.equals(uuid);
     }
-
-    public void addSales(ShopItem item){
-        sales.add(item);
+    
+    public void addSale(Player player, ShopItem item) {
+        this.sales.put(LocalDateTime.now(), Map.of(player.getUniqueId(), item));
     }
-
-    /**
-     * buy an item in the shop
-     *
-     * @param item the item to buy
-     * @param amountToBuy the amount of it
-     * @param buyer the player who buy
-     * @return a MethodState
-     */
-    public MethodState buy(ShopItem item, int amountToBuy, Player buyer) {
-        if (! ItemUtils.hasAvailableSlot(buyer)) return MethodState.SPECIAL;
-        if (amountToBuy > item.getAmount()) return MethodState.WARNING;
-        if (isOwner(buyer.getUniqueId())) return MethodState.FAILURE;
-        
-        if (!EconomyManager.withdrawBalance(buyer.getUniqueId(), item.getPrice(amountToBuy))) return MethodState.ERROR;
-        double basePrice = item.getPrice(amountToBuy);
-        turnover += item.getPrice(amountToBuy);
-        
-        EconomyManager.addBalance(ownerUUID, item.getPrice(amountToBuy));
-        Player player = Bukkit.getPlayer(ownerUUID);
-        if (player != null) {
-            MessagesManager.sendMessage(player, Component.text(buyer.getName() + " a acheté " + amountToBuy + " " + item.getItem().getType() + " pour " + item.getPrice(amountToBuy) + EconomyManager.getEconomyIcon() + ", l'argent vous a été transféré !"), Prefix.SHOP, MessageType.SUCCESS, false);
+    
+    public void buy(Player player, int amount) {
+        if (isOwner(player.getUniqueId())) {
+            MessagesManager.sendMessage(player, Component.text("§cVous ne pouvez pas acheter des items à votre propre shop."), Prefix.SHOP, MessageType.ERROR, false);
+            return;
         }
-        
-        ItemStack toGive = item.getItem().clone();
-        toGive.setAmount(amountToBuy);
-
-        List<ItemStack> stacks = ItemUtils.splitAmountIntoStack(toGive);
-        for (ItemStack stack : stacks) buyer.getInventory().addItem(stack);
-        
-        sales.add(item.copy().setAmount(amountToBuy));
-        item.setAmount(item.getAmount() - amountToBuy);
-
-        return MethodState.SUCCESS;
+        if (this.item.getAmount() < amount) {
+            MessagesManager.sendMessage(player, Component.text("§cLe nombre d'items achetés dépasse le nombre d'items présents dans le shop."), Prefix.SHOP, MessageType.ERROR, false);
+            return;
+        }
+        if (!ItemUtils.hasEnoughSpace(player, item.getItem(), amount)) {
+            MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas assez de place dans votre inventaire pour acheter ce nombre d'items."), Prefix.SHOP, MessageType.ERROR, false);
+            return;
+        }
+        if (!EconomyManager.transferBalance(player.getUniqueId(), getOwnerUUID(), this.item.getPrice(amount), getName() + " buying")) {
+            MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas assez d'argent pour acheter ce nombre d'items."), Prefix.SHOP, MessageType.ERROR, false);
+            return;
+        }
+        addSale(player, item.setAmount(amount));
+        player.give(item.getItem().asQuantity(amount));
     }
 
     /**

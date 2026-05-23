@@ -3,10 +3,8 @@ package fr.openmc.core.features.corporation.manager;
 import fr.openmc.api.input.location.ItemInteraction;
 import fr.openmc.core.OMCPlugin;
 import fr.openmc.core.bootstrap.integration.OMCLogger;
-import fr.openmc.core.features.corporation.ShopFurniture;
 import fr.openmc.core.features.corporation.models.Shop;
 import fr.openmc.core.features.economy.EconomyManager;
-import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import fr.openmc.core.utils.text.messages.MessageType;
 import fr.openmc.core.utils.text.messages.MessagesManager;
 import fr.openmc.core.utils.text.messages.Prefix;
@@ -80,25 +78,20 @@ public class PlayerShopManager {
             
             Bukkit.getScheduler().runTaskAsynchronously(OMCPlugin.getInstance(), () -> {
                 if (!ShopDatabaseManager.saveShop(shop)) {
-                    MessagesManager.sendMessage(player, Component.text("§cErreur lors de la création du shop (cannot save shop location) : §bappelez un admin"), Prefix.SHOP, MessageType.ERROR, false);
+                    MessagesManager.sendMessage(player, Component.text("§cErreur lors de la création du shop (cannot save shop location), essai de retrait du shop... §bVous, appelez un admin ou faites un ticket sur le discord d'OpenMC"), Prefix.SHOP, MessageType.ERROR, false);
 	                OMCLogger.error("Error when saving shop location for player {}! Trying to remove shop...", player.getName());
-                    ShopManager.removeShop(shop);
+                    if (!ShopManager.removeShop(shop)) MessagesManager.sendMessage(player, Component.text("§cImpossible de retirer le shop, tentez d'appeller un admin ou faites un ticket sur le discord d'OpenMC"), Prefix.SHOP, MessageType.ERROR, false);
+                    MessagesManager.sendMessage(player, Component.text("§6La création de shop n'ayant pas été possible, 500 " + EconomyManager.getEconomyIcon() + " vous ont été remboursés"), Prefix.SHOP, MessageType.INFO, true);
                 }
-                else ShopManager.getPlayerShops().put(player.getUniqueId(), shop);
+                else {
+                    ShopManager.getPlayerShops().put(player.getUniqueId(), shop);
+                    MessagesManager.sendMessage(player, Component.text("§aVotre shop a été créé avec succès ! Vous pouvez maintenant y ajouter des articles"), Prefix.SHOP, MessageType.SUCCESS, true);
+                    MessagesManager.sendMessage(player, Component.text("§c500" + EconomyManager.getEconomyIcon() + " retirés de votre compte personnel"), Prefix.SHOP, MessageType.SUCCESS, false);
+                }
             });
-            
-            
-            MessagesManager.sendMessage(player, Component.text("§aVotre shop a été créé avec succès ! Vous pouvez maintenant y ajouter des articles"), Prefix.SHOP, MessageType.SUCCESS, true);
-            MessagesManager.sendMessage(player, Component.text("§c500" + EconomyManager.getEconomyIcon() + " retirés de votre compte personnel"), Prefix.SHOP, MessageType.SUCCESS, false);
             return true;
         } else {
-            if (ItemsAdderHook.isEnable())
-                if (ShopFurniture.removeShopFurniture(cashBlock)) {
-                    cashBlock.setType(Material.AIR);
-                    barrel.setType(Material.AIR);
-                } else {
-                    MessagesManager.sendMessage(player, Component.text("§cErreur lors de la création du shop (cannot remove shop furniture) : §bappelez un admin"), Prefix.SHOP, MessageType.ERROR, false);
-                }
+            MessagesManager.sendMessage(player, Component.text("§cErreur lors de la création du shop (multiblock est nul) : §bappelez un admin ou faites un ticket sur le discord d'OpenMC"), Prefix.SHOP, MessageType.ERROR, false);
             return false;
         }
     }
@@ -121,7 +114,7 @@ public class PlayerShopManager {
         }
         
         if (!ShopManager.removeShop(shop)) {
-            MessagesManager.sendMessage(player, Component.text("§cShop introuvable (faites un screen de votre shop actuellement et appelez un admin)"), Prefix.SHOP, MessageType.ERROR, false);
+            MessagesManager.sendMessage(player, Component.text("§cShop introuvable : appelez un admin ou faites un ticket sur le discord d'OpenMC"), Prefix.SHOP, MessageType.ERROR, false);
             return;
         }
         
@@ -129,7 +122,8 @@ public class PlayerShopManager {
         
         Bukkit.getScheduler().runTaskAsynchronously(OMCPlugin.getInstance(), () -> {
             if (!ShopDatabaseManager.deleteShop(shop)) {
-                MessagesManager.sendMessage(player, Component.text("§cErreur lors de la suppression du shop (appelez un admin)"), Prefix.SHOP, MessageType.ERROR, false);
+                MessagesManager.sendMessage(player, Component.text("§cErreur lors de la suppression du shop dans la database : veuillez faire un ticket sur le discord d'OpenMC pour signaler cet incident."), Prefix.SHOP, MessageType.ERROR, false);
+                OMCLogger.error("Error when " + player.getName() + " trying to delete his shop!");
             }
         });
         
@@ -151,7 +145,7 @@ public class PlayerShopManager {
         
         Bukkit.getScheduler().runTaskAsynchronously(OMCPlugin.getInstance(), () -> {
             if (!ShopDatabaseManager.deleteShop(shop)) {
-                MessagesManager.sendMessage(admin, Component.text("§cErreur lors de la suppression du shop"), Prefix.SHOP, MessageType.ERROR, false);
+                MessagesManager.sendMessage(admin, Component.text("§cErreur lors de la suppression du shop dans la db"), Prefix.SHOP, MessageType.ERROR, false);
             }
         });
         

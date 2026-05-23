@@ -18,9 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ShopCatalogueMenu extends PaginatedMenu {
+public class ShopCatalogMenu extends PaginatedMenu {
 
-    public ShopCatalogueMenu(Player owner) {
+    public ShopCatalogMenu(Player owner) {
         super(owner);
     }
 

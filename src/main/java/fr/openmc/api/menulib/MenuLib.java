@@ -83,6 +83,11 @@ public final class MenuLib implements Listener {
         menu.getItemClickEvents().put(itemBuilder, e);
     }
 
+    public static void updateMenu(Player player) {
+        if (!(player.getOpenInventory().getTopInventory().getHolder() instanceof Menu menu)) return;
+        menu.update();
+    }
+
     public static void clearHistory(Player player) {
         menuHistory.remove(player);
     }
@@ -216,7 +221,7 @@ public final class MenuLib implements Listener {
      */
     @EventHandler
     public void onClose(InventoryCloseEvent e) {
-        if (!(e.getPlayer() instanceof  Player player)) return;
+        if (!(e.getPlayer() instanceof Player player)) return;
 
         if (e.getInventory().getHolder(false) instanceof Menu menu) {
             menu.onClose(e);

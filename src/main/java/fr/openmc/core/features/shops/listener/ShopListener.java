@@ -1,13 +1,13 @@
-package fr.openmc.core.features.corporation.listener;
+package fr.openmc.core.features.shops.listener;
 
 import dev.lone.itemsadder.api.CustomFurniture;
 import dev.lone.itemsadder.api.Events.FurnitureBreakEvent;
 import dev.lone.itemsadder.api.Events.FurnitureInteractEvent;
 import fr.openmc.core.OMCPlugin;
-import fr.openmc.core.features.corporation.manager.ShopManager;
-import fr.openmc.core.features.corporation.menu.ShopMenu;
-import fr.openmc.core.features.corporation.menu.ShopStocksMenu;
-import fr.openmc.core.features.corporation.models.Shop;
+import fr.openmc.core.features.shops.manager.ShopManager;
+import fr.openmc.core.features.shops.menu.ShopMenu;
+import fr.openmc.core.features.shops.menu.ShopStocksMenu;
+import fr.openmc.core.features.shops.models.Shop;
 import fr.openmc.core.utils.text.messages.MessageType;
 import fr.openmc.core.utils.text.messages.MessagesManager;
 import fr.openmc.core.utils.text.messages.Prefix;

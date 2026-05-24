@@ -1,4 +1,4 @@
-package fr.openmc.core.features.corporation;
+package fr.openmc.core.features.shops;
 
 import dev.lone.itemsadder.api.CustomFurniture;
 import dev.lone.itemsadder.api.CustomStack;

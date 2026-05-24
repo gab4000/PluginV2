@@ -1,4 +1,4 @@
-package fr.openmc.core.features.corporation.menu;
+package fr.openmc.core.features.shops.menu;
 
 import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.api.menulib.PaginatedMenu;
@@ -14,13 +14,13 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ShopCatalogMenu extends PaginatedMenu {
+public class ShopStocksMenu extends PaginatedMenu {
 
-    public ShopCatalogMenu(Player owner) {
+    public ShopStocksMenu(Player owner) {
         super(owner);
     }
 
@@ -46,17 +46,21 @@ public class ShopCatalogMenu extends PaginatedMenu {
 
     @Override
     public List<ItemStack> getItems() {
-		return new ArrayList<>();
+        List<ItemStack> items = new java.util.ArrayList<>();
+
+        return items;
     }
-	
-	@Override
-	public Map<Integer, ItemBuilder> getButtons() {
-		return Map.of();
-	}
-	
-	@Override
+
+    @Override
+    public Map<Integer, ItemBuilder> getButtons() {
+        Map<Integer, ItemBuilder> buttons = new HashMap<>();
+        
+        return buttons;
+    }
+
+    @Override
     public @NotNull Component getName() {
-        return Component.text("Menu du shop ");
+        return Component.text("Menu des Stocks de ");
     }
 
     @Override

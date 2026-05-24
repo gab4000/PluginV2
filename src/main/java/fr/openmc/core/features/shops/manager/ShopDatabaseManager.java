@@ -1,11 +1,11 @@
-package fr.openmc.core.features.corporation.manager;
+package fr.openmc.core.features.shops.manager;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import fr.openmc.core.bootstrap.integration.OMCLogger;
-import fr.openmc.core.features.corporation.models.Shop;
+import fr.openmc.core.features.shops.models.Shop;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.jetbrains.annotations.Nullable;

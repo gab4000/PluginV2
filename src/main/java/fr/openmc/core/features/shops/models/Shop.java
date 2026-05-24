@@ -1,18 +1,20 @@
-package fr.openmc.core.features.corporation.models;
+package fr.openmc.core.features.shops.models;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import fr.openmc.api.menulib.Menu;
 import fr.openmc.api.menulib.utils.ItemBuilder;
-import fr.openmc.core.features.corporation.ShopFurniture;
 import fr.openmc.core.features.economy.EconomyManager;
+import fr.openmc.core.features.shops.ShopFurniture;
 import fr.openmc.core.utils.bukkit.ItemUtils;
 import fr.openmc.core.utils.cache.CacheOfflinePlayer;
 import fr.openmc.core.utils.text.messages.MessageType;
 import fr.openmc.core.utils.text.messages.MessagesManager;
 import fr.openmc.core.utils.text.messages.Prefix;
 import lombok.Getter;
+import lombok.Setter;
 import net.kyori.adventure.text.Component;
+import net.minecraft.util.Tuple;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -35,11 +37,12 @@ public class Shop {
     private int z;
     
     private ShopItem item;
-    private final Map<LocalDateTime, Map<UUID, ShopItem>> sales = new HashMap<>();
+    private final Map<LocalDateTime, Tuple<UUID, ShopItem>> sales = new HashMap<>();
 	
     private Location location;
 	private Multiblock multiblock;
 
+    @Setter
     private double turnover = 0;
     
     Shop() {
@@ -73,7 +76,21 @@ public class Shop {
     }
     
     public void addSale(Player player, ShopItem item) {
-        this.sales.put(LocalDateTime.now(), Map.of(player.getUniqueId(), item));
+        this.sales.put(LocalDateTime.now(), new Tuple<>(player.getUniqueId(), item));
+    }
+    
+    public void addTurnover(double amount) {
+        this.turnover += amount;
+    }
+    
+    public double withdrawTurnover(Player player) {
+        if (!isOwner(player.getUniqueId())) return 0;
+        if (getTurnover() <= 0) return 0;
+        double tempTurnover = getTurnover();
+        EconomyManager.addBalance(player.getUniqueId(), tempTurnover, "salaires");
+        MessagesManager.sendMessage(player, Component.text("§6Vous avez récupéré " + tempTurnover + " " + EconomyManager.getEconomyIcon() + " de votre shop."), Prefix.SHOP, MessageType.SUCCESS, false);
+        setTurnover(0);
+        return tempTurnover;
     }
     
     public void buy(Player player, int amount) {
@@ -89,11 +106,13 @@ public class Shop {
             MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas assez de place dans votre inventaire pour acheter ce nombre d'items."), Prefix.SHOP, MessageType.ERROR, false);
             return;
         }
-        if (!EconomyManager.transferBalance(player.getUniqueId(), getOwnerUUID(), this.item.getPrice(amount), getName() + " buying")) {
+        double totalPrice = this.item.getPrice(amount);
+        if (!EconomyManager.withdrawBalance(player.getUniqueId(), totalPrice, getName() + " buying")) {
             MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas assez d'argent pour acheter ce nombre d'items."), Prefix.SHOP, MessageType.ERROR, false);
             return;
         }
         addSale(player, item.setAmount(amount));
+        addTurnover(totalPrice);
         player.give(item.getItem().asQuantity(amount));
     }
 
@@ -124,6 +143,19 @@ public class Shop {
         }
         this.multiblock = multiblock;
         return true;
+    }
+    
+    public void setItem(ShopItem item) {
+        if (this.item != null) return;
+        if (item.getPrice() < 0) return;
+        if (item.getItem() == null) return;
+        this.item = item;
+    }
+    
+    public void removeItem() {
+        if (this.item == null) return;
+        if (this.item.getAmount() > 0) return;
+        this.item = null;
     }
 
     public record Multiblock(Location stockBlockLoc, Location cashBlockLoc) {}

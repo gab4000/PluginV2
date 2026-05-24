@@ -1,10 +1,10 @@
-package fr.openmc.core.features.corporation.manager;
+package fr.openmc.core.features.shops.manager;
 
 import fr.openmc.api.input.location.ItemInteraction;
 import fr.openmc.core.OMCPlugin;
 import fr.openmc.core.bootstrap.integration.OMCLogger;
-import fr.openmc.core.features.corporation.models.Shop;
 import fr.openmc.core.features.economy.EconomyManager;
+import fr.openmc.core.features.shops.models.Shop;
 import fr.openmc.core.utils.text.messages.MessageType;
 import fr.openmc.core.utils.text.messages.MessagesManager;
 import fr.openmc.core.utils.text.messages.Prefix;
@@ -91,7 +91,7 @@ public class PlayerShopManager {
             });
             return true;
         } else {
-            MessagesManager.sendMessage(player, Component.text("§cErreur lors de la création du shop (multiblock est nul) : §bappelez un admin ou faites un ticket sur le discord d'OpenMC"), Prefix.SHOP, MessageType.ERROR, false);
+            MessagesManager.sendMessage(player, Component.text("§cErreur lors de la création du shop (multiblock is null) : §bappelez un admin ou faites un ticket sur le discord d'OpenMC"), Prefix.SHOP, MessageType.ERROR, false);
             return false;
         }
     }

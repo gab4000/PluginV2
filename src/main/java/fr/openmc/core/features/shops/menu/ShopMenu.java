@@ -1,13 +1,14 @@
-package fr.openmc.core.features.corporation.menu;
+package fr.openmc.core.features.shops.menu;
 
 import fr.openmc.api.menulib.Menu;
 import fr.openmc.api.menulib.template.ConfirmMenu;
 import fr.openmc.api.menulib.utils.InventorySize;
 import fr.openmc.api.menulib.utils.ItemBuilder;
-import fr.openmc.core.features.corporation.manager.PlayerShopManager;
-import fr.openmc.core.features.corporation.models.Shop;
+import fr.openmc.core.OMCRegistry;
 import fr.openmc.core.features.economy.EconomyManager;
-import fr.openmc.core.registry.items.CustomItemRegistry;
+import fr.openmc.core.features.shops.manager.PlayerShopManager;
+import fr.openmc.core.features.shops.models.Shop;
+import fr.openmc.core.features.shops.models.ShopItem;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -23,6 +24,7 @@ public class ShopMenu extends Menu {
 
     private int amountToBuy = 1;
     private final Shop shop;
+    private final ShopItem item;
     private final boolean isShopOwner;
     
     private final InventorySize size;
@@ -31,6 +33,7 @@ public class ShopMenu extends Menu {
     public ShopMenu(Player owner, Shop shop) {
         super(owner);
         this.shop = shop;
+        this.item = shop.getItem();
         this.isShopOwner = shop.getOwnerUUID().equals(owner.getUniqueId());
         this.size = isShopOwner ? InventorySize.LARGER : InventorySize.LARGE;
         this.texture =  isShopOwner ? "shop_menu" : "sell_shop_menu";
@@ -72,86 +75,101 @@ public class ShopMenu extends Menu {
                         Component.text("§6Retirer tout l'argent et les items est nécessaire pour supprimer le shop."),
                         Component.text("§4§lATTENTION, IL SERA IMPOSSIBLE DE REVENIR EN ARRIÈRE !")
                 ));
-            }).setOnClick(event -> {
-                new ConfirmMenu(
-                        getOwner(),
-                        () -> {
-                            getOwner().closeInventory();
-                            PlayerShopManager.deleteShop(getOwner());
-                        },
-                        () -> new ShopMenu(getOwner(), shop).open(),
-                        List.of(Component.text("§4Supprimer DÉFINITIVEMENT le shop.")),
-                        List.of(Component.text("§9Revenir dans le menu du shop."))
-                ).open();
-            }));
+            }).setOnClick(_ -> new ConfirmMenu(
+                    getOwner(),
+                    () -> {
+                        getOwner().closeInventory();
+                        PlayerShopManager.deleteShop(getOwner());
+                    },
+                    () -> new ShopMenu(getOwner(), shop).open(),
+                    List.of(Component.text("§4Supprimer DÉFINITIVEMENT le shop.")),
+                    List.of(Component.text("§9Revenir dans le menu du shop."))
+            ).open()));
             
             map.put(3, new ItemBuilder(this, Material.PAPER, itemMeta -> {
                 itemMeta.displayName(Component.text("§dAccéder aux ventes du shop"));
-            }).setOnClick(event -> new ShopSalesMenu(getOwner()).open()));
+                if (this.item == null) itemMeta.lore(List.of(Component.text("§cAucune statistique disponible, car aucun item n'est en vente.")));
+            }).setOnClick(_ -> {
+                if (this.item != null) new ShopSalesMenu(getOwner()).open();
+            }));
             
             map.put(4, new ItemBuilder(this, Material.GOLD_INGOT, itemMeta -> {
-                itemMeta.displayName(Component.text("§6Accéder au chiffre d'affaires du shop"));
+                itemMeta.displayName(Component.text("§6Accéder aux statistiques du shop"));
+                if (this.item == null) itemMeta.lore(List.of(Component.text("§cAucune statistique disponible, car aucun item n'est en vente.")));
+            }).setOnClick(_ -> {
+                if (this.item != null) new ShopStatsMenu(getOwner(), this.shop).open();
             }));
             
             map.put(5, new ItemBuilder(this, Material.BARREL, itemMeta -> {
                 itemMeta.displayName(Component.text("§bAccéder aux stocks du shop"));
-            }).setOnClick(event -> new ShopStocksMenu(getOwner()).open()));
+                if (this.item == null) itemMeta.lore(List.of(Component.text("§cImpossible d'accéder aux stocks, car aucun item n'est en vente.")));
+            }).setOnClick(_ -> {
+                if (this.item != null) new ShopStocksMenu(getOwner()).open();
+            }));
             
             map.put(8, new ItemBuilder(this, Material.GREEN_BANNER, itemMeta -> itemMeta.displayName(Component.text("§aCe shop est le vôtre"))));
         }
 		
-        map.put(isShopOwner ? 19 : 10, new ItemBuilder(this, CustomItemRegistry.getByName("omc_menus:64_btn").getBest(), itemMeta -> {
+        map.put(isShopOwner ? 19 : 10, new ItemBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("omc_menus:64_btn").getBest(), itemMeta -> {
             itemMeta.displayName(Component.text("§cRetirer 64"));
             itemMeta.lore(List.of(
                     Component.text("§e§lCLIQUEZ ICI POUR RETIRER 64")
             ));
         }).setOnClick(event -> removeAmount(64)));
-        map.put(isShopOwner ? 20 : 11, new ItemBuilder(this, CustomItemRegistry.getByName("omc_menus:10_btn").getBest(), itemMeta -> {
+        map.put(isShopOwner ? 20 : 11, new ItemBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("omc_menus:10_btn").getBest(), itemMeta -> {
             itemMeta.displayName(Component.text("§cRetirer 10"));
             itemMeta.lore(List.of(
                     Component.text("§e§lCLIQUEZ ICI POUR RETIRER 10")
             ));
         }).setOnClick(event -> removeAmount(10)));
-        map.put(isShopOwner ? 21 : 12, new ItemBuilder(this, CustomItemRegistry.getByName("omc_menus:minus_btn").getBest(), itemMeta -> {
+        map.put(isShopOwner ? 21 : 12, new ItemBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("omc_menus:minus_btn").getBest(), itemMeta -> {
             itemMeta.displayName(Component.text("§cRetirer 1"));
             itemMeta.lore(List.of(
                     Component.text("§e§lCLIQUEZ ICI POUR RETIRER 1")
             ));
         }).setOnClick(event -> removeAmount(1)));
         
-        map.put(isShopOwner ? 23 : 14, new ItemBuilder(this, CustomItemRegistry.getByName("omc_menus:plus_btn").getBest(), itemMeta -> {
+        map.put(isShopOwner ? 23 : 14, new ItemBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("omc_menus:plus_btn").getBest(), itemMeta -> {
             itemMeta.displayName(Component.text("§aAjouter 1"));
             itemMeta.lore(List.of(
                     Component.text("§e§lCLIQUEZ ICI POUR AJOUTER 1")
             ));
         }).setOnClick(event -> addAmount(1)));
-        map.put(isShopOwner ? 24 : 15, new ItemBuilder(this, CustomItemRegistry.getByName("omc_menus:10_btn").getBest(), itemMeta -> {
+        map.put(isShopOwner ? 24 : 15, new ItemBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("omc_menus:10_btn").getBest(), itemMeta -> {
             itemMeta.displayName(Component.text("§aAjouter 10"));
             itemMeta.lore(List.of(
                     Component.text("§e§lCLIQUEZ ICI POUR AJOUTER 10")
             ));
         }).setOnClick(event -> addAmount(10)));
-        map.put(isShopOwner ? 25 : 16, new ItemBuilder(this, CustomItemRegistry.getByName("omc_menus:64_btn").getBest(), itemMeta -> {
+        map.put(isShopOwner ? 25 : 16, new ItemBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("omc_menus:64_btn").getBest(), itemMeta -> {
             itemMeta.displayName(Component.text("§aAjouter 64"));
             itemMeta.lore(List.of(
                     Component.text("§e§lCLIQUEZ ICI POUR AJOUTER 64")
             ));
         }).setOnClick(event -> addAmount(64)));
         
-        map.put(isShopOwner ? 30 : 21, new ItemBuilder(this, CustomItemRegistry.getByName("omc_menus:accept_btn").getBest(), itemMeta -> {
-            itemMeta.displayName(Component.text("§aAccepter l'achat"));
-            itemMeta.lore(List.of(
-                    Component.text("§6Cela vous coûtera " + this.shop.getItem().getPrice(this.amountToBuy) + " " + EconomyManager.getEconomyIcon() + " pour " + this.amountToBuy + " items"),
-                    Component.text("§e§lCLIQUEZ ICI POUR ACCEPTER L'ACHAT")
-            ));
-        }).setOnClick(event -> this.shop.buy(getOwner(), this.amountToBuy)));
-        map.put(isShopOwner ? 32 : 23, new ItemBuilder(this, CustomItemRegistry.getByName("omc_menus:refuse_btn").getBest(), itemMeta -> {
-            itemMeta.displayName(Component.text("§cRefuser l'achat"));
-            itemMeta.lore(List.of(
-                    Component.text("§6Vous refusez d'acheter " + this.amountToBuy + " items"),
-                    Component.text("§e§lCLIQUEZ ICI POUR REFUSER L'ACHAT")
-            ));
-        }).setCloseButton());
+        if (this.item != null) {
+            
+            map.put(22, new ItemBuilder(this, this.item.getItem(), itemMeta -> {
+                itemMeta.itemName(this.item.getItem().effectiveName());
+                itemMeta.lore(this.item.getItem().lore());
+            }));
+            map.put(isShopOwner ? 30 : 21, new ItemBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("omc_menus:accept_btn").getBest(), itemMeta -> {
+                itemMeta.displayName(Component.text("§aAccepter l'achat"));
+                itemMeta.lore(List.of(
+                        Component.text("§6Cela vous coûtera " + this.item.getPrice(this.amountToBuy) + " " + EconomyManager.getEconomyIcon() + " §6pour " + this.amountToBuy + " items"),
+                        Component.text("§e§lCLIQUEZ ICI POUR ACCEPTER L'ACHAT")
+                ));
+            }).setOnClick(event -> this.shop.buy(getOwner(), this.amountToBuy)));
+            map.put(isShopOwner ? 32 : 23, new ItemBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("omc_menus:refuse_btn").getBest(), itemMeta -> {
+                itemMeta.displayName(Component.text("§cRefuser l'achat"));
+                itemMeta.lore(List.of(
+                        Component.text("§6Vous refusez d'acheter " + this.amountToBuy + " items"),
+                        Component.text("§e§lCLIQUEZ ICI POUR REFUSER L'ACHAT")
+                ));
+            }).setCloseButton());
+        }
+        
         return map;
     }
 

@@ -1,16 +1,18 @@
-package fr.openmc.core.features.corporation.commands;
+package fr.openmc.core.features.shops.commands;
 
-import fr.openmc.core.features.corporation.manager.PlayerShopManager;
-import fr.openmc.core.features.corporation.manager.ShopManager;
-import fr.openmc.core.features.corporation.menu.ShopMenu;
-import fr.openmc.core.features.corporation.menu.ShopSearchMenu;
-import fr.openmc.core.features.corporation.models.Shop;
 import fr.openmc.core.features.economy.EconomyManager;
+import fr.openmc.core.features.shops.manager.PlayerShopManager;
+import fr.openmc.core.features.shops.manager.ShopManager;
+import fr.openmc.core.features.shops.menu.ShopMenu;
+import fr.openmc.core.features.shops.menu.ShopSearchMenu;
+import fr.openmc.core.features.shops.models.Shop;
+import fr.openmc.core.features.shops.models.ShopItem;
 import fr.openmc.core.utils.text.messages.MessageType;
 import fr.openmc.core.utils.text.messages.MessagesManager;
 import fr.openmc.core.utils.text.messages.Prefix;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import revxrsal.commands.annotation.*;
 import revxrsal.commands.bukkit.annotation.CommandPermission;
 
@@ -48,7 +50,26 @@ public class ShopCommand {
     @Subcommand("sell")
     @Description("Sell an item in a shop")
     public void sellItem(Player player, @Named("price") double price) {
-    
+        Shop shop = ShopManager.getPlayerShop(player.getUniqueId());
+        if (shop == null) {
+            MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas de shop"), Prefix.SHOP, MessageType.WARNING, false);
+            return;
+        }
+        ItemStack item = player.getItemInHand();
+        if (item.isEmpty()) {
+            MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas d'item en main pour le vendre."), Prefix.SHOP, MessageType.WARNING, false);
+            return;
+        }
+        if (shop.getItem() != null) {
+            MessagesManager.sendMessage(player, Component.text("§cVous avez déjà un item en vente dans votre shop."), Prefix.SHOP, MessageType.WARNING, false);
+            return;
+        }
+        if (price < 0) {
+            MessagesManager.sendMessage(player, Component.text("§cVous ne pouvez pas vendre un item à un prix négatif."), Prefix.SHOP, MessageType.WARNING, false);
+            return;
+        }
+        shop.setItem(new ShopItem(item, price));
+        MessagesManager.sendMessage(player, Component.text("§aItem ajouté au shop pour " + price + " " + EconomyManager.getEconomyIcon()), Prefix.SHOP, MessageType.SUCCESS, true);
     }
 
     @Subcommand("create")
@@ -68,8 +89,22 @@ public class ShopCommand {
 
     @Subcommand("unsell")
     @Description("Unsell an item of a shop")
-    public void unsellItem(Player player, @Named("item number") int itemIndex) {
-    
+    public void unsellItem(Player player) {
+        Shop shop = ShopManager.getPlayerShop(player.getUniqueId());
+        if (shop == null) {
+            MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas de shop"), Prefix.SHOP, MessageType.WARNING, false);
+            return;
+        }
+        if (shop.getItem() == null) {
+            MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas d'item en vente dans votre shop."), Prefix.SHOP, MessageType.WARNING, false);
+            return;
+        }
+        if (shop.getItem().getAmount() > 0) {
+            MessagesManager.sendMessage(player, Component.text("§cVos stocks ne sont pas vides."), Prefix.SHOP, MessageType.WARNING, false);
+            return;
+        }
+        shop.removeItem();
+        MessagesManager.sendMessage(player, Component.text("§aItem retiré du shop"), Prefix.SHOP, MessageType.SUCCESS, true);
     }
 
     @Subcommand("delete")
@@ -79,7 +114,6 @@ public class ShopCommand {
             MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas de shop"), Prefix.SHOP, MessageType.WARNING, false);
             return;
         }
-        
         PlayerShopManager.deleteShop(player);
     }
 

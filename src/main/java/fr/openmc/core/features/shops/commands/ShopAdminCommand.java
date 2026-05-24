@@ -1,10 +1,10 @@
-package fr.openmc.core.features.corporation.commands;
+package fr.openmc.core.features.shops.commands;
 
-import fr.openmc.core.features.corporation.ShopFurniture;
-import fr.openmc.core.features.corporation.commands.autocomplete.ShopAdminCommandPlayerAutocomplete;
-import fr.openmc.core.features.corporation.manager.PlayerShopManager;
-import fr.openmc.core.features.corporation.manager.ShopManager;
-import fr.openmc.core.features.corporation.models.Shop;
+import fr.openmc.core.features.shops.ShopFurniture;
+import fr.openmc.core.features.shops.commands.autocomplete.ShopAdminCommandPlayerAutocomplete;
+import fr.openmc.core.features.shops.manager.PlayerShopManager;
+import fr.openmc.core.features.shops.manager.ShopManager;
+import fr.openmc.core.features.shops.models.Shop;
 import fr.openmc.core.utils.text.messages.MessageType;
 import fr.openmc.core.utils.text.messages.MessagesManager;
 import fr.openmc.core.utils.text.messages.Prefix;

@@ -1,7 +1,7 @@
-package fr.openmc.core.features.corporation.commands.autocomplete;
+package fr.openmc.core.features.shops.commands.autocomplete;
 
-import fr.openmc.core.features.corporation.manager.ShopManager;
-import fr.openmc.core.features.corporation.models.Shop;
+import fr.openmc.core.features.shops.manager.ShopManager;
+import fr.openmc.core.features.shops.models.Shop;
 import fr.openmc.core.utils.cache.CacheOfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 import revxrsal.commands.autocomplete.SuggestionProvider;

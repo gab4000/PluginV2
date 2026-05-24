@@ -1,4 +1,4 @@
-package fr.openmc.core.features.corporation.manager;
+package fr.openmc.core.features.shops.manager;
 
 import com.j256.ormlite.support.ConnectionSource;
 import fr.openmc.core.OMCPlugin;
@@ -6,9 +6,9 @@ import fr.openmc.core.bootstrap.features.Feature;
 import fr.openmc.core.bootstrap.features.types.DatabaseFeature;
 import fr.openmc.core.bootstrap.features.types.LoadAfterItemsAdder;
 import fr.openmc.core.bootstrap.integration.OMCLogger;
-import fr.openmc.core.features.corporation.ShopFurniture;
-import fr.openmc.core.features.corporation.listener.ShopListener;
-import fr.openmc.core.features.corporation.models.Shop;
+import fr.openmc.core.features.shops.ShopFurniture;
+import fr.openmc.core.features.shops.listener.ShopListener;
+import fr.openmc.core.features.shops.models.Shop;
 import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import fr.openmc.core.utils.world.WorldUtils;
 import lombok.Getter;

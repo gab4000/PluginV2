@@ -1,4 +1,4 @@
-package fr.openmc.core.features.corporation.models;
+package fr.openmc.core.features.shops.models;
 
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;

@@ -1,4 +1,4 @@
-package fr.openmc.core.features.corporation.menu;
+package fr.openmc.core.features.shops.menu;
 
 import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.api.menulib.PaginatedMenu;
@@ -14,13 +14,13 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ShopSalesMenu extends PaginatedMenu {
+public class ShopCatalogMenu extends PaginatedMenu {
 
-    public ShopSalesMenu(Player owner) {
+    public ShopCatalogMenu(Player owner) {
         super(owner);
     }
 
@@ -46,26 +46,27 @@ public class ShopSalesMenu extends PaginatedMenu {
 
     @Override
     public List<ItemStack> getItems() {
-        List<ItemStack> items = new java.util.ArrayList<>();
-        
-        return items;
+		return new ArrayList<>();
     }
-
-    @Override
-    public Map<Integer, ItemBuilder> getButtons() {
-        Map<Integer, ItemBuilder> buttons = new HashMap<>();
-        
-        return buttons;
-    }
-
-    @Override
+	
+	@Override
+	public Map<Integer, ItemBuilder> getButtons() {
+		return Map.of();
+	}
+	
+	@Override
     public @NotNull Component getName() {
-        return Component.text("Ventes de ");
+        return Component.text("Menu du shop ");
     }
 
     @Override
     public String getTexture() {
         return FontImageWrapper.replaceFontImages("§r§f:offset_-11::large_shop_menu:");
+    }
+
+    @Override
+    public void onInventoryClick(InventoryClickEvent inventoryClickEvent) {
+
     }
 
     @Override
@@ -76,10 +77,5 @@ public class ShopSalesMenu extends PaginatedMenu {
     @Override
     public List<Integer> getTakableSlot() {
         return List.of();
-    }
-
-    @Override
-    public void onInventoryClick(InventoryClickEvent inventoryClickEvent) {
-
     }
 }

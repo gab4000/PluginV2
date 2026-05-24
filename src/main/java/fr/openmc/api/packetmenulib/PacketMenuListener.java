@@ -17,11 +17,11 @@ import org.bukkit.plugin.Plugin;
 import java.util.Objects;
 import java.util.UUID;
 
-public class PacketListener extends PacketAdapter {
+public class PacketMenuListener extends PacketAdapter {
     @Getter
-    private static PacketListener instance;
+    private static PacketMenuListener instance;
 
-    public PacketListener(Plugin plugin) {
+    public PacketMenuListener(Plugin plugin) {
         super(plugin, PacketType.Play.Client.WINDOW_CLICK, PacketType.Play.Client.CLOSE_WINDOW, PacketType.Play.Server.OPEN_WINDOW, PacketType.Play.Server.SET_SLOT);
         ProtocolLibrary.getProtocolManager().addPacketListener(this);
         instance = this;

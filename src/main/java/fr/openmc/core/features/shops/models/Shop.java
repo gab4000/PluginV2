@@ -27,7 +27,9 @@ import java.util.*;
 @DatabaseTable(tableName = "shops")
 public class Shop {
     
-    @DatabaseField(id = true, columnName = "owner_uuid", canBeNull = false)
+    @DatabaseField(id = true, columnName = "shop_uuid", canBeNull = false)
+    private UUID shopUUID;
+    @DatabaseField(columnName = "owner_uuid", canBeNull = false)
     private UUID ownerUUID;
     @DatabaseField(canBeNull = false)
     private int x;
@@ -54,6 +56,7 @@ public class Shop {
     }
     
     public Shop(UUID ownerUUID, Location location) {
+        this.shopUUID = UUID.randomUUID();
         this.ownerUUID = ownerUUID;
 	    this.x = location.getBlockX();
 	    this.y = location.getBlockY();
@@ -61,9 +64,13 @@ public class Shop {
         this.location = location.toBlockLocation();
 		this.multiblock = new Multiblock(this.location, this.location.clone().add(0, 1, 0));
     }
+    
+    public Player getOwner() {
+        return CacheOfflinePlayer.getOfflinePlayer(ownerUUID).getPlayer();
+    }
 
     public String getName() {
-        return CacheOfflinePlayer.getOfflinePlayer(ownerUUID).getName() + "'s Shop";
+        return getOwner().getName() + "'s Shop";
     }
 
     /**
@@ -75,6 +82,10 @@ public class Shop {
         return ownerUUID.equals(uuid);
     }
     
+    public boolean isOwner(Player player) {
+        return isOwner(player.getUniqueId());
+    }
+    
     public void addSale(Player player, ShopItem item) {
         this.sales.put(LocalDateTime.now(), new Tuple<>(player.getUniqueId(), item));
     }
@@ -84,7 +95,7 @@ public class Shop {
     }
     
     public double withdrawTurnover(Player player) {
-        if (!isOwner(player.getUniqueId())) return 0;
+        if (!isOwner(player)) return 0;
         if (getTurnover() <= 0) return 0;
         double tempTurnover = getTurnover();
         EconomyManager.addBalance(player.getUniqueId(), tempTurnover, "salaires");
@@ -94,7 +105,7 @@ public class Shop {
     }
     
     public void buy(Player player, int amount) {
-        if (isOwner(player.getUniqueId())) {
+        if (isOwner(player)) {
             MessagesManager.sendMessage(player, Component.text("§cVous ne pouvez pas acheter des items à votre propre shop."), Prefix.SHOP, MessageType.ERROR, false);
             return;
         }
@@ -102,7 +113,7 @@ public class Shop {
             MessagesManager.sendMessage(player, Component.text("§cLe nombre d'items achetés dépasse le nombre d'items présents dans le shop."), Prefix.SHOP, MessageType.ERROR, false);
             return;
         }
-        if (!ItemUtils.hasEnoughSpace(player, item.getItem(), amount)) {
+        if (!ItemUtils.hasEnoughSpace(player, item.getItemStack(), amount)) {
             MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas assez de place dans votre inventaire pour acheter ce nombre d'items."), Prefix.SHOP, MessageType.ERROR, false);
             return;
         }
@@ -113,7 +124,7 @@ public class Shop {
         }
         addSale(player, item.setAmount(amount));
         addTurnover(totalPrice);
-        player.give(item.getItem().asQuantity(amount));
+        player.give(item.getItemStack().asQuantity(amount));
     }
 
     /**
@@ -130,7 +141,7 @@ public class Shop {
                     Component.text("§7■ Chiffre d'affaires : " + EconomyManager.getFormattedNumber(turnover)),
                     Component.text("§7■ Ventes : §f" + sales.size())
             ));
-            if (! fromShopMenu) lore.add(Component.text("§7■ Cliquez pour accéder au shop"));
+            if (!fromShopMenu) lore.add(Component.text("§7■ Cliquez pour accéder au shop"));
             itemMeta.lore(lore);
         });
     }
@@ -148,7 +159,7 @@ public class Shop {
     public void setItem(ShopItem item) {
         if (this.item != null) return;
         if (item.getPrice() < 0) return;
-        if (item.getItem() == null) return;
+        if (item.getItemStack() == null) return;
         this.item = item;
     }
     
@@ -156,6 +167,10 @@ public class Shop {
         if (this.item == null) return;
         if (this.item.getAmount() > 0) return;
         this.item = null;
+    }
+    
+    public boolean hasItem() {
+        return this.item != null;
     }
 
     public record Multiblock(Location stockBlockLoc, Location cashBlockLoc) {}

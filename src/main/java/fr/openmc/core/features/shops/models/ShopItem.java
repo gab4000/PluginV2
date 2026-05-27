@@ -1,7 +1,9 @@
 package fr.openmc.core.features.shops.models;
 
+import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import fr.openmc.core.features.shops.manager.ShopManager;
 import fr.openmc.core.utils.bukkit.ItemUtils;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
@@ -12,49 +14,32 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.UUID;
 
-import static com.j256.ormlite.field.DataType.BYTE_ARRAY;
-
 @Getter
 @DatabaseTable(tableName = "shop_items")
 public class ShopItem {
     
-    @DatabaseField(id = true, columnName = "owner_uuid", canBeNull = false)
-    private UUID ownerUUID;
-    @DatabaseField(canBeNull = false, columnName = "item_uuid")
-    private UUID itemUUID;
+    @DatabaseField(id = true, columnName = "shop_uuid", canBeNull = false)
+    private UUID shopUUID;
     @DatabaseField(canBeNull = false)
     private double pricePerItem;
     @DatabaseField(canBeNull = false)
     private int amount;
-    @DatabaseField(canBeNull = false, dataType = BYTE_ARRAY)
+    @DatabaseField(canBeNull = false, columnName = "item_bytes", dataType = DataType.BYTE_ARRAY)
     private byte[] itemBytes;
     
     private double price;
-    private ItemStack item;
+    private ItemStack itemStack;
     
     ShopItem() {
         // required for ORMLite
     }
 
-    public ShopItem(ItemStack item, double pricePerItem) {
-        this(item, pricePerItem, UUID.randomUUID());
-    }
-
-    public ShopItem(ItemStack item, double pricePerItem, UUID itemID) {
-        this.item = item.clone();
+    public ShopItem(UUID shopUUID, ItemStack itemStack, double pricePerItem) {
+        this.shopUUID = shopUUID;
+        this.itemStack = itemStack.clone();
         this.pricePerItem = pricePerItem;
-        this.item.setAmount(1);
         this.price = pricePerItem * amount;
         this.amount = 0;
-        this.itemUUID = itemID;
-    }
-    
-    public ShopItem(byte[] itemBytes, UUID ownerUUID, double price, int amount, UUID itemUUID) {
-        this.itemBytes = itemBytes;
-        this.ownerUUID = ownerUUID;
-        this.price = price;
-        this.amount = amount;
-        this.itemUUID = itemUUID;
     }
 
     /**
@@ -66,6 +51,12 @@ public class ShopItem {
     public ShopItem setAmount(int amount) {
         this.amount = amount;
         this.price = pricePerItem * amount;
+        return this;
+    }
+    
+    public ShopItem addAmout(int amount) {
+        this.amount += amount;
+        this.price = pricePerItem * this.amount;
         return this;
     }
 
@@ -85,15 +76,6 @@ public class ShopItem {
     }
 
     /**
-     * Create a copy of the ShopItem
-     *
-     * @return the copied ShopItem
-     */
-    public ShopItem copy() {
-        return new ShopItem(item.clone(), pricePerItem);
-    }
-
-    /**
      * Get the price of an item based on the amount
      *
      * @param amount the amount of the item
@@ -103,8 +85,7 @@ public class ShopItem {
         return pricePerItem * amount;
     }
     
-    public ShopItem deserialize() {
-        ItemStack item = ItemStack.deserializeBytes(itemBytes);
-        return new ShopItem(item, price, itemUUID).setAmount(amount);
+    public Shop getShop() {
+        return ShopManager.getShopByUUID(this.shopUUID);
     }
 }

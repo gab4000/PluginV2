@@ -6,9 +6,9 @@ import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import fr.openmc.core.bootstrap.integration.OMCLogger;
 import fr.openmc.core.features.shops.models.Shop;
+import fr.openmc.core.features.shops.models.ShopItem;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
 
 import java.sql.SQLException;
@@ -20,10 +20,14 @@ import java.util.UUID;
 public class ShopDatabaseManager {
 
 	private static Dao<Shop, UUID> shopDao;
+	private static Dao<ShopItem, UUID> shopItemDao;
 	
 	public static void initDB(ConnectionSource connectionSource) throws SQLException {
 		TableUtils.createTableIfNotExists(connectionSource, Shop.class);
 		shopDao = DaoManager.createDao(connectionSource, Shop.class);
+		
+		TableUtils.createTableIfNotExists(connectionSource, ShopItem.class);
+		shopItemDao = DaoManager.createDao(connectionSource, ShopItem.class);
 	}
 	
 	public static @NonNull Map<Location, Shop> loadDBShops() throws SQLException {
@@ -42,16 +46,29 @@ public class ShopDatabaseManager {
 		return shopsByLocation;
 	}
 	
-	public static @Nullable Shop loadShopFor(UUID ownerUUID) {
+	public static void loadDBShopItems() throws SQLException {
+		List<ShopItem> shopItems = shopItemDao.queryForAll();
+		for (ShopItem item : shopItems) {
+			Shop shop = ShopManager.getShopByUUID(item.getShopUUID());
+			if (shop == null) {
+				OMCLogger.error("Shop for item with shopUUID " + item.getShopUUID() + " is null, item not assigned");
+				continue;
+			}
+			shop.setItem(item);
+		}
+	}
+	
+	public static boolean saveDBShopItem(ShopItem item) {
 		try {
-			return shopDao.queryForId(ownerUUID);
+			shopItemDao.createOrUpdate(item);
+			return true;
 		} catch (SQLException e) {
-			OMCLogger.error("Failed to load shop for owner UUID: {}\nCause: {}", ownerUUID, e.getCause());
-			return null;
+			OMCLogger.error("Failed to save shop item for owner UUID: {}\nCause: {}", item.getShop().getOwnerUUID(), e.getCause());
+			return false;
 		}
 	}
 
-	public static boolean saveShop(Shop shop) {
+	public static boolean saveDBShop(Shop shop) {
 		try {
 			shopDao.createOrUpdate(shop);
 			return true;
@@ -61,7 +78,7 @@ public class ShopDatabaseManager {
 		}
 	}
 	
-	public static boolean deleteShop(Shop shop) {
+	public static boolean deleteDBShop(Shop shop) {
 		try {
 			shopDao.delete(shop);
 			return true;

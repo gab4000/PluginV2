@@ -3,16 +3,14 @@ package fr.openmc.core.features.shops.listener;
 import dev.lone.itemsadder.api.CustomFurniture;
 import dev.lone.itemsadder.api.Events.FurnitureBreakEvent;
 import dev.lone.itemsadder.api.Events.FurnitureInteractEvent;
-import fr.openmc.core.OMCPlugin;
 import fr.openmc.core.features.shops.manager.ShopManager;
 import fr.openmc.core.features.shops.menu.ShopMenu;
-import fr.openmc.core.features.shops.menu.ShopStocksMenu;
+import fr.openmc.core.features.shops.menu.ShopSellingMenu;
 import fr.openmc.core.features.shops.models.Shop;
 import fr.openmc.core.utils.text.messages.MessageType;
 import fr.openmc.core.utils.text.messages.MessagesManager;
 import fr.openmc.core.utils.text.messages.Prefix;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
@@ -33,11 +31,6 @@ import java.util.UUID;
 public class ShopListener implements Listener {
 
     private final Map<UUID, Boolean> inShopBarrel = new HashMap<>();
-    private final boolean initialized;
-    
-    public ShopListener(boolean initialized) {
-        this.initialized = true;
-    }
 
     @EventHandler
     public void onShopBreak(BlockBreakEvent e) {
@@ -56,7 +49,6 @@ public class ShopListener implements Listener {
 
     @EventHandler
     public void onShopClick(PlayerInteractEvent e) {
-        if (!initialized) return;
         Block block = e.getClickedBlock();
         if (block == null) return;
         if (!block.getType().equals(Material.OAK_SIGN)) return;
@@ -72,12 +64,12 @@ public class ShopListener implements Listener {
         if (shop == null) return;
         
         e.setCancelled(true);
-        new ShopMenu(e.getPlayer(), shop).open();
+        if (shop.hasItem()) new ShopMenu(e.getPlayer(), shop).open();
+        else new ShopSellingMenu(e.getPlayer(), shop).open();
     }
 
     @EventHandler
     public void onInteractWithBlock(PlayerInteractEvent e) {
-        if (!initialized) return;
         if (e.getAction() != Action.RIGHT_CLICK_BLOCK) return;
         Block block = e.getClickedBlock();
         if (block == null || block.getType() != Material.BARREL) return;
@@ -93,13 +85,8 @@ public class ShopListener implements Listener {
         Player player = e.getPlayer();
         if (!shop.getOwnerUUID().equals(player.getUniqueId())) {
             e.setCancelled(true);
-            return;
+            MessagesManager.sendMessage(player, Component.text("§cCeci n'est pas votre shop."), Prefix.SHOP, MessageType.WARNING, true);
         }
-        
-        Bukkit.getScheduler().runTaskLater(OMCPlugin.getInstance(), () -> {
-            player.closeInventory();
-            new ShopStocksMenu(player).open();
-        }, 1);
     }
 
     /**
@@ -121,7 +108,6 @@ public class ShopListener implements Listener {
     
     @EventHandler
     public void onFurnitureInteract(FurnitureInteractEvent e) {
-        if (!initialized) return;
 		CustomFurniture furniture = e.getFurniture();
 		
         if (furniture == null) return;
@@ -141,6 +127,7 @@ public class ShopListener implements Listener {
 	    }
 	    
 	    e.setCancelled(true);
-	    new ShopMenu(player, shop).open();
+	    if (shop.hasItem()) new ShopMenu(player, shop).open();
+        else new ShopSellingMenu(player, shop).open();
     }
 }

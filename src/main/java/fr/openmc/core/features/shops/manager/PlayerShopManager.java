@@ -13,7 +13,6 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
@@ -37,9 +36,9 @@ public class PlayerShopManager {
         ItemInteraction.runLocationInteraction(
                 player,
                 new ItemStack(Material.BARREL),
-                "shop:shop_creator",
+                "shops:shop_creator",
                 300,
-                Component.text("Vous avez reçu un tonneau pour poser votre shop"),
+                Component.text("§6Vous avez reçu un tonneau pour poser votre shop"),
                 Component.text("§cCréation de shop annulée"),
                 location -> {
                     if (location == null) return false;
@@ -77,14 +76,13 @@ public class PlayerShopManager {
             }
             
             Bukkit.getScheduler().runTaskAsynchronously(OMCPlugin.getInstance(), () -> {
-                if (!ShopDatabaseManager.saveShop(shop)) {
+                if (!ShopDatabaseManager.saveDBShop(shop)) {
                     MessagesManager.sendMessage(player, Component.text("§cErreur lors de la création du shop (cannot save shop location), essai de retrait du shop... §bVous, appelez un admin ou faites un ticket sur le discord d'OpenMC"), Prefix.SHOP, MessageType.ERROR, false);
 	                OMCLogger.error("Error when saving shop location for player {}! Trying to remove shop...", player.getName());
                     if (!ShopManager.removeShop(shop)) MessagesManager.sendMessage(player, Component.text("§cImpossible de retirer le shop, tentez d'appeller un admin ou faites un ticket sur le discord d'OpenMC"), Prefix.SHOP, MessageType.ERROR, false);
                     MessagesManager.sendMessage(player, Component.text("§6La création de shop n'ayant pas été possible, 500 " + EconomyManager.getEconomyIcon() + " vous ont été remboursés"), Prefix.SHOP, MessageType.INFO, true);
                 }
                 else {
-                    ShopManager.getPlayerShops().put(player.getUniqueId(), shop);
                     MessagesManager.sendMessage(player, Component.text("§aVotre shop a été créé avec succès ! Vous pouvez maintenant y ajouter des articles"), Prefix.SHOP, MessageType.SUCCESS, true);
                     MessagesManager.sendMessage(player, Component.text("§c500" + EconomyManager.getEconomyIcon() + " retirés de votre compte personnel"), Prefix.SHOP, MessageType.SUCCESS, false);
                 }
@@ -101,10 +99,9 @@ public class PlayerShopManager {
      *
      * @param player The player who deletes the shop
      */
-    public static void deleteShop(Player player) {
-        Shop shop = ShopManager.getPlayerShop(player.getUniqueId());
+    public static void deleteShop(Player player, Shop shop) {
         if (shop == null) {
-	        OMCLogger.error("Shop for player {} is null!", player.getName());
+            MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas de shop, ou celui-ci est introuvable"), Prefix.SHOP, MessageType.WARNING, false);
             return;
         }
         
@@ -118,10 +115,8 @@ public class PlayerShopManager {
             return;
         }
         
-        ShopManager.getPlayerShops().remove(player.getUniqueId());
-        
         Bukkit.getScheduler().runTaskAsynchronously(OMCPlugin.getInstance(), () -> {
-            if (!ShopDatabaseManager.deleteShop(shop)) {
+            if (!ShopDatabaseManager.deleteDBShop(shop)) {
                 MessagesManager.sendMessage(player, Component.text("§cErreur lors de la suppression du shop dans la database : veuillez faire un ticket sur le discord d'OpenMC pour signaler cet incident."), Prefix.SHOP, MessageType.ERROR, false);
                 OMCLogger.error("Error when " + player.getName() + " trying to delete his shop!");
             }
@@ -133,7 +128,7 @@ public class PlayerShopManager {
         MessagesManager.sendMessage(player, Component.text("§a400" + EconomyManager.getEconomyIcon() + " remboursés sur votre compte personnel"), Prefix.SHOP, MessageType.SUCCESS, true);
     }
     
-    public static void adminDeleteShop(OfflinePlayer player, Player admin) {
+    /* public static void adminDeleteShop(OfflinePlayer player, Player admin) {
         Shop shop = ShopManager.getPlayerShop(player.getUniqueId());
         if (shop == null) return;
         
@@ -144,7 +139,7 @@ public class PlayerShopManager {
         ShopManager.getPlayerShops().remove(player.getUniqueId());
         
         Bukkit.getScheduler().runTaskAsynchronously(OMCPlugin.getInstance(), () -> {
-            if (!ShopDatabaseManager.deleteShop(shop)) {
+            if (!ShopDatabaseManager.deleteDBShop(shop)) {
                 MessagesManager.sendMessage(admin, Component.text("§cErreur lors de la suppression du shop dans la db"), Prefix.SHOP, MessageType.ERROR, false);
             }
         });
@@ -152,5 +147,5 @@ public class PlayerShopManager {
         MessagesManager.sendMessage(admin, Component.text("§6Le shop a bien été supprimé !"), Prefix.SHOP, MessageType.SUCCESS, false);
         EconomyManager.addBalance(player.getUniqueId(), 400);
         MessagesManager.sendMessage(player, Component.text("§a400" + EconomyManager.getEconomyIcon() + " remboursés sur votre compte personnel"), Prefix.SHOP, MessageType.SUCCESS, true);
-    }
+    } */
 }

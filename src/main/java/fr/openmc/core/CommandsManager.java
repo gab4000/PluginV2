@@ -9,8 +9,6 @@ import fr.openmc.core.commands.utils.RTPCommands;
 import fr.openmc.core.commands.utils.Restart;
 import fr.openmc.core.commands.utils.Socials;
 import fr.openmc.core.features.credits.CreditsCommand;
-import fr.openmc.core.features.shops.commands.ShopAdminCommand;
-import fr.openmc.core.features.shops.commands.ShopCommand;
 import lombok.Getter;
 import revxrsal.commands.Lamp;
 import revxrsal.commands.bukkit.BukkitLamp;
@@ -46,9 +44,7 @@ public class CommandsManager {
                 new ChronometerCommand(),
                 new Restart(),
                 new CreditsCommand(),
-                new CustomItemCommand(),
-                new ShopCommand(),
-                new ShopAdminCommand()
+                new CustomItemCommand()
         );
     }
 }

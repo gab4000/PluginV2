@@ -1,12 +1,20 @@
 package fr.openmc.core.features.shops.menu;
 
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.api.menulib.PaginatedMenu;
 import fr.openmc.api.menulib.utils.InventorySize;
 import fr.openmc.api.menulib.utils.ItemBuilder;
 import fr.openmc.api.menulib.utils.StaticSlots;
+import fr.openmc.core.OMCRegistry;
+import fr.openmc.core.features.shops.models.Shop;
+import fr.openmc.core.features.shops.models.ShopItem;
+import fr.openmc.core.utils.bukkit.ContainerUtils;
+import fr.openmc.core.utils.bukkit.ItemUtils;
+import fr.openmc.core.utils.text.messages.MessageType;
+import fr.openmc.core.utils.text.messages.MessagesManager;
+import fr.openmc.core.utils.text.messages.Prefix;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
+import org.bukkit.block.Barrel;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -19,9 +27,15 @@ import java.util.List;
 import java.util.Map;
 
 public class ShopStocksMenu extends PaginatedMenu {
-
-    public ShopStocksMenu(Player owner) {
+    
+    private final Shop shop;
+    
+    private final int barrelStocks;
+    
+    public ShopStocksMenu(Player owner, Shop shop) {
         super(owner);
+        this.shop = shop;
+        this.barrelStocks = ContainerUtils.getTotalItemsIn((Barrel) this.shop.getMultiblock().stockBlockLoc().getBlock().getState(), this.shop.getItem().getItemStack());
     }
 
     @Override
@@ -46,26 +60,43 @@ public class ShopStocksMenu extends PaginatedMenu {
 
     @Override
     public List<ItemStack> getItems() {
-        List<ItemStack> items = new java.util.ArrayList<>();
-
-        return items;
+        ShopItem item = this.shop.getItem();
+        if (item == null) return List.of();
+        return ItemUtils.splitAmountIntoStack(item.getItemStack(), item.getAmount());
     }
 
     @Override
     public Map<Integer, ItemBuilder> getButtons() {
-        Map<Integer, ItemBuilder> buttons = new HashMap<>();
+        Map<Integer, ItemBuilder> map = new HashMap<>();
         
-        return buttons;
+        map.put(45, new ItemBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("_iainternal:icon_back_orange").getBest(), itemMeta ->
+                itemMeta.displayName(Component.text("§dRetour au menu du shop"))
+        ).setOnClick(_ -> new ShopMenu(getOwner(), shop).open()));
+        map.put(49, new ItemBuilder(this, Material.BARREL, itemMeta -> {
+            itemMeta.displayName(Component.text("§aRemplir depuis le tonneau (" + barrelStocks + "§a items disponibles)"));
+        }).setOnClick(_ -> {
+            if (barrelStocks == 0) return;
+            ShopItem item = this.shop.getItem();
+            int amountToAdd = 28 * item.getItemStack().getMaxStackSize() - item.getAmount();
+            if (amountToAdd <= 0) return;
+            if (amountToAdd > barrelStocks) amountToAdd = barrelStocks;
+            ContainerUtils.removeItemsFromInventory((Barrel) this.shop.getMultiblock().stockBlockLoc().getBlock().getState(), item.getItemStack(), amountToAdd);
+            item.addAmout(amountToAdd);
+            MessagesManager.sendMessage(getOwner(), Component.text("§aStocks rechargés."), Prefix.SHOP, MessageType.SUCCESS, true);
+            new ShopStocksMenu(getOwner(), shop).open();
+        }));
+        
+        return map;
     }
 
     @Override
     public @NotNull Component getName() {
-        return Component.text("Menu des Stocks de ");
+        return Component.text("Menu des Stocks");
     }
 
     @Override
     public String getTexture() {
-        return FontImageWrapper.replaceFontImages("§r§f:offset_-11::large_shop_menu:");
+        return "§r§f:offset_-11::large_shop_menu:";
     }
 
     @Override

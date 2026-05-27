@@ -1,6 +1,5 @@
 package fr.openmc.core.features.shops.menu;
 
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.api.menulib.PaginatedMenu;
 import fr.openmc.api.menulib.utils.InventorySize;
 import fr.openmc.api.menulib.utils.ItemBuilder;
@@ -53,9 +52,9 @@ public class ShopSalesMenu extends PaginatedMenu {
 
     @Override
     public Map<Integer, ItemBuilder> getButtons() {
-        Map<Integer, ItemBuilder> buttons = new HashMap<>();
+        Map<Integer, ItemBuilder> map = new HashMap<>();
         
-        return buttons;
+        return map;
     }
 
     @Override
@@ -65,7 +64,7 @@ public class ShopSalesMenu extends PaginatedMenu {
 
     @Override
     public String getTexture() {
-        return FontImageWrapper.replaceFontImages("§r§f:offset_-11::large_shop_menu:");
+        return "§r§f:offset_-11::large_shop_menu:";
     }
 
     @Override

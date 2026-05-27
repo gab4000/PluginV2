@@ -3,18 +3,26 @@ package fr.openmc.core.features.shops.manager;
 import com.j256.ormlite.support.ConnectionSource;
 import fr.openmc.core.OMCPlugin;
 import fr.openmc.core.bootstrap.features.Feature;
+import fr.openmc.core.bootstrap.features.annotations.Credit;
 import fr.openmc.core.bootstrap.features.types.DatabaseFeature;
+import fr.openmc.core.bootstrap.features.types.HasCommands;
+import fr.openmc.core.bootstrap.features.types.HasListeners;
 import fr.openmc.core.bootstrap.features.types.LoadAfterItemsAdder;
 import fr.openmc.core.bootstrap.integration.OMCLogger;
 import fr.openmc.core.features.shops.ShopFurniture;
+import fr.openmc.core.features.shops.commands.ShopCommand;
 import fr.openmc.core.features.shops.listener.ShopListener;
 import fr.openmc.core.features.shops.models.Shop;
 import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import fr.openmc.core.utils.world.WorldUtils;
 import lombok.Getter;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -22,21 +30,23 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public class ShopManager extends Feature implements LoadAfterItemsAdder, DatabaseFeature {
+@Credit(developers = {"gab400", "Nocolm", "Xernas78"}, graphist = {"Gexary"})
+public class ShopManager extends Feature implements LoadAfterItemsAdder, DatabaseFeature, HasListeners, HasCommands {
 	
 	@Getter
-	private static final Map<UUID, Shop> playerShops = new HashMap<>();
+	private static final Map<UUID, Shop> shops = new HashMap<>();
     private static Map<Location, Shop> shopsByLocation;
-    
+	
 	@Override
 	protected void init() {
 		loadShops();
-		OMCPlugin.registerEvents(new ShopListener(isInitialized()));
+		loadShopItems();
 	}
 	
 	@Override
 	protected void save() {
 		saveShops();
+		saveShopItems();
 	}
 	
 	@Override
@@ -44,55 +54,57 @@ public class ShopManager extends Feature implements LoadAfterItemsAdder, Databas
 		ShopDatabaseManager.initDB(connectionSource);
 	}
 	
+	@Override
+	public Set<Object> getCommands() {
+		return Set.of(new ShopCommand());
+	}
+	
+	@Override
+	public Set<Listener> getListeners() {
+		return Set.of(new ShopListener());
+	}
+	
 	public static boolean loadShops() {
 		if (shopsByLocation != null) shopsByLocation.clear();
 		try {
 			shopsByLocation = ShopDatabaseManager.loadDBShops();
 		} catch (SQLException e) {
-			throw new RuntimeException(e);
+			OMCLogger.error("Cannot save shops from database: " + e.getCause());
+			return false;
 		}
-		if (shopsByLocation == null) return false;
 		
-		shopsByLocation.values().forEach(shop -> setPlayerShop(shop.getOwnerUUID(), shop));
-		OMCLogger.info("Successfully loaded {} shops from database.", playerShops.size());
+		shopsByLocation.values().forEach(shop -> setUUIDShop(shop.getShopUUID(), shop));
+		OMCLogger.info("Successfully loaded {} shops from database.", shops.size());
 		return true;
 	}
 	
-	public static boolean loadShopFor(OfflinePlayer player) {
-		OMCLogger.info("Loading shop for player {} from database...", player.getName());
-		Shop shop = ShopDatabaseManager.loadShopFor(player.getUniqueId());
-		if (shop == null) {
-			OMCLogger.info("No shop found for player {}.", player.getName());
+	public static boolean loadShopItems() {
+		try {
+			ShopDatabaseManager.loadDBShopItems();
+			OMCLogger.info("Successfully loaded shop items from database.");
+			return true;
+		} catch (SQLException e) {
+			OMCLogger.error("Cannot save shop items from database: " + e.getCause());
 			return false;
 		}
-		Location loc = new Location(Bukkit.getWorld("world"), shop.getX(), shop.getY(), shop.getZ());
-		shopsByLocation.put(loc, shop);
-		setPlayerShop(player.getUniqueId(), shop);
-		OMCLogger.info("Loaded shop for player {}.", player.getName());
-		return true;
 	}
 	
 	public static boolean saveShops() {
-		for (Shop shop : playerShops.values()) {
-			if (!ShopDatabaseManager.saveShop(shop)) {
+		for (Shop shop : shops.values()) {
+			if (!ShopDatabaseManager.saveDBShop(shop)) {
 				OMCLogger.error("Failed to save " + shop.getName() + " to database.");
 			}
 		}
 		return true;
 	}
 	
-	public static boolean saveShopFor(OfflinePlayer player) {
-		OMCLogger.info("Saving shop for player {} to database...", player.getName());
-		Shop shop = getPlayerShop(player.getUniqueId());
-		if (shop == null) {
-			OMCLogger.info("No shop found for player {}.", player.getName());
-			return false;
+	public static boolean saveShopItems() {
+		for (Shop shop : shops.values()) {
+			if (!shop.hasItem()) continue;
+			if (!ShopDatabaseManager.saveDBShopItem(shop.getItem())) {
+				OMCLogger.error("Failed to save " + shop.getName() + " item to database.");
+			}
 		}
-		if (!ShopDatabaseManager.saveShop(shop)) {
-			OMCLogger.error("Failed to save shop for player {} to database.", player.getName());
-			return false;
-		}
-		OMCLogger.info("Shop for player {} saved to database successfully.", player.getName());
 		return true;
 	}
 
@@ -133,6 +145,7 @@ public class ShopManager extends Feature implements LoadAfterItemsAdder, Databas
         Block cashBlock = multiblock.cashBlockLoc().getBlock();
 		
 		shopsByLocation.put(shop.getLocation(), shop);
+		shops.put(shop.getShopUUID(), shop);
         
         if (ItemsAdderHook.isEnable()) {
 	        if (!ShopFurniture.placeShopFurniture(cashBlock, WorldUtils.getYaw(player))) cashBlock.setType(Material.OAK_SIGN);
@@ -167,16 +180,20 @@ public class ShopManager extends Feature implements LoadAfterItemsAdder, Databas
         Block stockBlock = world.getBlockAt(multiblock.stockBlockLoc());
 
         if (ItemsAdderHook.isEnable()) {
-            if (!ShopFurniture.hasFurniture(cashBlock)) return false;
-            if (!ShopFurniture.removeShopFurniture(cashBlock)) return false;
+            if (!ShopFurniture.hasFurniture(cashBlock)) {
+	            if (!ShopFurniture.removeShopFurniture(cashBlock)) return false;
+            }
+            else if ((cashBlock.getType() != Material.OAK_SIGN && cashBlock.getType() != Material.BARRIER) || stockBlock.getType() != Material.BARREL) return false;
         }
         else if ((cashBlock.getType() != Material.OAK_SIGN && cashBlock.getType() != Material.BARRIER) || stockBlock.getType() != Material.BARREL) return false;
 	    cashBlock.setType(Material.AIR); // Remove sign or furniture block
         stockBlock.setType(Material.AIR); // Remove barrel block
         
         // Async cleanup of location mappings
-        Bukkit.getScheduler().runTaskAsynchronously(OMCPlugin.getInstance(), () ->
-                shopsByLocation.entrySet().removeIf(entry -> entry.getValue().getOwnerUUID().equals(shop.getOwnerUUID())));
+        Bukkit.getScheduler().runTaskAsynchronously(OMCPlugin.getInstance(), () -> {
+			        shopsByLocation.entrySet().removeIf(entry -> entry.getValue().getOwnerUUID().equals(shop.getOwnerUUID()));
+					shops.remove(shop.getShopUUID());
+		        });
         return true;
     }
 	
@@ -186,28 +203,21 @@ public class ShopManager extends Feature implements LoadAfterItemsAdder, Databas
 	 * @return a set of shops
 	 */
 	public static Set<Shop> getAllShops() {
-		return Set.copyOf(shopsByLocation.values());
+		return Set.copyOf(shops.values());
 	}
 	
-	
-	/**
-	 * Returns a shop of a player
-	 *
-	 * @param playerUUID the UUID of the player
-	 * @return the shop if exists, null otherwise
-	 */
-	public static Shop getPlayerShop(UUID playerUUID) {
-		return playerShops.get(playerUUID);
+	public static Shop getShopByUUID(UUID shopUUID) {
+		return shops.get(shopUUID);
 	}
 	
 	/**
 	 * Assign a shop to a player if any shop was already assigned
 	 *
-	 * @param playerUUID the UUID of the player
+	 * @param shopUUID the UUID of the player
 	 * @param shop the shop
 	 */
-	public static void setPlayerShop(UUID playerUUID, Shop shop) {
-		playerShops.put(playerUUID, shop);
+	public static void setUUIDShop(UUID shopUUID, Shop shop) {
+		shops.put(shopUUID, shop);
 	}
 	
 	/**
@@ -217,6 +227,17 @@ public class ShopManager extends Feature implements LoadAfterItemsAdder, Databas
 	 * @return true if a shop is found
 	 */
 	public static boolean hasShop(UUID playerUUID) {
-		return getPlayerShop(playerUUID) != null;
+		for (Shop shop : shops.values()) {
+			if (shop.isOwner(playerUUID)) return true;
+		}
+		return false;
+	}
+	
+	public static boolean isShopOwner(Player player, Shop shop) {
+		return isShopOwner(player.getUniqueId(), shop);
+	}
+	
+	public static boolean isShopOwner(UUID playerUUID, Shop shop) {
+		return shop.getOwnerUUID().equals(playerUUID);
 	}
 }

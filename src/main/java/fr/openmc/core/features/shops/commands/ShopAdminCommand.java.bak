@@ -20,7 +20,7 @@ import revxrsal.commands.bukkit.annotation.CommandPermission;
 @CommandPermission("omc.admins.commands.shop")
 public class ShopAdminCommand {
 	
-	@Subcommand("multiblock set")
+	/@Subcommand("multiblock set")
 	public void setShopMultiblock(Player player, @Named("playerShop") @SuggestWith(ShopAdminCommandPlayerAutocomplete.class) OfflinePlayer playerShop, @Named("barrelLoc") Location barrelLoc) {
 		if (playerShop == null) return;
 		
@@ -79,60 +79,6 @@ public class ShopAdminCommand {
 		
 		shop.setMultiblock(new Shop.Multiblock(shopBarrelLoc, shopCashLoc));
 		MessagesManager.sendMessage(player, Component.text("§aMultiblock associé au shop."), Prefix.SHOP, MessageType.SUCCESS, false);
-	}
-	
-	@Subcommand("database query shops")
-	public void databaseQueryShops(Player player, @Optional @Named("playerShop") @SuggestWith(ShopAdminCommandPlayerAutocomplete.class) OfflinePlayer playerShop) {
-		if (playerShop == null) {
-			if (ShopManager.loadShops()) {
-				MessagesManager.sendMessage(player, Component.text("§aChargement des shops depuis la base de données réussie"), Prefix.SHOP, MessageType.SUCCESS, false);
-			} else {
-				MessagesManager.sendMessage(player, Component.text("§cÉchec du chargement des shops depuis la base de données (Error in console)"), Prefix.SHOP, MessageType.ERROR, false);
-			}
-		} else {
-			if (ShopManager.loadShopFor(playerShop)) {
-				MessagesManager.sendMessage(player, Component.text("§aChargement du shop du joueur §6" + playerShop.getName() + "§a depuis la base de données réussie"), Prefix.SHOP, MessageType.SUCCESS, false);
-			} else {
-				MessagesManager.sendMessage(player, Component.text("§cÉchec du chargement du shop du joueur §6" + playerShop.getName() + "§c depuis la base de données (Error in console)"), Prefix.SHOP, MessageType.ERROR, false);
-			}
-		}
-	}
-	
-	@Subcommand("database query shop_sales")
-	public void databaseQueryShopSales(Player player, @Optional @Named("playerShop") @SuggestWith(ShopAdminCommandPlayerAutocomplete.class) OfflinePlayer playerShop) {
-	
-	}
-	
-	@Subcommand("database query shop_items")
-	public void databaseQueryShopItems(Player player, @Optional @Named("playerShop") @SuggestWith(ShopAdminCommandPlayerAutocomplete.class) OfflinePlayer playerShop) {
-	
-	}
-	
-	@Subcommand("database save shops")
-	public void databaseSaveShops(Player player, @Optional @Named("playerShop") @SuggestWith(ShopAdminCommandPlayerAutocomplete.class) OfflinePlayer playerShop) {
-		if (playerShop == null) {
-			if (ShopManager.saveShops()) {
-				MessagesManager.sendMessage(player, Component.text("§aSauvegarde des shops dans la base de données réussie"), Prefix.SHOP, MessageType.SUCCESS, false);
-			} else {
-				MessagesManager.sendMessage(player, Component.text("§cÉchec de la sauvegarde des shops dans la base de données (Error in console)"), Prefix.SHOP, MessageType.ERROR, false);
-			}
-		} else {
-			if (ShopManager.saveShopFor(playerShop)) {
-				MessagesManager.sendMessage(player, Component.text("§aSauvegarde du shop du joueur §6" + playerShop.getName() + "§a dans la base de données réussie"), Prefix.SHOP, MessageType.SUCCESS, false);
-			} else {
-				MessagesManager.sendMessage(player, Component.text("§cÉchec de la sauvegarde du shop du joueur §6" + playerShop.getName() + "§c dans la base de données (Error in console)"), Prefix.SHOP, MessageType.ERROR, false);
-			}
-		}
-	}
-	
-	@Subcommand("database save shop_sales")
-	public void databaseSaveShopSales(Player player, @Optional @Named("playerShop") @SuggestWith(ShopAdminCommandPlayerAutocomplete.class) OfflinePlayer playerShop) {
-	
-	}
-	
-	@Subcommand("database save shop_items")
-	public void databaseSaveShopItems(Player player, @Optional @Named("playerShop") @SuggestWith(ShopAdminCommandPlayerAutocomplete.class) OfflinePlayer playerShop) {
-	
 	}
 	
 	@Subcommand("removeshop")

@@ -21,6 +21,7 @@ import fr.openmc.core.features.milestones.MilestonesManager;
 import fr.openmc.core.features.privatemessage.PrivateMessageManager;
 import fr.openmc.core.features.quests.QuestsManager;
 import fr.openmc.core.features.settings.PlayerSettingsManager;
+import fr.openmc.core.features.shops.manager.ShopManager;
 import fr.openmc.core.features.tickets.TicketManager;
 import fr.openmc.core.features.tpa.TPAManager;
 import lombok.Getter;
@@ -58,6 +59,7 @@ public enum Credits {
     PRIVATEMESSAGE(Material.ZOMBIE_HEAD, "feature.credits.feature.privatemessage", PrivateMessageManager.class),
     QUEST(OMCRegistry.CUSTOM_ITEMS.get("omc_homes:omc_homes_icon_chateau").getBest(), "feature.credits.feature.quest", QuestsManager.class),
     SETTINGS(Material.REDSTONE_TORCH, "feature.credits.feature.settings", PlayerSettingsManager.class),
+    SHOPS(Material.BARREL, "feature.credits.feature.shops", ShopManager.class),
     TICKETS(Material.BOOK, "feature.credits.feature.tickets", TicketManager.class),
     TPA(Material.ENDER_PEARL, "feature.credits.feature.tpa", TPAManager.class),
     RTP(Material.ENDER_PEARL, "feature.credits.feature.rtp", Set.of("miseur")),

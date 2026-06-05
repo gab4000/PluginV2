@@ -5,6 +5,7 @@ import fr.openmc.core.bootstrap.registries.LifecycleRegistry;
 import fr.openmc.core.registry.ambient.CustomAmbientRegistry;
 import fr.openmc.core.registry.enchantments.CustomEnchantmentRegistry;
 import fr.openmc.core.registry.items.CustomItemRegistry;
+import fr.openmc.core.registry.lootboxes.CustomLootboxRegistry;
 import fr.openmc.core.registry.loottable.CustomLootTableRegistry;
 import fr.openmc.core.registry.mobs.CustomMobRegistry;
 import io.papermc.paper.plugin.bootstrap.BootstrapContext;
@@ -19,6 +20,7 @@ public final class OMCRegistry {
     public static final CustomMobRegistry CUSTOM_MOBS = new CustomMobRegistry();
     public static final CustomEnchantmentRegistry CUSTOM_ENCHANTS = new CustomEnchantmentRegistry();
     public static final CustomLootTableRegistry CUSTOM_LOOT_TABLES = new CustomLootTableRegistry();
+    public static final CustomLootboxRegistry CUSTOM_LOOTBOXES = new CustomLootboxRegistry();
     public static final CustomAmbientRegistry CUSTOM_AMBIENTS = new CustomAmbientRegistry();
 
     private static final List<LifecycleRegistry> ALL = List.of(
@@ -26,6 +28,7 @@ public final class OMCRegistry {
             CUSTOM_MOBS,
             CUSTOM_ENCHANTS,
             CUSTOM_LOOT_TABLES,
+            CUSTOM_LOOTBOXES,
             CUSTOM_AMBIENTS
     );
 

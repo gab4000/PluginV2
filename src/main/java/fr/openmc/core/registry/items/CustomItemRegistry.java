@@ -2,6 +2,7 @@ package fr.openmc.core.registry.items;
 
 import dev.lone.itemsadder.api.CustomStack;
 import fr.openmc.core.CommandsManager;
+import fr.openmc.core.bootstrap.registries.KeyedRegistry;
 import fr.openmc.core.bootstrap.registries.Registry;
 import fr.openmc.core.hooks.itemsadder.ItemsAdderHook;
 import fr.openmc.core.registry.items.contents.AywenCap;
@@ -16,11 +17,15 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
-public class CustomItemRegistry extends Registry<String, CustomItem> {
+public class CustomItemRegistry extends Registry<String, CustomItem> implements KeyedRegistry<String, CustomItem> {
 
     public static final NamespacedKey CUSTOM_ITEM_KEY =
             new NamespacedKey("openmc", "custom_item");
 
+    @Override
+    public String key(CustomItem registryObject) {
+        return registryObject.getId();
+    }
     @Override
     public void postInit() {
         CommandsManager.getHandler().register(new CustomItemsDebugCommand());
@@ -119,10 +124,6 @@ public class CustomItemRegistry extends Registry<String, CustomItem> {
         }
     }
 
-    public void register(CustomItem item) {
-        register(item.getId(), item);
-    }
-
     public void register(String name, ItemStack item) {
         register(name, new CustomItem(name) {
             @Override
@@ -147,11 +148,5 @@ public class CustomItemRegistry extends Registry<String, CustomItem> {
                 return item;
             }
         });
-    }
-
-    public void register(Iterable<CustomItem> items) {
-        for (CustomItem item : items) {
-            register(item);
-        }
     }
 }

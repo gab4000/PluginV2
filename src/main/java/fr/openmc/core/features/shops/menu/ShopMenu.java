@@ -93,7 +93,7 @@ public class ShopMenu extends Menu {
                 itemMeta.displayName(Component.text("§dAccéder aux ventes du shop"));
                 if (this.item == null) itemMeta.lore(List.of(Component.text("§cAucune statistique disponible, car aucun item n'est en vente.")));
             }).setOnClick(_ -> {
-                if (this.item != null) new ShopSalesMenu(getOwner()).open();
+                if (this.item != null) new ShopSalesMenu(getOwner(), this.shop).open();
             }));
             
             map.put(4, new ItemBuilder(this, Material.GOLD_INGOT, itemMeta -> {

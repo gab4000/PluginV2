@@ -14,14 +14,14 @@ import fr.openmc.core.utils.text.messages.Prefix;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
-import net.minecraft.util.Tuple;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Getter
 @DatabaseTable(tableName = "shops")
@@ -39,7 +39,7 @@ public class Shop {
     private int z;
     
     private ShopItem item;
-    private final Map<LocalDateTime, Tuple<UUID, ShopItem>> sales = new HashMap<>();
+    private final List<ShopSale> sales = new ArrayList<>();
 	
     private Location location;
 	private Multiblock multiblock;
@@ -87,21 +87,27 @@ public class Shop {
     }
     
     public void addSale(Player player, ShopItem item) {
-        this.sales.put(LocalDateTime.now(), new Tuple<>(player.getUniqueId(), item));
+        this.sales.add(new ShopSale(this.shopUUID, player.getUniqueId(), item));
+    }
+    
+    public void registerSale(ShopSale sale) {
+        ShopItem item = sale.getShop().getItem().setAmount(sale.getAmount());
+        this.sales.add(sale);
     }
     
     public void addTurnover(double amount) {
         this.turnover += amount;
     }
     
-    public double withdrawTurnover(Player player) {
-        if (!isOwner(player)) return 0;
-        if (getTurnover() <= 0) return 0;
+    public void withdrawTurnover() {
+        Player player = CacheOfflinePlayer.getOfflinePlayer(getOwnerUUID()).getPlayer();
+        if (player == null) return;
+        if (!isOwner(player)) return;
+        if (getTurnover() <= 0) return;
         double tempTurnover = getTurnover();
-        EconomyManager.addBalance(player.getUniqueId(), tempTurnover, "salaires");
+        EconomyManager.addBalance(player.getUniqueId(), tempTurnover * 0.8, "salaires");
         MessagesManager.sendMessage(player, Component.text("§6Vous avez récupéré " + tempTurnover + " " + EconomyManager.getEconomyIcon() + " de votre shop."), Prefix.SHOP, MessageType.SUCCESS, false);
         setTurnover(0);
-        return tempTurnover;
     }
     
     public void buy(Player player, int amount) {

@@ -26,9 +26,9 @@ public class ShopStatsMenu extends Menu {
 		this.shop = shop;
 		if (shop.getItem() == null) owner.closeInventory();
 		if (!shop.getSales().isEmpty()) {
-			shop.getSales().values().forEach(tuple -> {
-				totalSoldItems += tuple.getB().getAmount();
-				totalUniquePlayers.add(tuple.getA());
+			shop.getSales().forEach(s -> {
+				totalSoldItems += s.getAmount();
+				totalUniquePlayers.add(s.getBuyerUUID());
 			});
 		}
 	}
@@ -73,7 +73,7 @@ public class ShopStatsMenu extends Menu {
 		map.put(15, new ItemBuilder(this, Material.BARREL, itemMeta ->
 				itemMeta.displayName(Component.text("§bItems restants dans les stocks : " + this.shop.getItem().getAmount()))));
 		
-		map.put(18, new ItemBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("_iainternal:icon_back_orange").getBest(), _ -> new ShopMenu(getOwner(), shop).open()));
+		map.put(18, new ItemBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("_iainternal:icon_cancel").getBest()).setOnClick(_ -> new ShopMenu(getOwner(), shop).open()));
 		
 		return map;
 	}

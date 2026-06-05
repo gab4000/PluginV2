@@ -88,4 +88,14 @@ public class ShopItem {
     public Shop getShop() {
         return ShopManager.getShopByUUID(this.shopUUID);
     }
+    
+    public ShopItem serialize() {
+        this.itemBytes = this.itemStack.serializeAsBytes();
+        return this;
+    }
+    
+    public ShopItem deserialize() {
+        this.itemStack = ItemStack.deserializeBytes(this.itemBytes);
+        return this;
+    }
 }

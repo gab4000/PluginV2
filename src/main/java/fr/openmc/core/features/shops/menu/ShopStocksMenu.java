@@ -69,9 +69,7 @@ public class ShopStocksMenu extends PaginatedMenu {
     public Map<Integer, ItemBuilder> getButtons() {
         Map<Integer, ItemBuilder> map = new HashMap<>();
         
-        map.put(45, new ItemBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("_iainternal:icon_back_orange").getBest(), itemMeta ->
-                itemMeta.displayName(Component.text("§dRetour au menu du shop"))
-        ).setOnClick(_ -> new ShopMenu(getOwner(), shop).open()));
+        map.put(45, new ItemBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("_iainternal:icon_cancel").getBest()).setOnClick(_ -> new ShopMenu(getOwner(), shop).open()));
         map.put(49, new ItemBuilder(this, Material.BARREL, itemMeta -> {
             itemMeta.displayName(Component.text("§aRemplir depuis le tonneau (" + barrelStocks + "§a items disponibles)"));
         }).setOnClick(_ -> {

@@ -59,7 +59,7 @@ public enum Credits {
     PRIVATEMESSAGE(Material.ZOMBIE_HEAD, "feature.credits.feature.privatemessage", PrivateMessageManager.class),
     QUEST(OMCRegistry.CUSTOM_ITEMS.get("omc_homes:omc_homes_icon_chateau").getBest(), "feature.credits.feature.quest", QuestsManager.class),
     SETTINGS(Material.REDSTONE_TORCH, "feature.credits.feature.settings", PlayerSettingsManager.class),
-    SHOPS(Material.BARREL, "feature.credits.feature.shops", ShopManager.class),
+    SHOPS(OMCRegistry.CUSTOM_ITEMS.get("omc_company:caisse").getBest(), "feature.credits.feature.shops", ShopManager.class),
     TICKETS(Material.BOOK, "feature.credits.feature.tickets", TicketManager.class),
     TPA(Material.ENDER_PEARL, "feature.credits.feature.tpa", TPAManager.class),
     RTP(Material.ENDER_PEARL, "feature.credits.feature.rtp", Set.of("miseur")),

@@ -64,12 +64,17 @@ public class ShopManager extends Feature implements LoadAfterItemsAdder, Databas
 		return Set.of(new ShopListener());
 	}
 	
+	/**
+	 * Load shops in the map from DB
+	 *
+	 * @return true if shop are successfully loaded, false otherwise
+	 */
 	public static boolean loadShops() {
 		if (shopsByLocation != null) shopsByLocation.clear();
 		try {
 			shopsByLocation = ShopDatabaseManager.loadDBShops();
 		} catch (SQLException e) {
-			OMCLogger.error("Cannot save shops from database: " + e.getCause());
+			OMCLogger.error("Cannot save shops from database:\n" + e.getMessage());
 			return false;
 		}
 		
@@ -78,17 +83,27 @@ public class ShopManager extends Feature implements LoadAfterItemsAdder, Databas
 		return true;
 	}
 	
+	/**
+	 * Load shops items from DB
+	 *
+	 * @return true if shop are successfully loaded, false otherwise
+	 */
 	public static boolean loadShopItems() {
 		try {
 			ShopDatabaseManager.loadDBShopItems();
 			OMCLogger.info("Successfully loaded shop items from database.");
 			return true;
 		} catch (SQLException e) {
-			OMCLogger.error("Cannot save shop items from database: " + e.getCause());
+			OMCLogger.error("Cannot save shop items from database:\n" + e.getMessage());
 			return false;
 		}
 	}
 	
+	/**
+	 * Save shops to DB
+	 *
+	 * @return true if shop are successfully saved, false otherwise
+	 */
 	public static boolean saveShops() {
 		for (Shop shop : shops.values()) {
 			if (!ShopDatabaseManager.saveDBShop(shop)) {
@@ -98,6 +113,11 @@ public class ShopManager extends Feature implements LoadAfterItemsAdder, Databas
 		return true;
 	}
 	
+	/**
+	 * Save shops items to DB
+	 *
+	 * @return true if shop are successfully saved, false otherwise
+	 */
 	public static boolean saveShopItems() {
 		for (Shop shop : shops.values()) {
 			if (!shop.hasItem()) continue;
@@ -233,10 +253,24 @@ public class ShopManager extends Feature implements LoadAfterItemsAdder, Databas
 		return false;
 	}
 	
+	/**
+	 * Verifies if the player is the owner of the shop
+	 *
+	 * @param player the player to verify
+	 * @param shop the shop to verify
+	 * @return true if the player is the owner of the shop, false otherwise
+	 */
 	public static boolean isShopOwner(Player player, Shop shop) {
 		return isShopOwner(player.getUniqueId(), shop);
 	}
 	
+	/**
+	 * Verifies if the player is the owner of the shop
+	 *
+	 * @param playerUUID the uuid of the player to verify
+	 * @param shop the shop to verify
+	 * @return true if the player is the owner of the shop, false otherwise
+	 */
 	public static boolean isShopOwner(UUID playerUUID, Shop shop) {
 		return shop.getOwnerUUID().equals(playerUUID);
 	}

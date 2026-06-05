@@ -33,11 +33,16 @@ public class HomeLimit {
     }
 
     public HomeLimits getHomeLimit() {
+        HomeLimits minHomeLimit = HomeLimits.LIMIT_0;
         for (HomeLimits value : HomeLimits.values()) {
             if (value.getLimit() == this.limit) {
                 return value;
             }
+            if (value.getLimit() < this.limit) {
+                minHomeLimit = value;
+            }
         }
-        return null;
+
+        return minHomeLimit;
     }
 }

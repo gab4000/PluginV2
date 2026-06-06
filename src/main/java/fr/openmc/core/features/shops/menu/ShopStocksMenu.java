@@ -2,7 +2,7 @@ package fr.openmc.core.features.shops.menu;
 
 import fr.openmc.api.menulib.PaginatedMenu;
 import fr.openmc.api.menulib.utils.InventorySize;
-import fr.openmc.api.menulib.utils.ItemBuilder;
+import fr.openmc.api.menulib.utils.ItemMenuBuilder;
 import fr.openmc.api.menulib.utils.StaticSlots;
 import fr.openmc.core.OMCRegistry;
 import fr.openmc.core.features.shops.models.Shop;
@@ -66,11 +66,11 @@ public class ShopStocksMenu extends PaginatedMenu {
     }
 
     @Override
-    public Map<Integer, ItemBuilder> getButtons() {
-        Map<Integer, ItemBuilder> map = new HashMap<>();
+    public Map<Integer, ItemMenuBuilder> getButtons() {
+        Map<Integer, ItemMenuBuilder> map = new HashMap<>();
         
-        map.put(45, new ItemBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("_iainternal:icon_cancel").getBest()).setOnClick(_ -> new ShopMenu(getOwner(), shop).open()));
-        map.put(49, new ItemBuilder(this, Material.BARREL, itemMeta -> {
+        map.put(45, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("_iainternal:icon_cancel").getBest()).setOnClick(_ -> new ShopMenu(getOwner(), shop).open()));
+        map.put(49, new ItemMenuBuilder(this, Material.BARREL, itemMeta -> {
             itemMeta.displayName(Component.text("§aRemplir depuis le tonneau (" + barrelStocks + "§a items disponibles)"));
         }).setOnClick(_ -> {
             if (barrelStocks == 0) return;

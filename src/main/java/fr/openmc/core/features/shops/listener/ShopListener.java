@@ -10,7 +10,7 @@ import fr.openmc.core.features.shops.models.Shop;
 import fr.openmc.core.utils.text.messages.MessageType;
 import fr.openmc.core.utils.text.messages.MessagesManager;
 import fr.openmc.core.utils.text.messages.Prefix;
-import net.kyori.adventure.text.Component;
+import fr.openmc.core.utils.text.messages.TranslationManager;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
@@ -85,7 +85,7 @@ public class ShopListener implements Listener {
         Player player = e.getPlayer();
         if (!shop.getOwnerUUID().equals(player.getUniqueId())) {
             e.setCancelled(true);
-            MessagesManager.sendMessage(player, Component.text("§cCeci n'est pas votre shop."), Prefix.SHOP, MessageType.WARNING, true);
+            MessagesManager.sendMessage(player, TranslationManager.translation("feature.shop.player.is_not_him_shop"), Prefix.SHOP, MessageType.WARNING, true);
         }
     }
 
@@ -116,13 +116,13 @@ public class ShopListener implements Listener {
         
         Player player = e.getPlayer();
 	    if (furniture.getEntity() == null) {
-		    MessagesManager.sendMessage(player, Component.text("§cErreur lors de l'ouverture du shop, veuillez contacter le staff. (Entity is null)"), Prefix.SHOP, MessageType.ERROR, true);
+		    MessagesManager.sendMessage(player, TranslationManager.translation("feature.shop.error.entity_is_null"), Prefix.SHOP, MessageType.ERROR, true);
 		    return;
 	    }
 	    
 	    Shop shop = ShopManager.getShopAt(furniture.getEntity().getLocation().subtract(0, 1, 0).toBlockLocation());
 	    if (shop == null) {
-		    MessagesManager.sendMessage(player, Component.text("§cErreur lors de l'ouverture du shop, veuillez contacter le staff. (Shop is null)"), Prefix.SHOP, MessageType.ERROR, true);
+		    MessagesManager.sendMessage(player, TranslationManager.translation("feature.shop.error.shop_is_null"), Prefix.SHOP, MessageType.ERROR, true);
 			return;
 	    }
 	    

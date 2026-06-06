@@ -3,7 +3,7 @@ package fr.openmc.core.features.shops.models;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import fr.openmc.api.menulib.Menu;
-import fr.openmc.api.menulib.utils.ItemBuilder;
+import fr.openmc.api.menulib.utils.ItemMenuBuilder;
 import fr.openmc.core.features.economy.EconomyManager;
 import fr.openmc.core.features.shops.ShopFurniture;
 import fr.openmc.core.utils.bukkit.ItemUtils;
@@ -105,7 +105,7 @@ public class Shop {
         if (!isOwner(player)) return;
         if (getTurnover() <= 0) return;
         double tempTurnover = getTurnover();
-        EconomyManager.addBalance(player.getUniqueId(), tempTurnover * 0.8, "salaires");
+        EconomyManager.addBalance(player.getUniqueId(), tempTurnover * 0.8, "turnover");
         MessagesManager.sendMessage(player, Component.text("§6Vous avez récupéré " + tempTurnover + " " + EconomyManager.getEconomyIcon() + " de votre shop."), Prefix.SHOP, MessageType.SUCCESS, false);
         setTurnover(0);
     }
@@ -139,8 +139,8 @@ public class Shop {
      * @param menu the menu
      * @param fromShopMenu know if it from shopMenu
      */
-    public ItemBuilder getIcon(Menu menu, boolean fromShopMenu) {
-        return new ItemBuilder(menu, fromShopMenu ? Material.GOLD_INGOT : Material.BARREL, itemMeta -> {
+    public ItemMenuBuilder getIcon(Menu menu, boolean fromShopMenu) {
+        return new ItemMenuBuilder(menu, fromShopMenu ? Material.GOLD_INGOT : Material.BARREL, itemMeta -> {
             itemMeta.displayName(Component.text("§e§l" + (fromShopMenu ? "Informations" : getName())));
             
             List<Component> lore = new ArrayList<>(List.of(

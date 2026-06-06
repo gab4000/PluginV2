@@ -2,10 +2,11 @@ package fr.openmc.core.features.shops.menu;
 
 import fr.openmc.api.menulib.Menu;
 import fr.openmc.api.menulib.utils.InventorySize;
-import fr.openmc.api.menulib.utils.ItemBuilder;
+import fr.openmc.api.menulib.utils.ItemMenuBuilder;
 import fr.openmc.core.OMCRegistry;
 import fr.openmc.core.features.economy.EconomyManager;
 import fr.openmc.core.features.shops.models.Shop;
+import fr.openmc.core.utils.text.messages.TranslationManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -35,7 +36,7 @@ public class ShopStatsMenu extends Menu {
 	
 	@Override
 	public @NotNull Component getName() {
-		return Component.text("Statistiques");
+		return TranslationManager.translation("feature.shop.menu.stats.title");
 	}
 	
 	@Override
@@ -59,21 +60,21 @@ public class ShopStatsMenu extends Menu {
 	}
 	
 	@Override
-	public @NotNull Map<Integer, ItemBuilder> getContent() {
-		Map<Integer, ItemBuilder> map = new HashMap<>();
+	public @NotNull Map<Integer, ItemMenuBuilder> getContent() {
+		Map<Integer, ItemMenuBuilder> map = new HashMap<>();
 		
-		map.put(11, new ItemBuilder(this, Material.PAPER, itemMeta ->
-				itemMeta.displayName(Component.text("§aTotal de ventes : " + this.shop.getSales().size()))));
-		map.put(12, new ItemBuilder(this, Material.GOLD_INGOT, itemMeta ->
-				itemMeta.displayName(Component.text("§2Total d'items vendus : " + this.totalSoldItems))));
-		map.put(13, new ItemBuilder(this, Material.GOLD_BLOCK, itemMeta ->
-				itemMeta.displayName(Component.text("§6Chiffre d'affaires : " + this.shop.getTurnover() + " " + EconomyManager.getEconomyIcon()))));
-		map.put(14, new ItemBuilder(this, Material.PLAYER_HEAD, itemMeta ->
-				itemMeta.displayName(Component.text("§dTotal d'acheteurs uniques : " + this.totalUniquePlayers.size()))));
-		map.put(15, new ItemBuilder(this, Material.BARREL, itemMeta ->
-				itemMeta.displayName(Component.text("§bItems restants dans les stocks : " + this.shop.getItem().getAmount()))));
+		map.put(11, new ItemMenuBuilder(this, Material.PAPER, itemMeta ->
+				itemMeta.displayName(TranslationManager.translation("feature.shop.menu.stats.sells.title", Component.text(this.shop.getSales().size())))));
+		map.put(12, new ItemMenuBuilder(this, Material.GOLD_INGOT, itemMeta ->
+				itemMeta.displayName(TranslationManager.translation("feature.shop.menu.stats.sales.title", Component.text(this.totalSoldItems)))));
+		map.put(13, new ItemMenuBuilder(this, Material.GOLD_BLOCK, itemMeta ->
+				itemMeta.displayName(TranslationManager.translation("feature.shop.menu.stats.turnover.title", Component.text(this.shop.getTurnover() + " " + EconomyManager.getEconomyIcon())))));
+		map.put(14, new ItemMenuBuilder(this, Material.PLAYER_HEAD, itemMeta ->
+				itemMeta.displayName(TranslationManager.translation("feature.shop.menu.stats.buyers.title", Component.text(this.totalUniquePlayers.size())))));
+		map.put(15, new ItemMenuBuilder(this, Material.BARREL, itemMeta ->
+				itemMeta.displayName(TranslationManager.translation("feature.shop.menu.stats.stocks.title", Component.text(this.shop.getItem().getAmount())))));
 		
-		map.put(18, new ItemBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("_iainternal:icon_cancel").getBest()).setOnClick(_ -> new ShopMenu(getOwner(), shop).open()));
+		map.put(18, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("_iainternal:icon_cancel").getBest()).setOnClick(_ -> new ShopMenu(getOwner(), shop).open()));
 		
 		return map;
 	}

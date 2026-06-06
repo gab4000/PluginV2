@@ -3,13 +3,14 @@ package fr.openmc.core.features.shops.menu;
 import fr.openmc.api.menulib.Menu;
 import fr.openmc.api.menulib.template.ConfirmMenu;
 import fr.openmc.api.menulib.utils.InventorySize;
-import fr.openmc.api.menulib.utils.ItemBuilder;
+import fr.openmc.api.menulib.utils.ItemMenuBuilder;
 import fr.openmc.core.OMCRegistry;
 import fr.openmc.core.features.economy.EconomyManager;
 import fr.openmc.core.features.shops.manager.PlayerShopManager;
 import fr.openmc.core.features.shops.manager.ShopManager;
 import fr.openmc.core.features.shops.models.Shop;
 import fr.openmc.core.features.shops.models.ShopItem;
+import fr.openmc.core.utils.text.messages.TranslationManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -42,7 +43,7 @@ public class ShopMenu extends Menu {
 
     @Override
     public @NotNull Component getName() {
-        return Component.text("Menu du shop de " + shop.getOwner().getName());
+        return TranslationManager.translation("feature.shop.menu.main.title", this.shop.getOwner().name());
     }
 
     @Override
@@ -68,15 +69,15 @@ public class ShopMenu extends Menu {
     }
 
     @Override
-    public @NotNull Map<Integer, ItemBuilder> getContent() {
-        Map<Integer, ItemBuilder> map = new HashMap<>();
+    public @NotNull Map<Integer, ItemMenuBuilder> getContent() {
+        Map<Integer, ItemMenuBuilder> map = new HashMap<>();
         
         if (this.isShopOwner) {
-            map.put(0, new ItemBuilder(this, Material.RED_DYE, itemMeta -> {
-                itemMeta.displayName(Component.text("§4Supprimer le shop"));
+            map.put(0, new ItemMenuBuilder(this, Material.RED_DYE, itemMeta -> {
+                itemMeta.displayName(TranslationManager.translation("feature.shop.menu.main.delete.btn.title"));
                 itemMeta.lore(List.of(
-                        Component.text("§6Retirer tout l'argent et les items est nécessaire pour supprimer le shop."),
-                        Component.text("§4§lATTENTION, IL SERA IMPOSSIBLE DE REVENIR EN ARRIÈRE !")
+                        TranslationManager.translation("feature.shop.menu.main.delete.btn.lore1"),
+                        TranslationManager.translation("feature.shop.menu.main.delete.btn.lore2")
                 ));
             }).setOnClick(_ -> new ConfirmMenu(
                     getOwner(),
@@ -85,85 +86,85 @@ public class ShopMenu extends Menu {
                         PlayerShopManager.deleteShop(getOwner(), shop);
                     },
                     () -> new ShopMenu(getOwner(), shop).open(),
-                    List.of(Component.text("§4Supprimer DÉFINITIVEMENT le shop.")),
-                    List.of(Component.text("§9Revenir dans le menu du shop."))
+                    List.of(TranslationManager.translation("feature.shop.menu.main.delete.confirm.accept")),
+                    List.of(TranslationManager.translation("feature.shop.menu.main.delete.confirm.refuse"))
             ).open()));
             
-            map.put(3, new ItemBuilder(this, Material.PAPER, itemMeta -> {
-                itemMeta.displayName(Component.text("§dAccéder aux ventes du shop"));
-                if (this.item == null) itemMeta.lore(List.of(Component.text("§cAucune statistique disponible, car aucun item n'est en vente.")));
+            map.put(3, new ItemMenuBuilder(this, Material.PAPER, itemMeta -> {
+                itemMeta.displayName(TranslationManager.translation("feature.shop.menu.main.sells.title"));
+                if (this.item == null) itemMeta.lore(List.of(TranslationManager.translation("feature.shop.menu.main.stats.lore")));
             }).setOnClick(_ -> {
                 if (this.item != null) new ShopSalesMenu(getOwner(), this.shop).open();
             }));
             
-            map.put(4, new ItemBuilder(this, Material.GOLD_INGOT, itemMeta -> {
-                itemMeta.displayName(Component.text("§6Accéder aux statistiques du shop"));
-                if (this.item == null) itemMeta.lore(List.of(Component.text("§cAucune statistique disponible, car aucun item n'est en vente.")));
+            map.put(4, new ItemMenuBuilder(this, Material.GOLD_INGOT, itemMeta -> {
+                itemMeta.displayName(TranslationManager.translation("feature.shop.menu.main.stats.title"));
+                if (this.item == null) itemMeta.lore(List.of(TranslationManager.translation("feature.shop.menu.main.stats.lore")));
             }).setOnClick(_ -> {
                 if (this.item != null) new ShopStatsMenu(getOwner(), this.shop).open();
             }));
             
-            map.put(5, new ItemBuilder(this, Material.BARREL, itemMeta -> {
-                itemMeta.displayName(Component.text("§bAccéder aux stocks du shop"));
-                if (this.item == null) itemMeta.lore(List.of(Component.text("§cImpossible d'accéder aux stocks, car aucun item n'est en vente.")));
+            map.put(5, new ItemMenuBuilder(this, Material.BARREL, itemMeta -> {
+                itemMeta.displayName(TranslationManager.translation("feature.shop.menu.main.stocks.title"));
+                if (this.item == null) itemMeta.lore(List.of(TranslationManager.translation("feature.shop.menu.main.stocks.lore")));
             }).setOnClick(_ -> {
                 if (this.item != null) new ShopStocksMenu(getOwner(), shop).open();
             }));
             
-            map.put(8, new ItemBuilder(this, Material.GREEN_BANNER, itemMeta -> itemMeta.displayName(Component.text("§aCe shop est le vôtre"))));
+            map.put(8, new ItemMenuBuilder(this, Material.GREEN_BANNER, itemMeta -> itemMeta.displayName(Component.text("§aCe shop est le vôtre"))));
         }
 		
-        map.put(isShopOwner ? 19 : 10, new ItemBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("omc_menus:64_btn").getBest(), itemMeta -> {
-            itemMeta.displayName(Component.text("§cRetirer 64"));
+        map.put(isShopOwner ? 19 : 10, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("omc_menus:64_btn").getBest(), itemMeta -> {
+            itemMeta.displayName(TranslationManager.translation("feature.shop.menu.main.remove.title", Component.text(64)));
             itemMeta.lore(List.of(
-                    Component.text("§e§lCLIQUEZ ICI POUR RETIRER 64")
+                    TranslationManager.translation("feature.shop.menu.main.remove.lore", Component.text(64))
             ));
         }).setOnClick(_ -> removeAmount(64)));
-        map.put(isShopOwner ? 20 : 11, new ItemBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("omc_menus:10_btn").getBest(), itemMeta -> {
-            itemMeta.displayName(Component.text("§cRetirer 10"));
+        map.put(isShopOwner ? 20 : 11, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("omc_menus:10_btn").getBest(), itemMeta -> {
+            itemMeta.displayName(TranslationManager.translation("feature.shop.menu.main.remove.title", Component.text(10)));
             itemMeta.lore(List.of(
-                    Component.text("§e§lCLIQUEZ ICI POUR RETIRER 10")
+                    TranslationManager.translation("feature.shop.menu.main.remove.lore", Component.text(10))
             ));
         }).setOnClick(_ -> removeAmount(10)));
-        map.put(isShopOwner ? 21 : 12, new ItemBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("omc_menus:minus_btn").getBest(), itemMeta -> {
-            itemMeta.displayName(Component.text("§cRetirer 1"));
+        map.put(isShopOwner ? 21 : 12, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("omc_menus:minus_btn").getBest(), itemMeta -> {
+            itemMeta.displayName(TranslationManager.translation("feature.shop.menu.main.remove.title", Component.text(1)));
             itemMeta.lore(List.of(
-                    Component.text("§e§lCLIQUEZ ICI POUR RETIRER 1")
+                    TranslationManager.translation("feature.shop.menu.main.remove.lore", Component.text(1))
             ));
         }).setOnClick(_ -> removeAmount(1)));
         
-        map.put(isShopOwner ? 23 : 14, new ItemBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("omc_menus:plus_btn").getBest(), itemMeta -> {
-            itemMeta.displayName(Component.text("§aAjouter 1"));
+        map.put(isShopOwner ? 23 : 14, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("omc_menus:plus_btn").getBest(), itemMeta -> {
+            itemMeta.displayName(TranslationManager.translation("feature.shop.menu.main.add.title", Component.text(1)));
             itemMeta.lore(List.of(
-                    Component.text("§e§lCLIQUEZ ICI POUR AJOUTER 1")
+                    TranslationManager.translation("feature.shop.menu.main.add.lore", Component.text(1))
             ));
         }).setOnClick(_ -> addAmount(1)));
-        map.put(isShopOwner ? 24 : 15, new ItemBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("omc_menus:10_btn").getBest(), itemMeta -> {
-            itemMeta.displayName(Component.text("§aAjouter 10"));
+        map.put(isShopOwner ? 24 : 15, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("omc_menus:10_btn").getBest(), itemMeta -> {
+            itemMeta.displayName(TranslationManager.translation("feature.shop.menu.main.add.title", Component.text(10)));
             itemMeta.lore(List.of(
-                    Component.text("§e§lCLIQUEZ ICI POUR AJOUTER 10")
+                    TranslationManager.translation("feature.shop.menu.main.add.lore", Component.text(10))
             ));
         }).setOnClick(_ -> addAmount(10)));
-        map.put(isShopOwner ? 25 : 16, new ItemBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("omc_menus:64_btn").getBest(), itemMeta -> {
-            itemMeta.displayName(Component.text("§aAjouter 64"));
+        map.put(isShopOwner ? 25 : 16, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("omc_menus:64_btn").getBest(), itemMeta -> {
+            itemMeta.displayName(TranslationManager.translation("feature.shop.menu.main.add.title", Component.text(64)));
             itemMeta.lore(List.of(
-                    Component.text("§e§lCLIQUEZ ICI POUR AJOUTER 64")
+                    TranslationManager.translation("feature.shop.menu.main.add.lore", Component.text(64))
             ));
         }).setOnClick(_ -> addAmount(64)));
         
-        map.put(22, new ItemBuilder(this, this.item.getItemStack().asOne()));
-        map.put(isShopOwner ? 30 : 21, new ItemBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("omc_menus:refuse_btn").getBest(), itemMeta -> {
-            itemMeta.displayName(Component.text("§cRefuser l'achat"));
+        map.put(22, new ItemMenuBuilder(this, this.item.getItemStack().asOne()));
+        map.put(isShopOwner ? 30 : 21, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("omc_menus:refuse_btn").getBest(), itemMeta -> {
+            itemMeta.displayName(TranslationManager.translation("feature.shop.menu.main.refuse.title"));
             itemMeta.lore(List.of(
-                    Component.text("§6Vous refusez d'acheter " + this.amountToBuy + " item(s)"),
-                    Component.text("§e§lCLIQUEZ ICI POUR REFUSER L'ACHAT")
+                    TranslationManager.translation("feature.shop.menu.main.refuse.lore1", Component.text(this.amountToBuy)),
+                    TranslationManager.translation("feature.shop.menu.main.refuse.lore2")
             ));
         }).setCloseButton());
-        map.put(isShopOwner ? 32 : 23, new ItemBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("omc_menus:accept_btn").getBest(), itemMeta -> {
-            itemMeta.displayName(Component.text("§aAccepter l'achat"));
+        map.put(isShopOwner ? 32 : 23, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("omc_menus:accept_btn").getBest(), itemMeta -> {
+            itemMeta.displayName(TranslationManager.translation("feature.shop.menu.main.accept.title"));
             itemMeta.lore(List.of(
-                    Component.text("§6Cela vous coûtera " + this.item.getPrice(this.amountToBuy) + " " + EconomyManager.getEconomyIcon() + " §6pour " + this.amountToBuy + " item(s)"),
-                    Component.text("§e§lCLIQUEZ ICI POUR ACCEPTER L'ACHAT")
+                    TranslationManager.translation("feature.shop.menu.main.accept.lore1", Component.text(this.item.getPrice(this.amountToBuy) + " " + EconomyManager.getEconomyIcon()), Component.text(this.amountToBuy)),
+                    TranslationManager.translation("feature.shop.menu.main.accept.lore2")
             ));
         }).setOnClick(_ -> this.shop.buy(getOwner(), this.amountToBuy)));
         

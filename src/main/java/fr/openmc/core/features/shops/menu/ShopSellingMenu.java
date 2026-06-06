@@ -3,12 +3,13 @@ package fr.openmc.core.features.shops.menu;
 import fr.openmc.api.input.dialog.DialogInput;
 import fr.openmc.api.menulib.Menu;
 import fr.openmc.api.menulib.utils.InventorySize;
-import fr.openmc.api.menulib.utils.ItemBuilder;
+import fr.openmc.api.menulib.utils.ItemMenuBuilder;
 import fr.openmc.core.features.shops.models.Shop;
 import fr.openmc.core.features.shops.models.ShopItem;
 import fr.openmc.core.utils.text.messages.MessageType;
 import fr.openmc.core.utils.text.messages.MessagesManager;
 import fr.openmc.core.utils.text.messages.Prefix;
+import fr.openmc.core.utils.text.messages.TranslationManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.block.Barrel;
 import org.bukkit.entity.Player;
@@ -34,7 +35,7 @@ public class ShopSellingMenu extends Menu {
 	
 	@Override
 	public @NotNull Component getName() {
-		return Component.text("Menu de vente");
+		return TranslationManager.translation("feature.shop.menu.selling.title");
 	}
 	
 	@Override
@@ -58,17 +59,17 @@ public class ShopSellingMenu extends Menu {
 	}
 	
 	@Override
-	public @NotNull Map<Integer, ItemBuilder> getContent() {
-		Map<Integer, ItemBuilder> map = new HashMap<>();
+	public @NotNull Map<Integer, ItemMenuBuilder> getContent() {
+		Map<Integer, ItemMenuBuilder> map = new HashMap<>();
 		
 		List<ItemStack> items = getUniqueItemStacks(barrelInventory.getContents()).stream().toList();
 		for (int i = 0; i < items.size(); i++) {
 			ItemStack item = items.get(i);
-			map.put(i, new ItemBuilder(this, item, itemMeta -> {
-				if (itemMeta.hasLore()) itemMeta.lore().add(Component.text("§l§8CLIQUEZ ICI POUR SELECTIONNER CET ITEM À VENDRE"));
-				else itemMeta.lore(List.of(Component.text("§l§8CLIQUEZ ICI POUR SELECTIONNER CET ITEM À VENDRE")));
+			map.put(i, new ItemMenuBuilder(this, item, itemMeta -> {
+				if (itemMeta.hasLore()) itemMeta.lore().add(TranslationManager.translation("feature.shop.menu.selling.item_lore"));
+				else itemMeta.lore(List.of(TranslationManager.translation("feature.shop.menu.selling.item_lore")));
 			}).setOnClick(_ -> DialogInput.send(getOwner(),
-					Component.text("§6Entrez le prix auquel vous voulez vendre votre item :"),
+					TranslationManager.translation("feature.shop.menu.selling.price_input"),
 					Integer.MAX_VALUE,
 					s -> {
 						double price = Double.parseDouble(s);
@@ -76,7 +77,7 @@ public class ShopSellingMenu extends Menu {
 						if (price <= 0) return;
 						shop.setItem(new ShopItem(shop.getShopUUID(), item, price));
 						new ShopMenu(getOwner(), shop).open();
-						MessagesManager.sendMessage(getOwner(), Component.text("§aItem ajouté au shop."), Prefix.SHOP, MessageType.SUCCESS, true);
+						MessagesManager.sendMessage(getOwner(), TranslationManager.translation("feature.shop.menu.selling.added_item"), Prefix.SHOP, MessageType.SUCCESS, true);
 					})));
 		}
 		return map;

@@ -8,6 +8,8 @@ import lombok.Getter;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Optional;
+
 public abstract class CustomItem {
     @Getter
     private final String id;
@@ -39,10 +41,10 @@ public abstract class CustomItem {
     @Override
     public boolean equals(Object object) {
         if (object instanceof ItemStack anotherItem) {
-            CustomItem citem = OMCRegistry.CUSTOM_ITEMS.get(anotherItem);
+            Optional<CustomItem> citem = OMCRegistry.CUSTOM_ITEMS.get(anotherItem);
 
-            if (citem == null) return false;
-            return citem.getId().equals(this.getId());
+            if (citem.isEmpty()) return false;
+            return citem.get().getId().equals(this.getId());
         }
 
         if (object instanceof String otherObjectName) {

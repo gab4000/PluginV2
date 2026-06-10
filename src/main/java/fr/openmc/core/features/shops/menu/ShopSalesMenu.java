@@ -1,10 +1,10 @@
 package fr.openmc.core.features.shops.menu;
 
 import fr.openmc.api.menulib.PaginatedMenu;
+import fr.openmc.api.menulib.template.ItemMenuTemplate;
 import fr.openmc.api.menulib.utils.InventorySize;
 import fr.openmc.api.menulib.utils.ItemMenuBuilder;
 import fr.openmc.api.menulib.utils.StaticSlots;
-import fr.openmc.core.OMCRegistry;
 import fr.openmc.core.features.economy.EconomyManager;
 import fr.openmc.core.features.shops.models.Shop;
 import fr.openmc.core.features.shops.models.ShopSale;
@@ -61,10 +61,10 @@ public class ShopSalesMenu extends PaginatedMenu {
         sales.forEach(s -> {
             ItemStack item = s.getItem().getItemStack();
             item.editMeta(itemMeta -> {
-                itemMeta.displayName(Component.text("§6Achat de " + s.getBuyer().getName()));
+                itemMeta.displayName(TranslationManager.translation("feature.shop.menu.sales.item.name", Component.text(s.getBuyer().getName())));
                 itemMeta.lore(List.of(
-                        Component.text("§dle " + s.getDate().toLocalDateTime().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM))),
-                        Component.text("§6 " + s.getAmount() + " items achetés pour " + s.getPrice() + " " + EconomyManager.getEconomyIcon())
+                        TranslationManager.translation("feature.shop.menu.sales.item.lore1", Component.text(s.getDate().toLocalDateTime().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)))),
+                        TranslationManager.translation("feature.shop.menu.sales.item.lore2", Component.text(s.getAmount()), Component.text(s.getPrice() + " " + EconomyManager.getEconomyIcon()))
                 ));
             });
             items.add(item);
@@ -75,16 +75,16 @@ public class ShopSalesMenu extends PaginatedMenu {
     @Override
     public Map<Integer, ItemMenuBuilder> getButtons() {
         Map<Integer, ItemMenuBuilder> map = new HashMap<>();
-        map.put(45, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("_iainternal:icon_cancel").getBest()).setOnClick(_ -> new ShopMenu(getOwner(), shop).open()));
-        map.put(48, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("_iainternal:icon_back_orange").getBest()).setPreviousPageButton());
+        map.put(45, ItemMenuTemplate.BTN_CANCEL.apply(this).setOnClick(_ -> new ShopMenu(getOwner(), shop).open()));
+        map.put(48, ItemMenuTemplate.BTN_PREVIOUS_PAGE_ORANGE.apply(this));
         map.put(49, new ItemMenuBuilder(this, Material.GOLD_BLOCK, itemMeta -> {
-            itemMeta.displayName(Component.text("§6Récupérer les bénéfices."));
+            itemMeta.displayName(TranslationManager.translation("feature.shop.menu.sales.get_turnover.name"));
             itemMeta.lore(List.of(
-                    Component.text("§d" + this.shop.getTurnover() * 0.8 + " " + EconomyManager.getEconomyIcon() + " §d à récupérer dans le shop (Hors taxes)."),
-                    Component.text("§7La TVA est de 20 %")
+                    TranslationManager.translation("feature.shop.menu.sales.get_turnover.lore1", Component.text(this.shop.getTurnover() * 0.8 + " " + EconomyManager.getEconomyIcon())),
+                    TranslationManager.translation("feature.shop.menu.sales.get_turnover.lore2")
             ));
         }).setOnClick(_ -> this.shop.withdrawTurnover()));
-        map.put(50, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("_iainternal:icon_next_orange").getBest()).setNextPageButton());
+        map.put(50, ItemMenuTemplate.BTN_NEXT_PAGE_ORANGE.apply(this));
         return map;
     }
 

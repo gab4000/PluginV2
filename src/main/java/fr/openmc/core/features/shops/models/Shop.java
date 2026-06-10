@@ -11,6 +11,7 @@ import fr.openmc.core.utils.cache.CacheOfflinePlayer;
 import fr.openmc.core.utils.text.messages.MessageType;
 import fr.openmc.core.utils.text.messages.MessagesManager;
 import fr.openmc.core.utils.text.messages.Prefix;
+import fr.openmc.core.utils.text.messages.TranslationManager;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
@@ -106,26 +107,26 @@ public class Shop {
         if (getTurnover() <= 0) return;
         double tempTurnover = getTurnover();
         EconomyManager.addBalance(player.getUniqueId(), tempTurnover * 0.8, "turnover");
-        MessagesManager.sendMessage(player, Component.text("§6Vous avez récupéré " + tempTurnover + " " + EconomyManager.getEconomyIcon() + " de votre shop."), Prefix.SHOP, MessageType.SUCCESS, false);
+        MessagesManager.sendMessage(player, TranslationManager.translation("feature.shop.get_turnover", Component.text(tempTurnover + " " + EconomyManager.getEconomyIcon())), Prefix.SHOP, MessageType.SUCCESS, false);
         setTurnover(0);
     }
     
     public void buy(Player player, int amount) {
         if (isOwner(player)) {
-            MessagesManager.sendMessage(player, Component.text("§cVous ne pouvez pas acheter des items à votre propre shop."), Prefix.SHOP, MessageType.ERROR, false);
+            MessagesManager.sendMessage(player, TranslationManager.translation("feature.shop.is_owner"), Prefix.SHOP, MessageType.ERROR, false);
             return;
         }
         if (this.item.getAmount() < amount) {
-            MessagesManager.sendMessage(player, Component.text("§cLe nombre d'items achetés dépasse le nombre d'items présents dans le shop."), Prefix.SHOP, MessageType.ERROR, false);
+            MessagesManager.sendMessage(player, TranslationManager.translation("feature.shop.not_enough_items"), Prefix.SHOP, MessageType.ERROR, false);
             return;
         }
         if (!ItemUtils.hasEnoughSpace(player, item.getItemStack(), amount)) {
-            MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas assez de place dans votre inventaire pour acheter ce nombre d'items."), Prefix.SHOP, MessageType.ERROR, false);
+            MessagesManager.sendMessage(player, TranslationManager.translation("feature.shop.not_enough_space"), Prefix.SHOP, MessageType.ERROR, false);
             return;
         }
         double totalPrice = this.item.getPrice(amount);
         if (!EconomyManager.withdrawBalance(player.getUniqueId(), totalPrice, getName() + " buying")) {
-            MessagesManager.sendMessage(player, Component.text("§cVous n'avez pas assez d'argent pour acheter ce nombre d'items."), Prefix.SHOP, MessageType.ERROR, false);
+            MessagesManager.sendMessage(player, TranslationManager.translation("feature.shop.not_enough_money"), Prefix.SHOP, MessageType.ERROR, false);
             return;
         }
         addSale(player, item.setAmount(amount));
@@ -147,7 +148,7 @@ public class Shop {
                     Component.text("§7■ Chiffre d'affaires : " + EconomyManager.getFormattedNumber(turnover)),
                     Component.text("§7■ Ventes : §f" + sales.size())
             ));
-            if (!fromShopMenu) lore.add(Component.text("§7■ Cliquez pour accéder au shop"));
+            if (!fromShopMenu) lore.add(Component.text("§7■ Cliquez pour accéder au shop")); //TODO a voir si on garde
             itemMeta.lore(lore);
         });
     }

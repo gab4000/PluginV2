@@ -1,10 +1,10 @@
 package fr.openmc.core.features.shops.menu;
 
 import fr.openmc.api.menulib.PaginatedMenu;
+import fr.openmc.api.menulib.template.ItemMenuTemplate;
 import fr.openmc.api.menulib.utils.InventorySize;
 import fr.openmc.api.menulib.utils.ItemMenuBuilder;
 import fr.openmc.api.menulib.utils.StaticSlots;
-import fr.openmc.core.OMCRegistry;
 import fr.openmc.core.features.shops.models.Shop;
 import fr.openmc.core.features.shops.models.ShopItem;
 import fr.openmc.core.utils.bukkit.ContainerUtils;
@@ -12,6 +12,7 @@ import fr.openmc.core.utils.bukkit.ItemUtils;
 import fr.openmc.core.utils.text.messages.MessageType;
 import fr.openmc.core.utils.text.messages.MessagesManager;
 import fr.openmc.core.utils.text.messages.Prefix;
+import fr.openmc.core.utils.text.messages.TranslationManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.block.Barrel;
@@ -69,9 +70,9 @@ public class ShopStocksMenu extends PaginatedMenu {
     public Map<Integer, ItemMenuBuilder> getButtons() {
         Map<Integer, ItemMenuBuilder> map = new HashMap<>();
         
-        map.put(45, new ItemMenuBuilder(this, OMCRegistry.CUSTOM_ITEMS.get("_iainternal:icon_cancel").getBest()).setOnClick(_ -> new ShopMenu(getOwner(), shop).open()));
+        map.put(45, ItemMenuTemplate.BTN_CANCEL.apply(this).setOnClick(_ -> new ShopMenu(getOwner(), shop).open()));
         map.put(49, new ItemMenuBuilder(this, Material.BARREL, itemMeta -> {
-            itemMeta.displayName(Component.text("§aRemplir depuis le tonneau (" + barrelStocks + "§a items disponibles)"));
+            itemMeta.displayName(TranslationManager.translation("feature.shop.menu.stocks.fill.name", Component.text(barrelStocks)));
         }).setOnClick(_ -> {
             if (barrelStocks == 0) return;
             ShopItem item = this.shop.getItem();
@@ -80,7 +81,7 @@ public class ShopStocksMenu extends PaginatedMenu {
             if (amountToAdd > barrelStocks) amountToAdd = barrelStocks;
             ContainerUtils.removeItemsFromInventory((Barrel) this.shop.getMultiblock().stockBlockLoc().getBlock().getState(), item.getItemStack(), amountToAdd);
             item.addAmout(amountToAdd);
-            MessagesManager.sendMessage(getOwner(), Component.text("§aStocks rechargés."), Prefix.SHOP, MessageType.SUCCESS, true);
+            MessagesManager.sendMessage(getOwner(), TranslationManager.translation("feature.shop.menu.stocks.fill.success"), Prefix.SHOP, MessageType.SUCCESS, true);
             new ShopStocksMenu(getOwner(), shop).open();
         }));
         
@@ -89,7 +90,7 @@ public class ShopStocksMenu extends PaginatedMenu {
 
     @Override
     public @NotNull Component getName() {
-        return Component.text("Menu des Stocks");
+        return TranslationManager.translation("feature.shop.menu.stocks.title");
     }
 
     @Override

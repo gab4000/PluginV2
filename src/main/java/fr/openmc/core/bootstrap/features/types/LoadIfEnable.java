@@ -37,7 +37,7 @@ public interface LoadIfEnable <T extends Hooks> {
             e.printStackTrace();
             return false;
         } catch (NoClassDefFoundError e) {
-            OMCLogger.errorFormatted("Plugin  has failed to register hooks because " + e.getMessage() + " does not exist.");
+            OMCLogger.errorFormatted("Plugin has failed to register hooks because " + e.getMessage() + " does not exist.");
             return false;
         }
     }

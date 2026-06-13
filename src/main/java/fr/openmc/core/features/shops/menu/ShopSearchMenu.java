@@ -3,7 +3,7 @@ package fr.openmc.core.features.shops.menu;
 import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import fr.openmc.api.menulib.PaginatedMenu;
 import fr.openmc.api.menulib.utils.InventorySize;
-import fr.openmc.api.menulib.utils.ItemBuilder;
+import fr.openmc.api.menulib.utils.ItemMenuBuilder;
 import fr.openmc.api.menulib.utils.StaticSlots;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
@@ -49,7 +49,7 @@ public class ShopSearchMenu extends PaginatedMenu {
     }
 
     @Override
-    public Map<Integer, ItemBuilder> getButtons() {
+    public Map<Integer, ItemMenuBuilder> getButtons() {
         return Map.of();
     }
 

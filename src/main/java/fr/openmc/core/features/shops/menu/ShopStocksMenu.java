@@ -14,6 +14,7 @@ import fr.openmc.core.utils.text.messages.MessagesManager;
 import fr.openmc.core.utils.text.messages.Prefix;
 import fr.openmc.core.utils.text.messages.TranslationManager;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.block.Barrel;
 import org.bukkit.entity.Player;
@@ -72,7 +73,7 @@ public class ShopStocksMenu extends PaginatedMenu {
         
         map.put(45, ItemMenuTemplate.BTN_CANCEL.apply(this).setOnClick(_ -> new ShopMenu(getOwner(), shop).open()));
         map.put(49, new ItemMenuBuilder(this, Material.BARREL, itemMeta -> {
-            itemMeta.displayName(TranslationManager.translation("feature.shop.menu.stocks.fill.name", Component.text(barrelStocks)));
+            itemMeta.displayName(TranslationManager.translation("feature.shop.menu.stocks.fill.name", Component.text(barrelStocks).color(NamedTextColor.GREEN)));
         }).setOnClick(_ -> {
             if (barrelStocks == 0) return;
             ShopItem item = this.shop.getItem();

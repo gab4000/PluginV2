@@ -10,6 +10,7 @@ import fr.openmc.core.features.shops.models.Shop;
 import fr.openmc.core.features.shops.models.ShopSale;
 import fr.openmc.core.utils.text.messages.TranslationManager;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -61,10 +62,10 @@ public class ShopSalesMenu extends PaginatedMenu {
         sales.forEach(s -> {
             ItemStack item = s.getItem().getItemStack();
             item.editMeta(itemMeta -> {
-                itemMeta.displayName(TranslationManager.translation("feature.shop.menu.sales.item.name", Component.text(s.getBuyer().getName())));
+                itemMeta.displayName(TranslationManager.translation("feature.shop.menu.sales.item.name", Component.text(s.getBuyer().getName()).color(NamedTextColor.GOLD)));
                 itemMeta.lore(List.of(
-                        TranslationManager.translation("feature.shop.menu.sales.item.lore1", Component.text(s.getDate().toLocalDateTime().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)))),
-                        TranslationManager.translation("feature.shop.menu.sales.item.lore2", Component.text(s.getAmount()), Component.text(s.getPrice() + " " + EconomyManager.getEconomyIcon()))
+                        TranslationManager.translation("feature.shop.menu.sales.item.lore1", Component.text(s.getDate().toLocalDateTime().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM))).color(NamedTextColor.LIGHT_PURPLE)),
+                        TranslationManager.translation("feature.shop.menu.sales.item.lore2", Component.text(s.getAmount()).color(NamedTextColor.AQUA), Component.text(s.getPrice() + " " + EconomyManager.getEconomyIcon()).color(NamedTextColor.AQUA))
                 ));
             });
             items.add(item);
@@ -80,7 +81,7 @@ public class ShopSalesMenu extends PaginatedMenu {
         map.put(49, new ItemMenuBuilder(this, Material.GOLD_BLOCK, itemMeta -> {
             itemMeta.displayName(TranslationManager.translation("feature.shop.menu.sales.get_turnover.name"));
             itemMeta.lore(List.of(
-                    TranslationManager.translation("feature.shop.menu.sales.get_turnover.lore1", Component.text(this.shop.getTurnover() * 0.8 + " " + EconomyManager.getEconomyIcon())),
+                    TranslationManager.translation("feature.shop.menu.sales.get_turnover.lore1", Component.text(this.shop.getTurnover() * 0.8 + " " + EconomyManager.getEconomyIcon()).color(NamedTextColor.LIGHT_PURPLE)),
                     TranslationManager.translation("feature.shop.menu.sales.get_turnover.lore2")
             ));
         }).setOnClick(_ -> this.shop.withdrawTurnover()));

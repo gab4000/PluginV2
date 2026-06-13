@@ -11,6 +11,7 @@ import fr.openmc.core.utils.text.messages.Prefix;
 import fr.openmc.core.utils.text.messages.TranslationManager;
 import fr.openmc.core.utils.world.WorldUtils;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -30,7 +31,7 @@ public class PlayerShopManager {
      */
     public static void startCreatingShop(Player player) {
         if (!EconomyManager.withdrawBalance(player.getUniqueId(), 500)) {
-			MessagesManager.sendMessage(player, TranslationManager.translation("feature.shop.player.not_enough_money", Component.text("500 " + EconomyManager.getEconomyIcon())), Prefix.SHOP, MessageType.ERROR, true);
+			MessagesManager.sendMessage(player, TranslationManager.translation("feature.shop.player.not_enough_money", Component.text("500 " + EconomyManager.getEconomyIcon()).color(NamedTextColor.RED)), Prefix.SHOP, MessageType.ERROR, true);
 			return;
         }
         
@@ -47,7 +48,7 @@ public class PlayerShopManager {
                 },
                 () -> {
                     EconomyManager.addBalance(player.getUniqueId(), 500, "Canceling shop creation");
-                    MessagesManager.sendMessage(player, TranslationManager.translation("feature.shop.player.cancelling_pay", Component.text("500 " + EconomyManager.getEconomyIcon())), Prefix.SHOP, MessageType.INFO, true);
+                    MessagesManager.sendMessage(player, TranslationManager.translation("feature.shop.player.cancelling_pay", Component.text("500 " + EconomyManager.getEconomyIcon()).color(NamedTextColor.GREEN)), Prefix.SHOP, MessageType.INFO, true);
                 }
         );
     }
@@ -81,11 +82,11 @@ public class PlayerShopManager {
                     MessagesManager.sendMessage(player, TranslationManager.translation("feature.shop.error.cannot_save_location"), Prefix.SHOP, MessageType.ERROR, false);
 	                OMCLogger.error("Error when saving shop location for player {}! Trying to remove shop...", player.getName());
                     if (!ShopManager.removeShop(shop)) MessagesManager.sendMessage(player, TranslationManager.translation("feature.shop.error.cannot_delete"), Prefix.SHOP, MessageType.ERROR, false);
-                    MessagesManager.sendMessage(player, TranslationManager.translation("feature.shop.error.pay_back", Component.text("500 " + EconomyManager.getEconomyIcon())), Prefix.SHOP, MessageType.INFO, true);
+                    MessagesManager.sendMessage(player, TranslationManager.translation("feature.shop.error.pay_back", Component.text("500 " + EconomyManager.getEconomyIcon()).color(NamedTextColor.GOLD)), Prefix.SHOP, MessageType.INFO, true);
                 }
                 else {
                     MessagesManager.sendMessage(player, TranslationManager.translation("feature.shop.player.success_created"), Prefix.SHOP, MessageType.SUCCESS, true);
-                    MessagesManager.sendMessage(player, TranslationManager.translation("feature.shop.player.withdraw_money", Component.text("500 " + EconomyManager.getEconomyIcon())), Prefix.SHOP, MessageType.SUCCESS, false);
+                    MessagesManager.sendMessage(player, TranslationManager.translation("feature.shop.player.withdraw_money", Component.text("500 " + EconomyManager.getEconomyIcon()).color(NamedTextColor.RED)), Prefix.SHOP, MessageType.SUCCESS, false);
                 }
             });
             return true;
@@ -126,7 +127,7 @@ public class PlayerShopManager {
         MessagesManager.sendMessage(player, TranslationManager.translation("feature.shop.player.deleted"), Prefix.SHOP, MessageType.SUCCESS, false);
         
         EconomyManager.addBalance(player.getUniqueId(), 400);
-        MessagesManager.sendMessage(player, TranslationManager.translation("feature.shop.player.pay_back", Component.text("400 " + EconomyManager.getEconomyIcon())), Prefix.SHOP, MessageType.SUCCESS, true);
+        MessagesManager.sendMessage(player, TranslationManager.translation("feature.shop.player.pay_back", Component.text("400 " + EconomyManager.getEconomyIcon()).color(NamedTextColor.GREEN)), Prefix.SHOP, MessageType.SUCCESS, true);
     }
     
     /* public static void adminDeleteShop(OfflinePlayer player, Player admin) {
